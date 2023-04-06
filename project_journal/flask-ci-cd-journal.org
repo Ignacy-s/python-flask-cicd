@@ -492,3 +492,123 @@ By following the detailed instructions provided in this project documentation, y
 * Sun 26 Mar 2023 02:57:37 PM CEST
 ** Just posting this project description would make me feel weak inside. How can I use it and still have clean conscience? By adding a note that it was written by ChatGPT and also informing potential readers that ChatGPT assisted in planning the project and writing parts of the documentation. Maybe just a general info in the project description, and then specific notes in places where ChatGPT does most of the work, like in the project description? This feels good. I have a feeling that this kind of ethical questions is what many people ask themselves at the moment. Problem in my case is that if I just had ChatGPT do 90% of the work in every aspect, it would be insincere to claim that I've done the work or that it shows any skills on my part other than prompt engineering.
 ** I should explicitly say in the project's readme (which can be just a .md version of project description from the documentation .org file) what ChatGPT helped with.
+* Thu 06 Apr 2023 05:09:35 PM CEST
+In the past 1.5 weeks I've put about 31 pomodoros into learning
+Terraform. I think that's taking too much time, going to experiment
+with a prompt to create a seasoned DevOps professional guide and ask
+him whether I should keep following the Terraform Up and Running book
+sequentially or just try to learn the absolute minimum required to
+continue with the project.
+
+I've learned a little more about using ChatGPT and practiced a
+lot. I've also found a project that takes in your prompt and upgrades
+it to be more effective. https://promptperfect.jina.ai/prompts
+** Prompt: 
+As an experienced DevOps guide and tutor, your task is to provide
+advice for a user working on a basic portfolio project involving the
+deployment of a Python Flask web application using Jenkins. The user
+has spent 1.5 weeks learning Terraform but feels that it may be taking
+too much time.
+
+Please evaluate whether they should continue with the "Terraform Up
+and Running" book sequentially or focus only on learning the minimum
+required to complete their current project. In your response, consider
+factors such as efficiency, long-term benefits, and skill development
+in relation to a junior DevOps professional's career
+growth. Additionally, feel free to offer alternative suggestions if
+you believe there are more effective ways for them to achieve their
+goals while also considering time constraints and overall
+effectiveness in accomplishing their objectives.
+
+Your response should clearly explain the pros and cons of each option
+(continuing with the book versus focusing on the minimum
+requirements), provide recommendations based on your evaluation, and
+offer any alternative approaches you think might help them reach their
+goals more effectively. Please ensure that your advice takes into
+account both short-term needs related to completing the project at
+hand and long-term career growth considerations for a junior DevOps
+professional.
+
+This is what can be found in the book, right now I'm halfway trough the second chapter.
+Chapter 2, “Getting Started with Terraform”
+Installing Terraform; an overview of Terraform syntax; an overview of
+the Terraform CLI tool; how to deploy a single server; how to deploy a
+web server; how to deploy a cluster of web servers; how to deploy a
+load balancer; how to clean up resources you’ve created.
+Chapter 3, “How to Manage Terraform State”
+What Terraform state is; how to store state so that multiple team
+members can access it; how to lock state files to prevent race
+conditions; how to isolate state files to limit the damage from errors;
+how to use Terraform workspaces; a best-practices file and folder layout
+for Terraform projects; how to use read-only state.
+Chapter 4, “How to Create Reusable Infrastructure with Terraform
+Modules”
+What modules are; how to create a basic module; how to make a
+module configurable with inputs and outputs; local values; versionedmodules; module gotchas; using modules to define reusable,
+configurable pieces of infrastructure.
+Chapter 5, “Terraform Tips and Tricks: Loops, If-Statements, Deployment,
+and Gotchas”
+Loops with the count parameter, for_each and for expressions,
+and the for string directive; conditionals with the count parameter,
+for_each and for expressions, and the if string directive; built-in
+functions; zero-downtime deployment; common Terraform gotchas and
+pitfalls, including count and for_each limitations, zero-downtime
+deployment gotchas, how valid plans can fail, and how to refactor
+Terraform code safely.
+** Reply: 
+As an experienced DevOps guide and tutor, I understand the importance
+of balancing short-term project goals with long-term career
+development. In this case, the user has spent 1.5 weeks learning
+Terraform and is considering whether to continue with the "Terraform
+Up and Running" book sequentially or focus only on learning the
+minimum required to complete their current project.
+
+Option 1: Continue with the book sequentially Pros:
+
+    Comprehensive understanding of Terraform's features and best
+    practices.  Developing a strong foundation in Terraform, which is
+    widely used in the industry.  Exposure to advanced Terraform
+    concepts that can be useful for future projects.
+
+Cons:
+
+    Time-consuming, which may delay the completion of the current
+    project.  Some topics covered in the book may not be immediately
+    relevant to the user's current project.
+
+Option 2: Focus on the minimum requirements Pros:
+
+    Faster completion of the current project.  Allows the user to
+    focus on learning just the necessary Terraform concepts for the
+    project.
+
+Cons:
+
+    Limited understanding of Terraform's features and best practices.
+    May need to revisit the book in the future for more advanced
+    topics.
+
+Recommendation: Considering the user's current situation, I recommend
+focusing on the minimum requirements to complete the project. This
+approach will allow the user to apply their Terraform knowledge more
+quickly, demonstrate their skills in a portfolio project, and
+potentially secure a junior DevOps position sooner.
+
+To ensure the user's long-term career growth, I suggest the following
+alternative approach:
+
+    Finish Chapter 2 of the book, which covers the basics of Terraform
+    and should be sufficient for the current project.  Prioritize
+    applying the learned concepts in the current project, focusing on
+    building a functional CI/CD pipeline for the Flask web
+    application.  After completing the project, return to the book and
+    continue learning more advanced Terraform concepts (Chapters 3-5)
+    at a comfortable pace. This way, the user can gradually build
+    their Terraform expertise without delaying the current project.
+
+This approach balances the user's short-term project goals with their
+long-term career development, ensuring they have the necessary skills
+to complete their project while also laying the groundwork for future
+growth as a DevOps professional.
+
+** Conclusions: I'm finishing the second chapter, focusing especially on what might be relevant to the flask CI/CD pipeline project.
