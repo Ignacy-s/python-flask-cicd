@@ -1,0 +1,17 @@
+This is a simple CI/CD project to showcase my skills in ....
+
+It's aim is for someone to be able to download this repository and run it
+himself to create a working CI/CD pipeline in AWS based on Jenkins
+that deploys a container with a flask web app to AWS each time a
+commit is made to the tracked flask app repository. 
+
+
+* Fork the simple Python Flask web application.
+** Exploring tutor's choice of the app. Reading about Corey Schafer on his blog, https://coreyms.com
+* Create a separate repository for Jenkins provisioning, installation, and configuration.
+* Set up Jenkins part 1: setting up on AWS using Terraform.
+* Set up Jenkins part 2: install Jenkins using Ansible.
+* Set up Jenkins part 3: Configure Jenkins using JCasC
+* Create a Jenkinsfile in the Flask web application repository
+* Deploy the Flask web application
+
