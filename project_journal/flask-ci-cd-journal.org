@@ -612,3 +612,34 @@ to complete their project while also laying the groundwork for future
 growth as a DevOps professional.
 
 ** Conclusions: I'm finishing the second chapter, focusing especially on what might be relevant to the flask CI/CD pipeline project.
+
+* Sun 16 Apr 2023 12:45:42 PM CEST
+Had a first sit down to project after I've spent some time learning
+Terraform. Downloaded the code for the flask app that will be later
+committed to the code repo of the project (infrastructure and CI/CD
+part has it's own repo, that also includes documentation and the
+journal). I'm going to make one last jump into Terraform Up and
+Running to learn about data sources. This will provide a solid
+foundation of Terraform knowledge, sufficient for this project
+and a basis for building further Terraform competence in the future.
+
+* Tue 18 Apr 2023 06:45:06 PM CEST
+With both the pipeline and code repositories ready, time to create a
+VM in the cloud to hold the Jenkins server. But what OS to use?
+** Choose OS and AMI
+*** Debian or Redhat family?
+I used to do servers using CentOS. Since CentOS got nuked, I was
+wondering whether Fedora wouldn't be a good choice for this
+project. Another alternative would be Alma Linux, which is a RHEL
+repackaged system in CentOS spirit. Another similar to Alma is Rocky
+Linux. I don't exclude Debian family from the equation, especially if
+there are some issues standing Jenkins on Redhat family.
+
+I think I'll go with Alma, because I haven't tried it before and it's
+kind of CentOS, so I might use it in the future for similar use
+cases. Fedora is on second place. If there are any repos missing for
+Alma that exist for Fedora, I'll fallback to Fedora Server edition.
+*** AMI, use an existing or build own?
+I could build my own ami using Packer, but to reduce complexity, I'll
+go with a ready-made AMI from AWS AMI Marketplace.
+

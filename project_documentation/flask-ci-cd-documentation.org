@@ -6,10 +6,29 @@ that deploys a container with a flask web app to AWS each time a
 commit is made to the tracked flask app repository. 
 
 
-* Fork the simple Python Flask web application.
+* DONE Fork the simple Python Flask web application.
+CLOSED: [2023-04-18 Tue 18:46]
 ** Exploring tutor's choice of the app. Reading about Corey Schafer on his blog, https://coreyms.com
-* Create a separate repository for Jenkins provisioning, installation, and configuration.
-* Set up Jenkins part 1: setting up on AWS using Terraform.
+This app was committed as a whole, with several distinct stages. I'm
+going to use the stages as basis of separate commits for testing of
+the pipeline and in the beginning only commit the first stage.
+** Download the repository contents with curl.
+#+BEGIN_SRC bash
+curl -L
+http://github.com/CoreyMSchafer/code_snippets/archive/master.tar.gz |
+tar zxf -
+#+END_SRC
+** Created a new repository, copied contents of the first chapter from Flask_Blog tutorial.
+Flask Blog code found at [[https://github.com/CoreyMSchafer/code_snippets/tree/master/Python/Flask_Blog][this address]].
+Copied .gitignore from the CI/CD repo, but added the name of directory
+with the original Corey's repo files, so they wont all get committed
+at once.
+
+* DONE Create a separate repository for Jenkins provisioning, installation, and configuration.
+CLOSED: [2023-04-18 Tue 18:47]
+* TODO Set up Jenkins part 1: setting up a VM on AWS using Terraform.
+
+
 * Set up Jenkins part 2: install Jenkins using Ansible.
 * Set up Jenkins part 3: Configure Jenkins using JCasC
 * Create a Jenkinsfile in the Flask web application repository
