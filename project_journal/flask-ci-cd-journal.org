@@ -659,4 +659,83 @@ will be generated on host and inserted onto the instance using
 Terraform. I'll probably just get the instances IP using Terraform
 output variable and paste it into the inventory file with a script.
 
+** Getting the AMI
+AMI IDs are a source of fun (problems), because the same virtual
+machine image will have different AMI number on each region.
+
+I've downloaded AMI IDs list from Alma Linux project's website, file
+is named aws_amis.csv. Need to extract the correct (and just one) AMI
+number from it. Or find an alternative that doesn't include
+downloading files from Alma's website.
+*** grep method
+$ grep eu-north-1 aws_amis.csv | grep x86 | sort -nrk 2 -t',' | head -1 | cut -f4 -d','
+*** awk method
+$ awk -F, '$3 == "\"eu-north-1\"" && $5 == "\"x86_64\"" { \               
+           version=$2; \
+           if (version > max_version) { \
+             max_version = version; \
+             ami_id = $4 \
+           } \
+         } \
+         END { print ami_id }' aws_amis.csv
+*** Terraform Data Source method
+Still didn't like downloading the file (should it be in repo, should
+it be re-downloaded each time?) and grepping for the AMI. Had a hunch
+that it might be solved in Terraform, so I asked if it's possible to
+have an elegant solution using Terraform only:
+
+To use Terraform Data Source to get the AMI of AlmaLinux OS 9 for x86_64 on the `eu-north-1` region, you can use the `aws_ami` data source with the appropriate filters. Here's a Terraform configuration that demonstrates this:
+
+#+BEGIN_SRC hcl
+provider "aws" {
+  region = "eu-north-1"
+}
+
+data "aws_ami" "alma_linux_9" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["AlmaLinux OS 9*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  filter {
+    name   = "hypervisor"
+    values = ["xen"]
+  }
+
+  owners = ["amazon", "aws-marketplace", "self"]
+}
+
+output "alma_linux_9_ami_id" {
+  value = data.aws_ami.alma_linux_9.id
+}
+#+END_SRC
+
+
+This configuration sets up the AWS provider for the `eu-north-1` region and defines an `aws_ami` data source that filters the available AMIs based on the name pattern, architecture, and other properties. The `most_recent = true` option ensures that you get the latest available version of the AMI.
+
+After running `terraform init` and `terraform apply`, the output should display the AMI ID of the most recent AlmaLinux OS 9 for x86_64 in the `eu-north-1` region.
+
+* Mon 01 May 2023 02:40:31 PM CEST
+Back after a break. From the three methods to get AMI, the terraform
+looks like easiest to read and maintain. AWK is cool, but few people
+know it well. And it depends on the Alma site working and not changing
+the name of the file with list of the AMIs. Terraform solution needs
+the AWS to be online, just like the rest of the project.
 
