@@ -29,6 +29,7 @@ CLOSED: [2023-04-18 Tue 18:47]
 * TODO Set up Jenkins part 1: setting up a VM on AWS using Terraform.
 
 ** Create a data source that gets the AMI of the latest Alma Linux 9
+** Create a base main.tf file that is a copy from the Terraform Up and Running code. Also add an alternative version that was given as an example of Jenkins setup on AWS.
 
 * Set up Jenkins part 2: install Jenkins using Ansible.
 * Set up Jenkins part 3: Configure Jenkins using JCasC

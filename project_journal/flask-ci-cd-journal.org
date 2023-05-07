@@ -739,3 +739,12 @@ know it well. And it depends on the Alma site working and not changing
 the name of the file with list of the AMIs. Terraform solution needs
 the AWS to be online, just like the rest of the project.
 
+I've copied the main.tf file from what I wrote with Terraform Up and
+Running. Need to slightly modify it before I can commit both the AMI
+data source and the initial version of the main.tf.
+
+I've also got an example file from ChatGPT. Had it explain the file
+line by line. There are few differences between the file I had
+already, but ChatGPT made good arguments on why the changes were
+introduced.
+
