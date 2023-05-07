@@ -20,3 +20,11 @@ temp*
 # Certs
 acme.json
 
+# Secrets
+*.secret
+
+# Terraform files
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.tfstate.lock.info
