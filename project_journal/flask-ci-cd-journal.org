@@ -748,3 +748,32 @@ line by line. There are few differences between the file I had
 already, but ChatGPT made good arguments on why the changes were
 introduced.
 
+** Differences:
+*** Defined VPC and Subnet
+VPC and Subnet are a must have if our infrastructure is not the only
+one defined on that account. It's a good practice to define them, as
+it enhances security by isolating this and other projects. Subnets
+allow for even more network segregation.
+
+They also allow usage of more advanced network tools like Network ACL
+(Access Control Lists) and Route Tables.
+**** I'm keeping the definitions.
+*** Explicitly defining egress traffic rules in the Security Group
+I asked for explanation on why to do that, if the default AWS behavior
+is to allow outbound traffic anyway. Reply was that it shows that all
+outgoing traffic is allowed purposefully and also makes it easier to
+understand our intentions for people reading our IaC.
+
+* Sun 07 May 2023 01:09:21 PM CEST
+Replaced variable code parts like region, instance type or ports with
+variables, defined in the vars.tf. Going to commit the first version
+of Terraform files before taking on the SSH keys.
+
+It's not proper to make huge commits with multiple changes. I'm
+dividing changes into smaller commits. Divided it into commits with:
+a decision on what would make Terraform part of the project complete,
+adding the data source that fetches the AMI of latest Alma Linux,
+adding the two alternatives of main.tf file,
+finally consolidating the two files into one with some variables
+separated into a vars.tf file.
+

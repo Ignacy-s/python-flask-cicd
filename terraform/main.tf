@@ -1,47 +1,80 @@
 provider "aws" {
-  region = "eu-north-1"
+  region = "var.aws_region"
 }
 
-variable "server_port" {
-  description = "The port the server will use for HTTP requests"
-  type        = number
-  default     = 8080
-}
+resource "aws_vpc" "jenkins" {
+  cidr_block = "10.0.0.0/16"
 
-output "public_ip" {
-  value        = aws_instance.teruarc2-3.public_ip
-  description  = "The public IP address of the web server"
-}
-
-resource "aws_security_group" "instance" {
-  name = "terraform-example-instance"
-
-  ingress {
-    from_port = var.server_port
-    to_port = var.server_port
-    protocol = "tcp"
-    cidr_blocks =  ["0.0.0.0/0"]
+  tags = {
+    Name = "JenkinsVPC"
   }
 }
 
-resource "aws_instance" "teruarc2-3" {
-  ami ="ami-064087b8d355e9051"
-  instance_type = "t3.nano"
-  vpc_security_group_ids = [aws_security_group.instance.id]
+resource "aws_subnet" "jenkins" {
+  vpc_id                  = aws_vpc.jenkins.id
+  cidr_block              = "10.0.1.0/24"
+
   tags = {
-    Name = "terraform-is-up"
+    Name = "JenkinsSubnet"
+  }
+}
+
+resource "aws_security_group" "jenkins" {
+  name        = "JenkinsSG"
+  description = "Allow Jenkins and SSH traffic"
+  vpc_id      = aws_vpc.jenkins.id
+
+  ingress {
+    from_port   = var.ssh_port
+    to_port     = var.ssh_port
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = var.jenkins_server_port
+    to_port     = var.jenkins_server_port
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "JenkinsSG"
+  }
+}
+
+resource "aws_instance" "jenkins" {
+  ami           = data.aws_ami.alma_linux_9.id
+  instance_type = var.instance_type
+
+#  key_name      = "your_key_pair_name"
+  subnet_id     = aws_subnet.jenkins.id
+
+  vpc_security_group_ids = [
+    aws_security_group.jenkins.id
+  ]
+
+  tags = {
+    Name = "JenkinsServer"
   }
 
   user_data = <<-EOF
-    #!/bin/bash
-    echo "It really works, my friend!" > index.html
-    nohup busybox httpd -f -p ${var.server_port} &
-    EOF
-  
-  user_data_replace_on_change = true
-
+              #!/bin/bash
+              sudo dnf update -y
+              EOF
   credit_specification {
     cpu_credits = "standard"
   }
 }
 
+output "jenkins_public_ip" {
+  value       = aws_instance.jenkins.public_ip
+  description = "The public IP address of the server"
+}

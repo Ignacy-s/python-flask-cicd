@@ -27,12 +27,18 @@ at once.
 * DONE Create a separate repository for Jenkins provisioning, installation, and configuration.
 CLOSED: [2023-04-18 Tue 18:47]
 * TODO Set up Jenkins part 1: setting up a VM on AWS using Terraform.
-
 ** Create a data source that gets the AMI of the latest Alma Linux 9
 ** Create a base main.tf file that is a copy from the Terraform Up and Running code. Also add an alternative version that was given as an example of Jenkins setup on AWS.
+** Add definitions for basic VPC and subnet
+** Modify the basic security group definition to allow incoming traffic on ports 22 (for SSH) and 8080 (Jenkins web app)
+** Move some values to variables to make code cleaner and reusable or usable by people who choose to use different AWS region
+*** Move the port values to a variable and use variables instead.
+*** Move the EC2 instance type to a variable (eu-north-1 region requires usage of a non standard t3 type server)
+*** Move the region name to a variable.
 
 * Set up Jenkins part 2: install Jenkins using Ansible.
 * Set up Jenkins part 3: Configure Jenkins using JCasC
 * Create a Jenkinsfile in the Flask web application repository
 * Deploy the Flask web application
 
+* TODO's:
