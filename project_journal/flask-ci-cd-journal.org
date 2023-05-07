@@ -642,4 +642,21 @@ Alma that exist for Fedora, I'll fallback to Fedora Server edition.
 *** AMI, use an existing or build own?
 I could build my own ami using Packer, but to reduce complexity, I'll
 go with a ready-made AMI from AWS AMI Marketplace.
+* Wed 19 Apr 2023 08:38:35 PM CEST
+Trying to iron out the details for the Terraform setup. It's quite
+simple, because it's just one instance. There are however some aspects
+that were not covered in the part of Terraform Up and Running I've
+read. I need to make sure the Instance gets my ssh-key baked in. The
+firewall rules (security group) also has to accept Jenkins traffic.
+* Sat 22 Apr 2023 01:47:05 PM CEST
+Preparing what's required for the Terraform configuration. In the
+simplest form, I just need a Linux cloud instance with a web and ssh
+ports open. I also need to pass the IP address of the instance to
+Ansible.
+
+Firewall configuration will be done using AWS Security Group. SSH key
+will be generated on host and inserted onto the instance using
+Terraform. I'll probably just get the instances IP using Terraform
+output variable and paste it into the inventory file with a script.
+
 
