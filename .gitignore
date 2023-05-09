@@ -22,9 +22,11 @@ acme.json
 
 # Secrets
 *.secret
+vault/
 
 # Terraform files
 .terraform/
 *.tfstate
 *.tfstate.backup
 .terraform.tfstate.lock.info
+

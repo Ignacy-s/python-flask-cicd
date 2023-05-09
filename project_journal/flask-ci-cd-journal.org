@@ -777,3 +777,278 @@ adding the two alternatives of main.tf file,
 finally consolidating the two files into one with some variables
 separated into a vars.tf file.
 
+
+* Tue 09 May 2023 07:31:53 PM CEST
+Time to solve the problem of SSH keys. I have no idea what are good
+practices of SSH keys management when working with a project like
+that.
+
+Maybe I'll make a script that would auto generate such a key, put it
+in a safe LUKS vault and also upload public key to AWS.
+
+** Generated instructions on how to create and upload an ssh key:
+
+I understand your concern about SSH key management. Here's an approach you can consider for your project:
+
+    Generate a new ed25519 SSH key pair with a custom number of iterations for the key derivation function (KDF):
+
+bash
+
+ssh-keygen -t ed25519 -a <number_of_iterations> \
+  -f <project_location>/my_project_key
+
+Replace <number_of_iterations> with the desired number of iterations (e.g., 100) and <project_location> with the path to your project directory.
+
+    Upload the generated public key to AWS using Terraform:
+
+hcl
+
+resource "aws_key_pair" "my_project_key" {
+  key_name   = "my_project_key"
+  public_key = file("<project_location>/my_project_key.pub")
+}
+
+    Use the generated key pair when creating the EC2 instance:
+
+hcl
+
+resource "aws_instance" "jenkins" {
+  ami           = <ami_id>
+  instance_type = "t2.micro"
+
+  key_name = aws_key_pair.my_project_key.key_name
+
+  # Other configurations ...
+}
+
+    Add the private key file (my_project_key) to your .gitignore file to avoid accidentally committing it to your version control system.
+
+    Configure your Ansible inventory and playbook to use the generated private key when connecting to the remote host.
+
+This approach will generate a project-specific SSH key pair in your
+project directory, upload the public key to AWS, and associate it with
+the EC2 instance. This allows you to manage the keys more efficiently
+and avoid using a single key for multiple projects or machines.
+
+
+** Generated instructions on how to create a LUKS container for SSH key:
+To create a small LUKS container to store your SSH key securely at rest, follow these steps:
+
+    Install the required packages for LUKS (Linux Unified Key Setup). On Debian/Ubuntu-based systems, you can use the following command:
+
+bash
+
+sudo apt-get install cryptsetup
+
+On CentOS/RHEL/Fedora systems:
+
+bash
+
+sudo yum install cryptsetup
+
+    Create an empty file to use as the LUKS container. Here, we'll create a 10MB container:
+
+bash
+
+dd if=/dev/zero of=my_ssh_key_container.img bs=1M count=10
+
+    Set up the LUKS container using the cryptsetup command:
+
+bash
+
+sudo cryptsetup luksFormat my_ssh_key_container.img
+
+This command will prompt you to enter a passphrase to protect the container. Make sure you choose a strong passphrase.
+
+    Open the LUKS container:
+
+bash
+
+sudo cryptsetup luksOpen my_ssh_key_container.img my_ssh_key_container
+
+Enter the passphrase you set earlier when prompted.
+
+    Create a file system inside the container:
+
+bash
+
+sudo mkfs.ext4 /dev/mapper/my_ssh_key_container
+
+    Mount the container to a directory:
+
+bash
+
+mkdir my_ssh_key_mount
+sudo mount /dev/mapper/my_ssh_key_container my_ssh_key_mount
+
+    Now you can copy the SSH key files into the mounted directory:
+
+bash
+
+sudo cp <project_location>/my_project_key my_ssh_key_mount/
+sudo cp <project_location>/my_project_key.pub my_ssh_key_mount/
+
+    Set the appropriate ownership and permissions for the key files:
+
+bash
+
+sudo chown $(whoami):$(whoami) my_ssh_key_mount/my_project_key*
+sudo chmod 600 my_ssh_key_mount/my_project_key
+sudo chmod 644 my_ssh_key_mount/my_project_key.pub
+
+    When you're done using the keys, unmount the container and close it:
+
+bash
+
+sudo umount my_ssh_key_mount
+sudo cryptsetup luksClose my_ssh_key_container
+
+This will create a LUKS container, store your SSH keys securely inside
+it, and allow you to mount and unmount the container as needed. To
+access the keys, you'll need to open the container with the
+passphrase, mount it, and then use the keys from the mounted
+directory.
+
+** Generated a script to create, open and close the container.
+
+
+#+BEGIN_SRC bash
+#!/bin/bash
+
+set -e
+
+VAULT_DIR="vault"
+CONTAINER="$VAULT_DIR/my_ssh_key_container.img"
+MOUNT_POINT="$VAULT_DIR/my_ssh_key_mount"
+
+function create_container() {
+  dd if=/dev/zero of="$CONTAINER" bs=1M count=30
+  sudo cryptsetup luksFormat "$CONTAINER"
+  sudo cryptsetup luksOpen "$CONTAINER" \
+    my_ssh_key_container
+  sudo mkfs.ext4 /dev/mapper/my_ssh_key_container
+  sudo cryptsetup luksClose my_ssh_key_container
+}
+
+function open_container() {
+  sudo cryptsetup luksOpen "$CONTAINER" \
+    my_ssh_key_container
+  sudo mkdir -p "$MOUNT_POINT"
+  sudo mount /dev/mapper/my_ssh_key_container "$MOUNT_POINT"
+}
+
+function close_container() {
+  sudo umount "$MOUNT_POINT"
+  sudo cryptsetup luksClose my_ssh_key_container
+}
+
+case "$1" in
+  create)
+    create_container
+    ;;
+  open)
+    open_container
+    ;;
+  close)
+    close_container
+    ;;
+  *)
+    echo "Usage: $0 {create|open|close}"
+    exit 1
+    ;;
+esac
+#+END_SRC
+
+** V2 version of script for management of LUKS container
+
+#+BEGIN_SRC bash
+  # Here's the updated script that uses a SHELL_VARIABLE for the passphrase when creating and opening the LUKS container. The second script initializes the project and creates an SSH key inside the container.
+
+  # vault_management.sh:
+
+  # bash
+
+  #!/bin/bash
+
+  set -e
+
+  VAULT_DIR="vault"
+  CONTAINER="$VAULT_DIR/my_ssh_key_container.img"
+  MOUNT_POINT="$VAULT_DIR/my_ssh_key_mount"
+  PASS_VAR="VAULT_PASSPHRASE"
+
+  function create_container() {
+    dd if=/dev/zero of="$CONTAINER" bs=1M count=30
+    echo -n "${!PASS_VAR}" | sudo cryptsetup luksFormat \
+      --key-file=- "$CONTAINER"
+    open_container
+    sudo mkfs.ext4 /dev/mapper/my_ssh_key_container
+    close_container
+  }
+
+  function open_container() {
+    echo -n "${!PASS_VAR}" | sudo cryptsetup luksOpen \
+      --key-file=- "$CONTAINER" my_ssh_key_container
+    sudo mkdir -p "$MOUNT_POINT"
+    sudo mount /dev/mapper/my_ssh_key_container "$MOUNT_POINT"
+  }
+
+  function close_container() {
+    sudo umount "$MOUNT_POINT"
+    sudo cryptsetup luksClose my_ssh_key_container
+  }
+
+  case "$1" in
+    create)
+      create_container
+      ;;
+    open)
+      open_container
+      ;;
+    close)
+      close_container
+      ;;
+    ,*)
+      echo "Usage: $0 {create|open|close}"
+      exit 1
+      ;;
+  esac
+#+END_SRC
+
+** Generated a script to init the project, create the ssh key and the container. Also auto export passphrase so it can be used in the project.
+
+
+#+BEGIN_SRC bash
+#!/bin/bash
+
+set -e
+
+VAULT_DIR="vault"
+MOUNT_POINT="$VAULT_DIR/my_ssh_key_mount"
+KEY_NAME="my_project_key"
+PASS_VAR="VAULT_PASSPHRASE"
+
+# Prompt for the passphrase
+echo -n "Enter the passphrase for the LUKS container and SSH key: "
+read -s PASSPHRASE
+echo
+export $PASS_VAR="$PASSPHRASE"
+
+# Create and open the LUKS container
+./vault_management.sh create
+./vault_management.sh open
+
+# Generate the SSH key inside the container
+echo -n "${!PASS_VAR}" | ssh-keygen -t ed25519 \
+  -N "" -f "$MOUNT_POINT/$KEY_NAME"
+
+# Close the LUKS container
+./vault_management.sh close
+#+END_SRC
+
+In this version, the vault_management.sh script uses the passphrase
+stored in the SHELL_VARIABLE when creating and opening the LUKS
+container. The init_project.sh script initializes the project, creates
+the container, generates an SSH key inside it, and then closes the
+container. The passphrase is read once using read -s and stored in the
+SHELL_VARIABLE.
