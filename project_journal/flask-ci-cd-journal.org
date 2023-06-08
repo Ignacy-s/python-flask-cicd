@@ -1089,5 +1089,18 @@ I have a working container management script, but it doesn't detect if
 container is already open and reports an error in this case. Fixing it
 smells of Yak Shaving, so I'm leaving it as an extra TODO.
 
+* Thu 08 Jun 2023 03:21:05 PM CEST
+Starting pseudocode for the general project execution script. Would be
+nice to find a better name for it.
 
+For now it's called start_project.sh.
 
+Wrote all the main points of the project, from creating a VM, through
+provisioning a Jenkins instance and configuring it (setting up a CI/CD
+pipeline) to testing Jenkins by pushing a commit to the app repository
+and testing if a new container has been build and pushed out.
+It will probably become more detailed as the project develops.
+
+Because there is a DJ playing at the airport where I'm sitting now,
+and the master script is going play trough all the points in the
+script, I'm renaming it to playtrough.sh.

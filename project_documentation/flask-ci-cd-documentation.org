@@ -36,6 +36,7 @@ CLOSED: [2023-04-18 Tue 18:47]
 *** Move the EC2 instance type to a variable (eu-north-1 region requires usage of a non standard t3 type server)
 *** Move the region name to a variable.
 ** Create a script to create and open/close LUKS container (which can hold the SSH key).
+** Write out pseudocode for a script that would execute the whole project.
 
 
 * Set up Jenkins part 2: install Jenkins using Ansible.
