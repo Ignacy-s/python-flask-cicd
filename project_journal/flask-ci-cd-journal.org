@@ -777,7 +777,6 @@ adding the two alternatives of main.tf file,
 finally consolidating the two files into one with some variables
 separated into a vars.tf file.
 
-
 * Tue 09 May 2023 07:31:53 PM CEST
 Time to solve the problem of SSH keys. I have no idea what are good
 practices of SSH keys management when working with a project like
@@ -1052,3 +1051,43 @@ container. The init_project.sh script initializes the project, creates
 the container, generates an SSH key inside it, and then closes the
 container. The passphrase is read once using read -s and stored in the
 SHELL_VARIABLE.
+
+* Sat 13 May 2023 12:59:08 PM CEST
+A script to create, open and close the LUKS container will simplify
+usage of the vault for SSH key and possibly other secrets.
+
+A script to glue the whole Jenkins deployment process would also be
+useful. It can use the vault_management script to create, open vault
+and generate an SSH key inside.
+
+Initial vault management script is ready, but it shouldn't create a
+container if there is one already.
+* Sun 21 May 2023 03:33:45 PM CEST
+General script for the project "execution", starting with
+pseudocode. Eventually moving on to steps defined in bash. Expected
+semi-production grade, but aiming at professional quality, easily
+usable by non-experts.
+
+Volume management and ssh creation automation can be a bit more rough.
+
+* Tue 30 May 2023 08:26:54 PM CEST
+Another short sit down to the project, hopefully can get momentum back
+up after a break.
+
+Finishing up the vault_management script.
+
+* Tue Jun  6 02:50:54 PM CEST 2023
+Some really annoying thing happened to date, where as above, the year
+got moved to the end of the date string printed by vanilla `date`
+command. Only on Fedora, happened when updating from Fedora 36 to 38.
+Might consider binding `date +'%a %d %b %Y %X %Z'` as `date`, but for
+now can just use it to generate a proper date. So annoying when things
+are not correct.
+
+* Tue 06 Jun 2023 02:53:54 PM CEST
+I have a working container management script, but it doesn't detect if
+container is already open and reports an error in this case. Fixing it
+smells of Yak Shaving, so I'm leaving it as an extra TODO.
+
+
+

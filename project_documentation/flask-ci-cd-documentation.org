@@ -35,6 +35,8 @@ CLOSED: [2023-04-18 Tue 18:47]
 *** Move the port values to a variable and use variables instead.
 *** Move the EC2 instance type to a variable (eu-north-1 region requires usage of a non standard t3 type server)
 *** Move the region name to a variable.
+** Create a script to create and open/close LUKS container (which can hold the SSH key).
+
 
 * Set up Jenkins part 2: install Jenkins using Ansible.
 * Set up Jenkins part 3: Configure Jenkins using JCasC
@@ -42,3 +44,4 @@ CLOSED: [2023-04-18 Tue 18:47]
 * Deploy the Flask web application
 
 * TODO's:
+** Vault management script could detect if container is already created/closed/open and not report an error if container state is already as requested.
