@@ -1104,3 +1104,6 @@ It will probably become more detailed as the project develops.
 Because there is a DJ playing at the airport where I'm sitting now,
 and the master script is going play trough all the points in the
 script, I'm renaming it to playtrough.sh.
+
+* Thu 08 Jun 2023 04:58:58 PM CEST
+Defined some more steps in the playtrough.sh.
