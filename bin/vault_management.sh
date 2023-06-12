@@ -7,6 +7,8 @@ CONTAINER="$VAULT_DIR/my_ssh_key_container.img"
 MOUNT_POINT="$VAULT_DIR/my_ssh_key_mount"
 PASS_VAR="VAULT_PASSPHRASE"
 
+# set -x to be commented out when script is confirmed to work
+# flawlessly
 set -x
 
 function usage() {
@@ -57,7 +59,6 @@ function create_container() {
     || die "Error creating filesystem on container."
   sudo cryptsetup luksClose my_ssh_key_container \
     || die "Error closing container."
-
 }
 
 function open_container() {
@@ -81,6 +82,12 @@ function close_container() {
   sudo cryptsetup luksClose my_ssh_key_container \
        || die "Error closing container."
 }
+
+# Make sure that the PASS_VAR points at a non-empty variable
+if [[ -z "${!PASS_VAR}" ]]; then
+  die "The '${PASS_VAR}' variable is empty or not defined.\n\
+Need to know Vault's password to create/open it."
+fi
 
 # Inform the user about why the script prompts him for his password.
 cat <<EOF >&2
