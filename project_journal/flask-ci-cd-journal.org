@@ -1107,3 +1107,54 @@ script, I'm renaming it to playtrough.sh.
 
 * Thu 08 Jun 2023 04:58:58 PM CEST
 Defined some more steps in the playtrough.sh.
+
+* Sat 10 Jun 2023 02:58:43 PM CEST
+Consultation with a friend revealed that using a LUKS Vault for
+secrets is not a typical approach and Hashicorp's Vault would be
+better. LUKS Vault is fine for now though. But upgrading the
+vault_management.sh is kind of pointless (if a similar amount of work
+can be put into learning to use an industry standard tool).
+* Sun 11 Jun 2023 12:21:44 PM CEST
+For testing purposes (integration testing of the whole project and
+it's elements), it would be cool to have a kind of fall trough switch
+statement. So that we could (knowing first which number belongs to
+which step in project's playtrough) execute only certain chain of
+steps, maybe starting in the middle or not going all the way to the
+end.
+
+Bash doesn't have such a statement, but it can be simulated and even
+improved by using a chain of if tests testing variables START_POINT
+and LAST_POINT. So that for each step, the variables are tested and
+they would prevent re-running non idempotent steps to avoid extra fun
+(problems). Fully idempotent script is a goal, but it's lower priority
+than having a working MVP of the project.
+
+Example:
+#+BEGIN_SRC bash
+  START_POINT=2
+  LAST_POINT=3
+
+  STEP=1
+  if [[ (( START_POINT <= STEP )) && (( LAST_POINT >= STEP )) ]]; then
+    echo "step 1"
+  fi
+  STEP=2
+  if [[ (( START_POINT <= STEP )) && (( LAST_POINT >= STEP )) ]]; then
+    echo "step 2"
+  fi
+  STEP=3
+  if [[ (( START_POINT <= STEP )) && (( LAST_POINT >= STEP )) ]]; then
+    echo "step 3"
+  fi
+  STEP=4
+  if [[ (( START_POINT <= STEP )) && (( LAST_POINT >= STEP )) ]]; then
+    echo "step 4"
+  fi
+#+END_SRC
+
+This would print:
+step 2
+step 3
+
+Kinda cool, and copying and pasting can be used to save a lot of
+writing.
