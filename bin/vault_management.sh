@@ -9,7 +9,7 @@ PASS_VAR="VAULT_PASSPHRASE"
 
 # set -x to be commented out when script is confirmed to work
 # flawlessly
-set -x
+# set -x
 
 function usage() {
   echo "Usage: $0 {create|open|close}"
@@ -19,7 +19,7 @@ function usage() {
 function die() {
   # Exit with a message.
   MESSAGE="${*}"
-  echo "${MESSAGE}" >&2
+  echo -e "${MESSAGE}" >&2
   exit 1
 }
 
