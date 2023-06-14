@@ -73,6 +73,8 @@ function open_container() {
     || die "Error creating mountpoint."
   sudo mount /dev/mapper/my_ssh_key_container "$MOUNT_POINT" \
     || die "Error mounting container."
+  sudo chown "${USER}": "$MOUNT_POINT" \
+    || die "Error setting ownership of ${MOUNT_POINT} to ${USER}."
 }
 
 function close_container() {
@@ -89,11 +91,14 @@ if [[ -z "${!PASS_VAR}" ]]; then
 Need to know Vault's password to create/open it."
 fi
 
-# Inform the user about why the script prompts him for his password.
-cat <<EOF >&2
+# Inform the user about why the script prompts him for his password
+# Only if there is no sudo password cached
+if ! sudo -n true 2>/dev/null; then
+  cat <<EOF >&2
 This script needs sudo privileges to mount containers or to use
 the cryptsetup binary.
 EOF
+fi
 
 case "$1" in
   create)

@@ -37,7 +37,8 @@ CLOSED: [2023-04-18 Tue 18:47]
 *** Move the region name to a variable.
 ** Create a script to create and open/close LUKS container (which can hold the SSH key).
 ** Write out pseudocode for a script that would execute the whole project.
-** Put the initial steps into the playtrough script.
+** Put the initial steps (vault creation, SSH key generation and uploading and Jenkins VM spin up) into the playtrough script.
+*** 1: Vault creation
 
 * Set up Jenkins part 2: install Jenkins using Ansible.
 * Set up Jenkins part 3: Configure Jenkins using JCasC
@@ -45,9 +46,14 @@ CLOSED: [2023-04-18 Tue 18:47]
 * Deploy the Flask web application
 
 * TODO's:
-** vault_management.sh:
+** vault_management.sh (low priority, because using Hashicorp's Vault will make this script obsolete):
 *** Vault management script could detect if container is already created/closed/open and not report an error if container state is already as requested.
 *** Add an option to destroy the existing vault.
 ** playtrough.sh
-*** Test if script is run in the project's root directory.
-
+*** Both sub points can be achieved checking for presence of a dotfile.
+**** Test if script is run in the project's root directory
+**** Test if the vault is already accessible
+*** DONE Get password from a file or source other than user's input.
+CLOSED: [2023-06-13 Tue 12:05]
+If an environment variable with password is already defined,
+playtrough.sh will not ask for the password.

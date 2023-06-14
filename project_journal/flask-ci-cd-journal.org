@@ -1158,3 +1158,47 @@ step 3
 
 Kinda cool, and copying and pasting can be used to save a lot of
 writing.
+
+* Tue Jun 13 11:54:45 AM CEST 2023
+Got an idea that I can quickly find out if the current directory is
+project's root dir by testing for the presence of a file. Same goes
+for checking of vault accessibility.
+
+To have a persistent vault password, it can be exported as a shell
+variable. Exported shell variables are accessible from inside of
+scripts run in the same shell, as proven with this script:
+
+#+BEGIN_SRC bash
+ENV_VAR_NAME="var1"
+
+echo "This is the value of var ${ENV_VAR_NAME}:"
+echo "${!ENV_VAR_NAME}"
+exit 0
+#+END_SRC
+
+* Wed 14 Jun 2023 09:39:44 AM CEST
+Just solved an annoying bug, where a test for password length would
+fail (and say that password is empty) because I miss-typed the
+variable name. I then copied the whole test few lines later in code
+(to make sure that password was properly assigned), which made the
+typo named variable VAULT_PASSHPRASE appear twice and not be detected
+by shellcheck (Bash linter, static code analysis tool).
+
+I even suspected there might be a typo, but it appeared correct on the
+first pass. Man needs eagle eyes to spot typos for programming. That's
+maybe even more important than being good at coming with algorithmic
+solutions to abstract problems. A good solution is not worth much if
+it doesn't work because of a typo.
+
+* Wed 14 Jun 2023 11:10:31 AM CEST
+Vault management command is displaying the 'sudo warning' multiple
+times. It's ok to only show it if the sudo password hasn't been
+recently entered. There is a way to check for cached sudo password
+with a non interactive sudo command, (sudo -n), for example `sudo -n
+true` and then testing the result.
+
+Running `playtrough.sh 1 2` (to execute steps 1 and 2) works well,
+whether user has exported a vault passphrase or types it in. Vault
+creation and access test works, whether it had to be created, opened
+or just accessed. Can commit changes.
+
