@@ -1202,3 +1202,17 @@ whether user has exported a vault passphrase or types it in. Vault
 creation and access test works, whether it had to be created, opened
 or just accessed. Can commit changes.
 
+* Wed 14 Jun 2023 02:31:55 PM CEST
+Time to generate the SSH key. Best practices for SSH key generation on
+Linux can be found in this stack exchange answer:
+https://security.stackexchange.com/a/144044
+In short, use the ed25519 as the type of the key, if using passphrase,
+have 100 rounds of hashing algorithm and also have a comment for the
+key that says what it's used for.
+
+Since this key is meant for automatic use with Ansible, we could do
+without a passphrase (especially since it's kept in a safe place). On
+the other hand, it's not really a fully automatic use-case, since we
+are explicitly going to run the Ansible playbooks. Then it doesn't
+really matter if we use the passphrase in addition to the vault's
+password. To make things simpler, I'm not using passphrase for now.

@@ -12,6 +12,7 @@ ROOT_DIR_MARKER=".flask-ci-cd-project-root-marker"
 # File that marks the ssh-key vault
 VAULT_ACCESS_MARKER=".ssh-vault-marker"
 VAULT_LOCATION="vault/my_ssh_key_mount"
+SSH_KEY_NAME="id_25519_aws_flaskcicd"
 
 # FUNCTIONS
 function usage() {
@@ -107,6 +108,16 @@ EOF
   # Generate an SSH key for the project (if it doesn't exist)
   if [[ ( START_POINT -le STEP ) && ( LAST_POINT -ge STEP ) ]]; then
     echo "Performing step ${STEP}."
+    # Check if the key doesn't already exist
+    if [[ -f "${VAULT_LOCATION}/${SSH_KEY_NAME}" ]]; then
+      echo "Key ${SSH_KEY_NAME} already exists."
+    else
+      ssh-keygen -t ed25519 \
+                 -C "AWS SSH key for flask-ci-cd project" \
+                 -f "${VAULT_LOCATION}/${SSH_KEY_NAME}" \
+                 -N "" \
+        || die "Failed to generate an SSH key."
+    fi
   fi
 
   STEP=4

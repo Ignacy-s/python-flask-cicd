@@ -39,6 +39,7 @@ CLOSED: [2023-04-18 Tue 18:47]
 ** Write out pseudocode for a script that would execute the whole project.
 ** Put the initial steps (vault creation, SSH key generation and uploading and Jenkins VM spin up) into the playtrough script.
 *** 1: Vault creation
+*** 2: SSH key generation
 
 * Set up Jenkins part 2: install Jenkins using Ansible.
 * Set up Jenkins part 3: Configure Jenkins using JCasC
