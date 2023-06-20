@@ -40,6 +40,7 @@ CLOSED: [2023-04-18 Tue 18:47]
 ** Put the initial steps (vault creation, SSH key generation and uploading and Jenkins VM spin up) into the playtrough script.
 *** 1: Vault creation
 *** 2: SSH key generation
+** Had some issues wit creating a VM accessible from the outside. Followed a blog article tutorial and succeeded, need to take what I learned there and put it in my Terraform code. 
 
 * Set up Jenkins part 2: install Jenkins using Ansible.
 * Set up Jenkins part 3: Configure Jenkins using JCasC
@@ -51,10 +52,27 @@ CLOSED: [2023-04-18 Tue 18:47]
 *** Vault management script could detect if container is already created/closed/open and not report an error if container state is already as requested.
 *** Add an option to destroy the existing vault.
 ** playtrough.sh
-*** Both sub points can be achieved checking for presence of a dotfile.
+*** DONE Both sub points can be achieved checking for presence of a dotfile.
+CLOSED: [2023-06-15 Thu 13:50]
 **** Test if script is run in the project's root directory
 **** Test if the vault is already accessible
 *** DONE Get password from a file or source other than user's input.
 CLOSED: [2023-06-13 Tue 12:05]
 If an environment variable with password is already defined,
 playtrough.sh will not ask for the password.
+
+*** Mention the opt-in to the Alma Linux AMI in playtrough.sh
+ Error: creating EC2 Instance: OptInRequired: In order to use this AWS Marketplace product you need to accept terms and subscribe. To do so please visit https://aws.amazon.com/marketplace/pp?sku=3kukoxmnoighcsbjd0u4nq9ds
+│       status code: 401, request id:
+c915e28b-9e1e-4199-9e1c-a5e027333e9e
+**** Maybe it will be enough to warn the user? Would be cool to somehow force this subscription as one of the steps in the playtrough.sh. Maybe even test for it.
+
+* Mistakes:
+** Terraform:
+*** Encapsulated a variable reference in double quotes, making it a literal string (effectively) turning off the reference mechanism.
+#+BEGIN_SRC terraform
+  provider "aws" {
+    region = var.aws_region # Correct
+    # region = "var.aws_region" # Incorrect
+  }
+#+END_SRC
