@@ -38,9 +38,78 @@ CLOSED: [2023-04-18 Tue 18:47]
 ** Create a script to create and open/close LUKS container (which can hold the SSH key).
 ** Write out pseudocode for a script that would execute the whole project.
 ** Put the initial steps (vault creation, SSH key generation and uploading and Jenkins VM spin up) into the playtrough script.
-*** 1: Vault creation
-*** 2: SSH key generation
+*** 1: Vault creation - done
+*** 2: SSH key generation - done
+*** 3: SSH key uploading & VM spin up - need to finish some things first:
+**** Find a way to make the EC2 instance accessible from the internet (can't access it now if I'm creating my own subnet)
+**** Find a way to pass the IP address of the EC2 instance to Ansible
 ** Had some issues wit creating a VM accessible from the outside. Followed a blog article tutorial and succeeded, need to take what I learned there and put it in my Terraform code. 
+Following instructions in the [[https://medium.com/geekculture/how-to-manage-public-and-private-subnets-in-aws-with-terraform-69c272003c81][blog post]] for deploying a private and public subnet on AWS using Terraform.
+*** Planning:
+I'll create this infrastructure copying the solution from the blog
+word for word in a separate directory. After confirming that it works,
+I'll note the differences between the working infrastructure and what
+I had. Afterwards I'll use the notes to modify mine to comply with the
+working one and hope it will be what's needed. From skimming the
+document quickly, I guess that my problem was not adding the routing
+table to the public subnet, but it might not be everything.
+*** DONE Create a file for VPC
+CLOSED: [2023-06-19 Mon 18:42]
+*** DONE Create a file for Public Subnet
+CLOSED: [2023-06-19 Mon 18:49]
+*** DONE Create a file for Internet Gateway
+CLOSED: [2023-06-19 Mon 19:31]
+*** DONE Create a file for the Route Table for the Public Subnet
+CLOSED: [2023-06-19 Mon 19:37]
+*** DONE Create a file for the Security Group
+CLOSED: [2023-06-19 Mon 21:51]
+*** DONE Create a file for the Public EC2 Instance
+CLOSED: [2023-06-19 Mon 22:03]
+*** DONE Create a variable file
+CLOSED: [2023-06-19 Mon 22:05]
+*** DONE Creating a NAT with an Elastic IP - what I'm not going to do.
+CLOSED: [2023-06-19 Mon 22:05]
+**** Create a file for the Public Subnet for NAT Gateway
+**** Create a file for Elastic IP (EIP)
+**** Create a file for the NAT Gateway
+**** Create a file for the Route Table for the NAT Gateway
+**** Create a file for the Private Subnet
+**** Create a file for the Route Table for the Private Subnet
+**** Create a file for the Private EC2 Instance
+*** DONE Run and see if it works
+CLOSED: [2023-06-20 Tue 12:44]
+**** Strange error, looked like one line was "disappeared" in Emacs.
+Terraform signaled an error of redefining type. This type of error
+happens if we have a double definition of something that can only be
+defined once.
+
+I didn't see anything wrong in the file. Turning on the 'linum-mode'
+in Emacs showed, that there was one line that "disappeared". Line 4
+was right after the second line. I didn't investigate, just went to
+the end of line 2 and held delete until I deleted the phantom line.
+**** Had to add the ssh key uploading code.
+I thought I can just link the name of the key uploaded by the flask
+terraform code. It didn't work, maybe because 'terraform destroy'
+destroys also SSH keys that are defined in the project. I just copied
+what had to be copied and got the ssh-key name using terraform
+variable substitution instead of the name I could get from AWS. Thanks
+to writing out all the code I feel like I'm getting the hang of
+Terraform. At least the hang of how things tend to be named and how to
+get id's or inside-secret-names of things, using variables.
+
+
+
+*** DONE Find the differences
+CLOSED: [2023-06-22 Thu 18:17]
+Differences were the routing table and routing table association.
+*** DONE Add them to flask-ci-cd Terraform code.
+CLOSED: [2023-06-23 Fri 15:42]
+Added all networking infrastructure code to main.tf.
+
+** Creating a file with secrets in the vault
+*** We can keep some kind of state file there so that Terraform, Ansible and later Jenkins can communicate with each other or find out details on how to run the project.
+*** File will be in bash, so that it can be sourced to read all the variables into memory.
+*** To protect the secrets, a trap will be added to playtrough.sh script so that on script exit, the vault can be locked again.
 
 * Set up Jenkins part 2: install Jenkins using Ansible.
 * Set up Jenkins part 3: Configure Jenkins using JCasC
@@ -52,6 +121,7 @@ CLOSED: [2023-04-18 Tue 18:47]
 *** Vault management script could detect if container is already created/closed/open and not report an error if container state is already as requested.
 *** Add an option to destroy the existing vault.
 ** playtrough.sh
+*** If the variables in the vault are not set, interview the user about required project details at the beginning of the script.
 *** DONE Both sub points can be achieved checking for presence of a dotfile.
 CLOSED: [2023-06-15 Thu 13:50]
 **** Test if script is run in the project's root directory

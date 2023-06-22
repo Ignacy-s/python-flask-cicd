@@ -1432,7 +1432,8 @@ CLOSED: [2023-06-19 Mon 22:05]
 *** Create a file for the Private Subnet
 *** Create a file for the Route Table for the Private Subnet
 *** Create a file for the Private EC2 Instance
-** TODO Run and see if it works
+** DONE Run and see if it works
+CLOSED: [2023-06-20 Tue 12:44]
 *** Strange error, looked like one line was "disappeared" in Emacs.
 Terraform signaled an error of redefining type. This type of error
 happens if we have a double definition of something that can only be
@@ -1452,4 +1453,12 @@ to writing out all the code I feel like I'm getting the hang of
 Terraform. At least the hang of how things tend to be named and how to
 get id's or inside-secret-names of things, using variables.
 
+
+
+** DONE Find the differences
+CLOSED: [2023-06-22 Thu 18:17]
+Differences were the routing table and routing table association.
+** DONE Add them to flask-ci-cd Terraform code.
+CLOSED: [2023-06-23 Fri 15:42]
+Added all networking infrastructure code to main.tf.
 
