@@ -17,7 +17,7 @@ SSH_KEY_NAME="id_25519_aws_flaskcicd"
 # FUNCTIONS
 function usage() {
 cat <<EOF >&2
-Usage: ${0} X [Y]
+Usage: ${0} [X [Y]]
 Where X is the step you want to start at (0 to start from the
 beginning), and Y is the step you want to end with. Y is optional, if
 not submitted, the script will run until the end.
@@ -43,11 +43,8 @@ or the file ${ROOT_DIR_MARKER} is missing.\n\
 Please start the script from inside the project's root."
   fi
 
-  if (( ${#} < 1 )); then
-    die "You didn't provide the starting step argument."
-  fi
   
-  START_POINT="${1}"
+  START_POINT="${1:-1}"
   LAST_POINT="${2:-999}"
 
 
