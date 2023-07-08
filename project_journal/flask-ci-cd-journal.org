@@ -1461,4 +1461,122 @@ Differences were the routing table and routing table association.
 ** DONE Add them to flask-ci-cd Terraform code.
 CLOSED: [2023-06-23 Fri 15:42]
 Added all networking infrastructure code to main.tf.
+* Sat 08 Jul 2023 04:29:38 PM CEST
+** Having a shot at doing some tests with Ansible using given ssh key.
+** Problems with EC2 key pair - it already exists.
+*** Prompt:
+Error in terraform, probably because the key has already been uploaded before. How to make terraform upload key only if it doesn't exist yet?
+Here is the error and code from main.tf
+
+aws_key_pair.jenkins-key: Creating...
+╷
+│ Error: importing EC2 Key Pair (cicd-project-key): InvalidKeyPair.Duplicate: The keypair already exists
+│       status code: 400, request id: ba2b8cd1-53de-43d0-b63b-d5c5f821efff
+│ 
+│   with aws_key_pair.jenkins-key,
+│   on main.tf line 79, in resource "aws_key_pair" "jenkins-key":
+│   79: resource "aws_key_pair" "jenkins-key" {
+│
+
+
+resource "aws_key_pair" "jenkins-key" {
+  key_name      = "cicd-project-key"
+  public_key    = file("../vault/my_ssh_key_mount/id_25519_aws_flaskcicd.pub")
+}
+
+
+resource "aws_instance" "jenkins" {
+  ami           = "ami-04e4606740c9c9381"
+#  ami           = data.aws_ami.amazon_linux.id
+  instance_type = var.instance_type
+
+  key_name      = aws_key_pair.jenkins-key.key_name
+*** Answer:
+Terraform does not natively support conditional creation of resources. However, you can work around this limitation by using a combination of a data block and a resource block.
+
+First, you can use a data block to check if the key pair already exists:
+
+hcl
+
+data "aws_key_pair" "existing" {
+  key_name = "cicd-project-key"
+}
+
+Then, you can use a resource block to create the key pair only if it does not already exist. You can do this by using the count parameter and the aws_key_pair.existing data source:
+
+hcl
+
+resource "aws_key_pair" "jenkins-key" {
+  count       = data.aws_key_pair.existing ? 0 : 1
+  key_name    = "cicd-project-key"
+  public_key  = file("../vault/my_ssh_key_mount/id_25519_aws_flaskcicd.pub")
+}
+
+In this code, the count parameter is set to 0 if the key pair already exists (which means the resource will not be created), and 1 if it does not (which means the resource will be created).
+
+Finally, you can modify the aws_instance resource block to use the existing key pair if it exists, and the new key pair otherwise:
+
+hcl
+
+resource "aws_instance" "jenkins" {
+  ami           = "ami-04e4606740c9c9381"
+  instance_type = var.instance_type
+
+  key_name      = data.aws_key_pair.existing ? data.aws_key_pair.existing.key_name : aws_key_pair.jenkins-key[0].key_name
+}
+
+In this code, the key_name parameter is set to the name of the
+existing key pair if it exists, and the name of the new key pair
+otherwise. Note the use of [0] to access the first (and only) element
+of the aws_key_pair.jenkins-key resource, since it is a list due to
+the use of the count parameter.
+
+Planning failed. Terraform encountered an error while generating this plan.
+
+
+*** Error: Incorrect condition type
+│ 
+│   on main.tf line 86, in resource "aws_key_pair" "jenkins-key":
+│   86:   count         = data.aws_key_pair.existing ? 0 : 1                 
+│     ├────────────────
+│     │ data.aws_key_pair.existing is object with 12 attributes                      
+│ 
+│ The condition expression must be of type bool.
+╵
+
+*** Answer:
+I apologize for the confusion earlier. The `data.aws_key_pair.existing` is an object, not a boolean. We need to check if the key pair exists by checking if the key pair's `key_name` attribute is not `null`.
+
+Here's how you can modify the `count` parameter to do this:
+
+```hcl
+resource "aws_key_pair" "jenkins-key" {
+  count       = data.aws_key_pair.existing.key_name != null ? 0 : 1
+  key_name    = "cicd-project-key"
+  public_key  = file("../vault/my_ssh_key_mount/id_25519_aws_flaskcicd.pub")
+}
+```
+
+In this code, the `count` parameter is set to `0` if the key pair's `key_name` attribute is not `null` (which means the key pair exists), and `1` if it is `null` (which means the key pair does not exist).
+
+Please note that this will only work if the data source does not
+produce an error when the key pair does not exist. If it does produce
+an error, you may need to use a different method to check if the key
+pair exists.
+
+*** Summary:
+Conditionals in hcl don't automatically substitute 'null' or boolean
+'no' for structures that don't exist.
+#+BEGIN_SRC terraform
+    #But we can compare them (thestructure) to a null with
+    # logical equals (==) or not_equals (!=) operators:
+  key_name      = (data.aws_key_pair.existing != null ?
+    data.aws_key_pair.existing.key_name :
+    aws_key_pair.jenkins-key[0].key_name)
+#+END_SRC
+Also, when using 'count' to create only a certain number of resources,
+it's changing that resource into a list, so even if we only have one
+of these items, we need to refer to it as to the first element of an
+array. C trick doesn't work here, address of the array is not same as
+the address of it's first element.
 

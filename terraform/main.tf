@@ -76,7 +76,14 @@ resource "aws_security_group" "jenkins" {
   }
 }
 
+
+# SSH key setup
+data "aws_key_pair" "existing" {
+  key_name = "cicd-project-key"
+}
+
 resource "aws_key_pair" "jenkins-key" {
+  count         = data.aws_key_pair.existing != null ? 0 : 1
   key_name      = "cicd-project-key"
   public_key    = file("../vault/my_ssh_key_mount/id_25519_aws_flaskcicd.pub")
 }
@@ -87,7 +94,12 @@ resource "aws_instance" "jenkins" {
 #  ami           = data.aws_ami.amazon_linux.id
   instance_type = var.instance_type
 
-  key_name      = aws_key_pair.jenkins-key.key_name
+  key_name      = (data.aws_key_pair.existing != null ?
+    data.aws_key_pair.existing.key_name :
+    aws_key_pair.jenkins-key[0].key_name)
+#    aws_key_pair.jenkins-key[0].key_name
+
+#  key_name      = aws_key_pair.jenkins-key.key_name
   subnet_id     = aws_subnet.jenkins.id
   associate_public_ip_address = true
 
