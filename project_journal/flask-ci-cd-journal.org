@@ -1580,3 +1580,8 @@ of these items, we need to refer to it as to the first element of an
 array. C trick doesn't work here, address of the array is not same as
 the address of it's first element.
 
+* Fri 14 Jul 2023 01:33:57 PM CEST
+** Would be cool to have some kind of Backlog? Or should I use the TODO list at the end of docs?
+** It felt weird and unnatural to use $PROJECT_ROOT/vault/ssh_key_mountpoint as the mountpoint for the vault. Changed it so that the /vault is the mountpoint for vault and the LUKS image sits at /vault.img.
+
+

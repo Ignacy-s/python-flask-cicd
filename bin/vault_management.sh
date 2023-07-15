@@ -3,16 +3,17 @@
 # Script for managing a LUKS vault for project secrets like SSH keys.
 
 VAULT_DIR="$(pwd)/vault"
-CONTAINER="$VAULT_DIR/my_ssh_key_container.img"
-MOUNT_POINT="$VAULT_DIR/my_ssh_key_mount"
+CONTAINER="${VAULT_DIR}.img"
+MOUNT_POINT="${VAULT_DIR}"
 PASS_VAR="VAULT_PASSPHRASE"
+VAULT_DEVICE="my_project_vault"
 
 # set -x to be commented out when script is confirmed to work
 # flawlessly
 # set -x
 
 function usage() {
-  echo "Usage: $0 {create|open|close}"
+  echo "Usage: ${0} {create|open|close}"
   exit 1
 }
 
@@ -28,11 +29,11 @@ function create_container() {
   # Creates a LUKS container and sets up a filesystem on it.
 
   # mkdir -p won't signal an error if dir exists
-  mkdir -p "$VAULT_DIR" \
+  mkdir -p "${VAULT_DIR}" \
     || die "Couldn't create vault."
 
   # Test if the container doesn't already exist.
-  if [[ -s "$CONTAINER" ]] && cryptsetup isLuks "$CONTAINER"
+  if [[ -s "${CONTAINER}" ]] && cryptsetup isLuks "${CONTAINER"
   then
     echo "A LUKS container already exists at ${CONTAINER}." >&2
     echo "Remove it by hand to use this script to create a new one." >&2
@@ -40,24 +41,24 @@ function create_container() {
   fi
 
   # Create a block device for the new container
-  dd if=/dev/zero of="$CONTAINER" bs=1M count=30 \
+  dd if=/dev/zero of="${CONTAINER}" bs=1M count=30 \
      || die "Error creating image file."
   # Create a luks2 container in this block.
   echo -n "${!PASS_VAR}" | sudo cryptsetup luksFormat \
                                 --type luks2 \
                                 --key-file=- \
-                                "$CONTAINER" \
+                                "${CONTAINER}" \
        || die "Error formating image as LUKS container."
 
   # Open the container temporarily to create a filesystem on it.
   echo -n "${!PASS_VAR}" | sudo cryptsetup luksOpen \
                                 --key-file=- \
-                                "$CONTAINER" \
-                                my_ssh_key_container \
+                                "${CONTAINER}" \
+                                "${VAULT_DEVICE}" \
                     || die "Error opening container."
-  sudo mkfs.ext4 /dev/mapper/my_ssh_key_container \
+  sudo mkfs.ext4 /dev/mapper/"${VAULT_DEVICE}" \
     || die "Error creating filesystem on container."
-  sudo cryptsetup luksClose my_ssh_key_container \
+  sudo cryptsetup luksClose "${VAULT_DEVICE}" \
     || die "Error closing container."
 }
 
@@ -66,22 +67,22 @@ function open_container() {
 
   echo -n "${!PASS_VAR}" | sudo cryptsetup luksOpen \
                                 --key-file=- \
-                                "$CONTAINER" \
-                                my_ssh_key_container \
+                                "${CONTAINER}" \
+                                "${VAULT_DEVICE}" \
                     || die "Error opening container."
-  sudo mkdir -p "$MOUNT_POINT" \
+  sudo mkdir -p "${MOUNT_POINT}" \
     || die "Error creating mountpoint."
-  sudo mount /dev/mapper/my_ssh_key_container "$MOUNT_POINT" \
+  sudo mount /dev/mapper/"${VAULT_DEVICE}" "${MOUNT_POINT}" \
     || die "Error mounting container."
-  sudo chown "${USER}": "$MOUNT_POINT" \
+  sudo chown "${USER}": "${MOUNT_POINT}" \
     || die "Error setting ownership of ${MOUNT_POINT} to ${USER}."
 }
 
 function close_container() {
   # Unmounts and closes the LUKS container.
-  sudo umount "$MOUNT_POINT" \
+  sudo umount "${MOUNT_POINT}" \
        || die "Error unmounting container."
-  sudo cryptsetup luksClose my_ssh_key_container \
+  sudo cryptsetup luksClose "${VAULT_DEVICE}" \
        || die "Error closing container."
 }
 
@@ -100,7 +101,7 @@ the cryptsetup binary.
 EOF
 fi
 
-case "$1" in
+case "${1}" in
   create)
     create_container
     ;;
