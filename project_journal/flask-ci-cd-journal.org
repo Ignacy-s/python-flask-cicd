@@ -1580,8 +1580,75 @@ of these items, we need to refer to it as to the first element of an
 array. C trick doesn't work here, address of the array is not same as
 the address of it's first element.
 
+* Sun 09 Jul 2023 05:44:10 PM CEST
+I'd like the terraform to auto update the hosts.ini file.
+It's possible, I used a null_resource and provisioner "local-exec" in
+it, where I run a bash script, passing the IP address as an argument
+to the bash script.
+
+At first it only run once, but then I modified it to make it run every
+time. Here is the ChatGPT convo:
+
+** But I want to pass some data to it (namely in IP address). What format should I use to perform variable substitution when running the script from terraform, so that the script receives the ip address string as one of it's parameters?
+You can pass variables to the script by including them in the command string. Here's an example of how you might do it:
+
+hcl
+
+resource "null_resource" "ansible_inventory_edit" {
+  provisioner "local-exec" {
+    command = "bash ${path.module}/edit_inventory.sh ${self.private_ip}"
+  }
+}
+
+In this example, ${self.private_ip} is a placeholder for the actual IP address you want to pass to the script. You would replace this with the actual Terraform expression that gets the IP address you want.
+
+Then, in your bash script, you can access this IP address as an argument:
+
+bash
+
+#!/bin/bash
+
+# The first argument is the IP address
+IP_ADDRESS=$1
+
+# Path to your inventory file
+INVENTORY_FILE="/path/to/your/inventory.ini"
+
+# Use sed or awk to edit the file, inserting the IP address where needed
+sed -i "s/IP_ADDRESS_PLACEHOLDER/$IP_ADDRESS/g" $INVENTORY_FILE
+
+In this script, $1 is a special variable that holds the first argument
+passed to the script. The script then uses sed to replace the
+placeholder text "IP_ADDRESS_PLACEHOLDER" with the actual IP address
+in the inventory file. You would replace "IP_ADDRESS_PLACEHOLDER" with
+whatever placeholder text you have in your inventory file.
+
+** How to make this 'null resource' work every time, so that it updates the file every time, not just when resource is "created"?
+The `null_resource` in Terraform is a resource that allows you to configure provisioners that are not directly associated with a single, specific resource. By default, the provisioners associated with a `null_resource` are only run when the `null_resource` is created, and not when it is updated.
+
+However, you can force the `null_resource` to be recreated every time you run `terraform apply` by using the `triggers` argument. The `triggers` argument is a map of arbitrary strings that, when changed, will cause the resource to be replaced, thus re-running the provisioners.
+
+Here's an example of how you might use it:
+
+```hcl
+resource "null_resource" "ansible_inventory_edit" {
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+
+  provisioner "local-exec" {
+    command = "bash ${path.module}/edit_inventory.sh ${self.private_ip}"
+  }
+}
+```
+
+In this example, the `timestamp()` function returns the current date
+and time. Since this value changes every time you run `terraform
+apply`, it will cause the `null_resource` to be recreated, and the
+provisioners to be re-run, every time.
+
 * Fri 14 Jul 2023 01:33:57 PM CEST
 ** Would be cool to have some kind of Backlog? Or should I use the TODO list at the end of docs?
+The documentation file should be one.
 ** It felt weird and unnatural to use $PROJECT_ROOT/vault/ssh_key_mountpoint as the mountpoint for the vault. Changed it so that the /vault is the mountpoint for vault and the LUKS image sits at /vault.img.
-
 
