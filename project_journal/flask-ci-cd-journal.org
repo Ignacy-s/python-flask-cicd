@@ -1461,6 +1461,15 @@ Differences were the routing table and routing table association.
 ** DONE Add them to flask-ci-cd Terraform code.
 CLOSED: [2023-06-23 Fri 15:42]
 Added all networking infrastructure code to main.tf.
+* Thu 22 Jun 2023 06:28:17 PM CEST
+** Creating a file with secrets in the vault
+*** Secrets are: VM IP address, AWS access keys (danger!!), maybe also instance type, region and some other things that come up later on.
+**** I'd rather not store AWS access keys. Maybe they can be exported to a environment variable, like the way I'm authorizing at the moment?
+**** If we could somehow test if we have AWS access to stand up a virtual machine? Then there would be no need to ask for the AWS keys. There are a few ways one can authorize Terraform to work on his behalf.
+*** At first the data will be entered manually.
+*** Later on there also will be an option to start the playtrough.sh script with an interview asking for all the required settings.
+*** To keep things safe, a trap can be added to playtrough.sh that would close the files.
+
 * Sat 08 Jul 2023 04:29:38 PM CEST
 ** Having a shot at doing some tests with Ansible using given ssh key.
 ** Problems with EC2 key pair - it already exists.

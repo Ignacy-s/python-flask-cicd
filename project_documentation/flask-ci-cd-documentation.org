@@ -106,10 +106,13 @@ Differences were the routing table and routing table association.
 CLOSED: [2023-06-23 Fri 15:42]
 Added all networking infrastructure code to main.tf.
 
-** Creating a file with secrets in the vault
+** TODO <<Create a file with secrets in the vault>>
+*** Temporarily solved by having Terraform update Ansible's inventory file on each execution of 'terraform apply'.
 *** We can keep some kind of state file there so that Terraform, Ansible and later Jenkins can communicate with each other or find out details on how to run the project.
 *** File will be in bash, so that it can be sourced to read all the variables into memory.
 *** To protect the secrets, a trap will be added to playtrough.sh script so that on script exit, the vault can be locked again.
+*** Since vault starts as empty, we need to check if it(file with secrets)'s there and generate the file if it doesn't exist yet.
+
 
 * Set up Jenkins part 2: install Jenkins using Ansible.
 * Set up Jenkins part 3: Configure Jenkins using JCasC
@@ -117,6 +120,7 @@ Added all networking infrastructure code to main.tf.
 * Deploy the Flask web application
 
 * TODO's:
+** Create a secret's file in the vault, as described [[Create a file with secrets in the vault][here]] in part 1 of the project.
 ** vault_management.sh (low priority, because using Hashicorp's Vault will make this script obsolete):
 *** Vault management script could detect if container is already created/closed/open and not report an error if container state is already as requested.
 *** Add an option to destroy the existing vault.
