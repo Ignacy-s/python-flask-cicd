@@ -26,7 +26,8 @@ at once.
 
 * DONE Create a separate repository for Jenkins provisioning, installation, and configuration.
 CLOSED: [2023-04-18 Tue 18:47]
-* TODO Set up Jenkins part 1: setting up a VM on AWS using Terraform.
+* DONE Set up Jenkins part 1: setting up a VM on AWS using Terraform.
+CLOSED: [2023-07-21 Fri 14:54]
 ** Create a data source that gets the AMI of the latest Alma Linux 9
 ** Create a base main.tf file that is a copy from the Terraform Up and Running code. Also add an alternative version that was given as an example of Jenkins setup on AWS.
 ** Add definitions for basic VPC and subnet
@@ -43,7 +44,7 @@ CLOSED: [2023-04-18 Tue 18:47]
 *** 3: SSH key uploading & VM spin up - need to finish some things first:
 **** Find a way to make the EC2 instance accessible from the internet (can't access it now if I'm creating my own subnet)
 **** Find a way to pass the IP address of the EC2 instance to Ansible
-** Had some issues wit creating a VM accessible from the outside. Followed a blog article tutorial and succeeded, need to take what I learned there and put it in my Terraform code. 
+** Had some issues with creating a VM accessible from the outside. Followed a blog article tutorial and succeeded, need to take what I learned there and put it in my Terraform code.
 Following instructions in the [[https://medium.com/geekculture/how-to-manage-public-and-private-subnets-in-aws-with-terraform-69c272003c81][blog post]] for deploying a private and public subnet on AWS using Terraform.
 *** Planning:
 I'll create this infrastructure copying the solution from the blog
