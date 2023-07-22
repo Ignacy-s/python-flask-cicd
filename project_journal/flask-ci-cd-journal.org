@@ -1661,3 +1661,169 @@ provisioners to be re-run, every time.
 The documentation file should be one.
 ** It felt weird and unnatural to use $PROJECT_ROOT/vault/ssh_key_mountpoint as the mountpoint for the vault. Changed it so that the /vault is the mountpoint for vault and the LUKS image sits at /vault.img.
 
+* Sat Jul 22 12:22:18 PM CEST 2023
+Ready to start with Ansible part of the project, as the absolute
+minimum is already done by Terraform, namely creating a VM on AWS and
+putting it's IP address in Ansible's inventory file.
+
+Inventory file needs to be stripped from the IP address(es) before
+it's committed. Git has a functionality called post and pre-commit
+hooks for such occasions. These are scripts executed by git
+automatically on specific triggers.
+
+It's not an essential functionality, but work to improve work,
+therefore I don't feel it's wrong to use ChatGPT to do it.
+
+** Prompt: I would like to commit Ansible's hosts.ini file, but there are IP addresses inside.
+
+How can I have git run a script stripping a specific line in the file
+before commiting? Don't need a regexp to detect IPs since I can locate
+the file and the IP is placed in double quotes after an equal (=)
+sign.
+
+*** Answer: You can use a Git hook to automate this process. Git hooks are scripts that Git executes before or after events such as commit, push, and so on.
+They're a built-in feature - no need to download anything. They
+are stored in the .git/hooks directory.
+
+In your case, you can use a pre-commit hook to modify the hosts.ini
+file before it gets committed. Here's a simple example of how you
+could do this:
+
+    Navigate to your repository's .git/hooks directory.
+
+    Create a new file named pre-commit (no file extension).
+
+    Open the file in a text editor and add the following bash script:
+
+bash
+
+#!/bin/sh
+
+# Path to your hosts.ini file
+FILE="path/to/your/hosts.ini"
+
+# Backup original file
+cp $FILE "$FILE.bak"
+
+# Replace IP addresses with placeholder
+sed -i 's/=".*"/="0.0.0.0"/g' $FILE
+
+# Add the modified file to the commit
+git add $FILE
+
+    Save and close the file.
+
+    Make the pre-commit hook executable by running chmod +x pre-commit
+    in your terminal.
+
+Now, every time you run git commit, the pre-commit hook will replace
+all IP addresses in your hosts.ini file with 0.0.0.0 before the commit
+is created.
+
+Please note that this will modify the actual hosts.ini file in your
+working directory. If you want to keep the original IP addresses in
+your working directory, you could create a copy of the hosts.ini file,
+modify the copy, commit the copy, and then delete the copy. However,
+this would mean that the hosts.ini file in your repository would
+always have the placeholder IP addresses, not the real ones.
+
+Also, remember to restore the original hosts.ini file after the
+commit, if necessary. You can do this by adding a post-commit hook
+that restores the hosts.ini file from the hosts.ini.bak backup.
+
+*** Followup prompt: Would it run everytime or only when the hosts.ini is staged?
+The `pre-commit` hook, as written, will run every time you execute
+`git commit`, regardless of whether `hosts.ini` is staged or not. It
+will replace the IP addresses in `hosts.ini` and add the modified file
+to the commit.
+
+If you want the script to only run when `hosts.ini` is staged, you can
+modify the script to check if `hosts.ini` is in the list of staged
+files before performing the replacement. Here's an example of how you
+could do this:
+
+```bash
+#!/bin/sh
+
+# Path to your hosts.ini file
+FILE="path/to/your/hosts.ini"
+
+# Check if hosts.ini is staged
+if git diff --cached --name-only | grep --quiet "$FILE"; then
+  # Backup original file
+  cp $FILE "$FILE.bak"
+
+  # Replace IP addresses with placeholder
+  sed -i 's/=".*"/="0.0.0.0"/g' $FILE
+
+  # Add the modified file to the commit
+  git add $FILE
+fi
+```
+
+In this version of the script, `git diff --cached --name-only` lists
+the names of all staged files, and `grep --quiet "$FILE"` checks if
+`hosts.ini` is in that list. The rest of the script only executes if
+`hosts.ini` is staged.
+
+** There are only minor errors in ChatGPT script generated that I see initially.
+We'll see if and how it works. I could make a regexp to catch any IP
+addresses, but for now it's ok to just edit the line starting with
+'jenkins'.
+
+The 'git add' command puts the file in cache as it is, so we can
+revert the file to backup right after we perform the add. At least
+that's how I understand it.
+
+It worked with a minor issue - magit (Emacs git handler) keeps showing
+the hosts.ini as modified (since the IP address it sees is not equal
+to the placeholder XXX that sits in repo), but I can live with that.
+
+I like that now the config file can be tracked in repo, since it makes
+it easier for new people to understand and use it.
+
+* Sun Jul 23 08:19:51 PM CEST 2023
+** Created a pre-commit hook for git to remove IP addresses form Ansible's hosts.ini file.
+In the process I've learned about what special characters for bash sed
+have to be escaped inside single quotes:
+*** curly braces \{  - (for regex repetition pattern)
+*** round braces \(  - (for regex block to be f.ex. repeated)
+*** dot . if we need literal dot \.
+
+** pre-commit script in the final form:
+#+BEGIN_SRC bash
+#!/bin/bash
+
+# # log function for debugging
+# log(){
+#   echo "$(date +%F+%T):${*}" \
+#        >> hook-debug.$(date +%F).log
+# }
+
+# Path to your hosts.ini file
+FILE="ansible/hosts.ini"
+
+# Check if hosts.ini is staged
+if git diff --cached --name-only \
+    | grep --quiet "${FILE}"
+then 
+  # Backup original file
+  cp -p "${FILE}" "${FILE}.bak"
+
+  # Define a regexp catching IP addresses
+  IP_REGEX='\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}'
+
+  # Replace IP addresses with placeholder
+  sed -i \
+    '/ansible_host="'"${IP_REGEX}"'"/s/=".*"/="XXX"/' \
+    "${FILE}"
+
+  # Add the modified file to the commit
+  git add "${FILE}"
+
+  # Copy back the backup file
+  mv "${FILE}.bak" "${FILE}"
+fi
+
+exit 0
+#+END_SRC
