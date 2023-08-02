@@ -33,7 +33,7 @@ function create_container() {
     || die "Couldn't create vault."
 
   # Test if the container doesn't already exist.
-  if [[ -s "${CONTAINER}" ]] && cryptsetup isLuks "${CONTAINER"
+  if [[ -s "${CONTAINER}" ]] && cryptsetup isLuks "${CONTAINER}"
   then
     echo "A LUKS container already exists at ${CONTAINER}." >&2
     echo "Remove it by hand to use this script to create a new one." >&2
