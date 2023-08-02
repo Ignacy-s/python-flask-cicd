@@ -114,13 +114,65 @@ Added all networking infrastructure code to main.tf.
 *** To protect the secrets, a trap will be added to playtrough.sh script so that on script exit, the vault can be locked again.
 *** Since vault starts as empty, we need to check if it(file with secrets)'s there and generate the file if it doesn't exist yet.
 
+* TODO Set up Jenkins part 2: install Jenkins using Ansible.
+** DONE Find good instructions on how to install Jenkins in it's documentation or from some other credible source
+CLOSED: [2023-07-28 Fri 19:13]
+*** https://www.jenkins.io/doc/book/installing/linux/#fedora
+** DONE Create a Vagrant VM for local tests/development of the Jenkins playbook
+CLOSED: [2023-08-02 Wed 13:54]
+*** Reinstalled Vagrant because of libvirt plugin issues 
+I've made the mistake of assuming that libvirt-devel package is going
+to automatically pull libvirt. It's possible that reinstallation
+wasn't necessary.
+*** Installed & enabled libvirt and vagrant-libvirt plugin
+*** Downloaded Alma Linux 9 vagrant box
+*** Modified the default Vagrantfile based on previous projects (hostname, IP address, RAM)
+*** Start an Apache server on the Vagrant machine to make sure everything works
+I could see the test webpage after installing Apache and enabling it
+in firewall.
+** DONE Create a bash script or pseudocode script with the instructions listed in order.
+CLOSED: [2023-08-02 Wed 13:54]
+*** Here are instructions from the Jenkins docs for installation on Fedora.
+#+BEGIN_SRC bash
+sudo wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat-stable/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+sudo dnf upgrade
+# Add required dependencies for the jenkins package
+sudo dnf install java-17-openjdk
+sudo dnf install jenkins
+sudo systemctl daemon-reload
+#+END_SRC
+Not sure if it enables and starts the Jenkins service.
+*** Here is a script to configure firewalld (RedHat family firewall service), also from Jenkins docs
 
-* Set up Jenkins part 2: install Jenkins using Ansible.
+#+BEGIN_SRC bash
+YOURPORT=8080
+PERM="--permanent"
+SERV="$PERM --service=jenkins"
+
+firewall-cmd $PERM --new-service=jenkins
+firewall-cmd $SERV --set-short="Jenkins ports"
+firewall-cmd $SERV --set-description="Jenkins port exceptions"
+firewall-cmd $SERV --add-port=$YOURPORT/tcp
+firewall-cmd $PERM --add-service=jenkins
+firewall-cmd --zone=public --add-service=http --permanent
+firewall-cmd --reload
+#+END_SRC
+
+** DONE Test if these scripts/instructions work on a local Vagrant VM
+CLOSED: [2023-08-02 Wed 13:54]
+*** All this works and installs 
+Jenkins, tho the Jenkins service had to be explicitly enabled/started
+Firewall configuration might be even simpler - the Jenkins service is
+most likely already defined in firewalld services.
+** TODO Create a playbook based on the instructions
+** Debug the playbook until it deploys a working Jenkins server
 * Set up Jenkins part 3: Configure Jenkins using JCasC
 * Create a Jenkinsfile in the Flask web application repository
 * Deploy the Flask web application
 
-* TODO's:
+* TODO's (non-mission critical):
 ** Create a secret's file in the vault, as described [[Create a file with secrets in the vault][here]] in part 1 of the project.
 ** vault_management.sh (low priority, because using Hashicorp's Vault will make this script obsolete):
 *** Vault management script could detect if container is already created/closed/open and not report an error if container state is already as requested.
