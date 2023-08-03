@@ -1836,4 +1836,34 @@ exit 0
 ** And got Jenkins working using instructions from Jenkins docs
 * Wed Aug  2 01:48:49 PM CEST 2023
 ** Got to translate the Jenkins installation instructions from Jenkins' docs (bash) to an Ansible playbook.
+** First going to put the instructions in one file
+** Actually, first going to nuke the local VM and check if installing Jenkins installs also firewalld configuration, which would simplify firewall setup.
+In the process cleaned up the installation script a little.
 
+Found Jenkins service. Reloading firewall and testing if it works.
+It works, have to remember about the --permanent option and to reload the firewall afterwards. Added these to the script.
+** Had some error when changed the name of the mountpoint in the playtrough.sh. Used 'sudo rm /dev/mapper/LUKS_CONTAINER_NAME' to delete the old container that didn't want to cooperate.
+Maybe I could add a check for it in the vault management script.
+The 'rm' command wasn't enough. What did the job was using 'cryptsetup close my_project_container'.
+** The 'firewalld' module in Ansible didn't work.
+Module documentation said to test if it's present with 'ansible-galaxy
+collection list'. It returned nothing. Docs said that the module
+should've been installed with a regular Ansible install, (dnf package
+'ansible') but not when installing only ansible-core. So I tried
+installing the 'ansible' package and it started installation - looks
+like I only had ansible-core installed.
+** Had issues connecting to the local VM using the key generated for Ansible
+There was some glitch with ssh-copy-id, where it thought the key
+submitted in the command was already installed while it wasn't. Had to
+modify the ssh-copy-id command to include the -f (force) flag, which
+solved the problem.
+
+#+BEGIN_SRC bash
+# Copying the key (forcefully)
+ssh-copy-id -fi ../vault/id_25519_aws_flaskcicd.pub -o "IdentityFile /home/igi/Coding/projekty/cv-portfolio/python-flask-cicd/vagrant/.vagrant/machines/jenkins/libvirt/private_key" vagrant@jenkins
+
+# Checking if the key got copied
+ssh jenkins 'cat ~/.ssh/authorized_keys'
+#+END_SRC
+
+** Another problem connecting to the local VM - Ansible interpreted ssh options from hosts.ini as host definitions. Turns out, that a proper way to set variables for a group is to name a subsection [GROUPNAME:vars].

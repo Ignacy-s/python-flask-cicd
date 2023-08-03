@@ -166,7 +166,8 @@ CLOSED: [2023-08-02 Wed 13:54]
 Jenkins, tho the Jenkins service had to be explicitly enabled/started
 Firewall configuration might be even simpler - the Jenkins service is
 most likely already defined in firewalld services.
-** TODO Create a playbook based on the instructions
+** DONE Create a playbook based on the instructions
+CLOSED: [2023-08-03 Thu 21:25]
 ** Debug the playbook until it deploys a working Jenkins server
 * Set up Jenkins part 3: Configure Jenkins using JCasC
 * Create a Jenkinsfile in the Flask web application repository
@@ -203,3 +204,11 @@ c915e28b-9e1e-4199-9e1c-a5e027333e9e
     # region = "var.aws_region" # Incorrect
   }
 #+END_SRC
+** Using 'firewall-cmd' command without the '--permanent' option
+It doesn't work.
+** Defining variables for a group in Ansible's hosts.ini outside [GROUPNAME:vars] subsection (forgetting the ':vars' modificator)
+I used just the [GROUPNAME], instead of this:
+[aws:vars]
+#ansible_user=ec2-user
+ansible_user=vagrant
+ansible_ssh_private_key_file="../vault/id_25519_aws_flaskcicd"

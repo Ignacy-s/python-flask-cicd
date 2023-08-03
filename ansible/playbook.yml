@@ -1,0 +1,43 @@
+---
+- hosts: all
+  become: yes
+
+  tasks:
+    - name: Add key for Jenkins repo
+      rpm_key:
+        state: present
+        key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+    - name: Add the Jenkins repo
+      yum_repository:
+        name: jenkins
+        description: jenkins stable repo
+        baseurl: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+        gpgcheck: yes
+
+    - name: Update all system packages before installation
+      dnf:
+        name: "*"
+        state: latest
+
+    - name: Install Jenkins
+      dnf:
+        name:
+          - java-17-openjdk
+          - jenkins
+        state: present
+
+    - name: Start and enable jenkins and firewalld services
+      service:
+        name:
+          - jenkins
+          - firewalld
+        state: started
+        enabled: yes
+
+    - name: Allow Jenkins service in firewall
+      ansible.posix.firewalld:
+        service:
+          - jenkins
+        state: enabled
+        permanent: true
