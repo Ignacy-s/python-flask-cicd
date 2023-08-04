@@ -168,7 +168,11 @@ Firewall configuration might be even simpler - the Jenkins service is
 most likely already defined in firewalld services.
 ** DONE Create a playbook based on the instructions
 CLOSED: [2023-08-03 Thu 21:25]
-** Debug the playbook until it deploys a working Jenkins server
+** DONE Debug the playbook until it deploys a working Jenkins server
+CLOSED: [2023-08-04 Fri 10:36]
+*** There were issues with nearly each task in this short playbook. The way Ansible tasks are defined is very similar to bash, but it's not identical. I've also made a YAML newbie mistake of supplying a one-element list instead of a string.
+Notes from troubleshooting/debugging can be found in the project
+journal under Fri Aug 4 10:45:00 AM CEST 2023
 * Set up Jenkins part 3: Configure Jenkins using JCasC
 * Create a Jenkinsfile in the Flask web application repository
 * Deploy the Flask web application

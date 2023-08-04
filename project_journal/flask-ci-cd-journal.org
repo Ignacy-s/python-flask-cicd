@@ -1845,6 +1845,8 @@ It works, have to remember about the --permanent option and to reload the firewa
 ** Had some error when changed the name of the mountpoint in the playtrough.sh. Used 'sudo rm /dev/mapper/LUKS_CONTAINER_NAME' to delete the old container that didn't want to cooperate.
 Maybe I could add a check for it in the vault management script.
 The 'rm' command wasn't enough. What did the job was using 'cryptsetup close my_project_container'.
+* Fri Aug  4 10:40:53 AM CEST 2023
+Debugging the playbook.
 ** The 'firewalld' module in Ansible didn't work.
 Module documentation said to test if it's present with 'ansible-galaxy
 collection list'. It returned nothing. Docs said that the module
@@ -1867,3 +1869,98 @@ ssh jenkins 'cat ~/.ssh/authorized_keys'
 #+END_SRC
 
 ** Another problem connecting to the local VM - Ansible interpreted ssh options from hosts.ini as host definitions. Turns out, that a proper way to set variables for a group is to name a subsection [GROUPNAME:vars].
+** Problem with adding of the Jenkins repo - cannot download repodata/repomd.xml
+#+BEGIN_SRC yaml
+# Code in question:
+    - name: Add the Jenkins repo
+      yum_repository:
+        name: jenkins
+        description: jenkins stable repo
+        baseurl: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+        gpgcheck: yes
+#+END_SRC
+
+Looks like the general way of using the yum_repo module is correct,
+but the repo link I used from the Jenkins documentation shell script
+is not correct. This is a link to the repository configuration file
+and not the actual repository. We need to go one directory level
+up. Trying again with https://pkg.jenkins.io/redhat-stable
+** Error in the 'service' module. "This module does not currently support using glob patterns, found '[' in service name: ['jenkins', 'firewalld']".
+Looks like it's about the way YAML works. ChatGPT claimed that the
+Ansible version I was using should be high enough for the service
+module to accept a list. I used a list in a 'block style', (each element
+on a new line, prepended with a dash). ChatGPT suggests going around
+this limitation using a loop, but I'll first check if it will work
+using the 'flow style' list (each element on the same line, coma separated).
+
+Problematic piece of code:
+#+BEGIN_SRC yaml
+  - name: Start and enable jenkins and firewalld services
+    service:
+      # (block list)
+      # name:
+      #   - jenkins
+      #   - firewalld
+      # (flow list)
+      name: jenkins, firewalld
+
+      state: started
+      enabled: yes
+#+END_SRC
+
+It didn't work either, will create a loop. I wonder which is a better
+alternative, loop or with_items?
+Looks like it's the loop, because it's more robust (accepts complex
+data types, not just lists). 'with_items' is here for backwards
+compatibility.
+** Ansible Firewalld module says that the Jenkins service is absent. Pretty sure I checked it before and it wasn't.
+There is a command to list all pre-defined services - 'firewall-cmd
+--get-services' (--list-services lists only the active ones).
+#+BEGIN_SRC bash
+ssh jenkins 'sudo firewall-cmd --get-services' | grep -q jenkins && echo "Found jenkins" || echo "No jenkins"
+Found jenkins
+#+END_SRC
+
+So the 'jenkins' service is here, but the Ansible module can't see
+it. Maybe I need to name it some other way? I could "just make it
+work" by adding the tcp port 8080, but nothing looks more confusing
+than a list of seemingly random ports when looking at firewall
+settings.
+
+The 'jenkins' service name was supplied to the firewalld module in the
+form of a block list. Changed it to a simple parameter. That was
+it. The module expected a string with the name (or maybe names too?)
+of the service/s and I supplied a list.
+** Can't connect to the Jenkins web server. Looks like firewall misconfiguration.
+[igi@fedora ansible]$ nc -z 10.11.12.5 8080 && echo true || echo false
+false
+[igi@fedora ansible]$ ssh jenkins 'nc -z localhost 8080 && echo true || echo false'
+true
+[igi@fedora ansible]$ ssh jenkins 'sudo firewall-cmd --list-services'
+cockpit dhcpv6-client ssh
+
+For some reason, Ansible's change of firewall settings didn't
+hold. Maybe the firewalld module doesn't reload the firewall
+automatically?
+
+I'm on a plane right now and the playbook fails on the first task
+(can't get the key). In ansible-playbook manual there is a parameter
+called '--start-at-task TASK_NAME'. When supplied with the name
+string, it did start with the firewall setup task.
+
+Since there's no internet, I'll try to find an example in the Ansible
+for DevOps book.
+
+Found an example in the server hardening chapter. Looks like it's a
+common error and it's caused by the "permanent: yes" parameter. In
+case we use 'permanent', we need to add another parameter "immediate:
+yes" to have the firewall changes applied immediately.
+
+[igi@fedora ansible]$ ssh jenkins 'sudo firewall-cmd --list-services'
+cockpit dhcpv6-client jenkins ssh
+[igi@fedora ansible]$ nc -z 10.11.12.5 8080 && echo true || echo false
+true
+
+Now the Jenkins service is properly listed and netcat says it can
+connect to port 8080. The webpage loads too. We can say that the
+deployment of a basic Jenkins installation was successful.

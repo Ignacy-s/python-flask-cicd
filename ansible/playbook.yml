@@ -12,7 +12,7 @@
       yum_repository:
         name: jenkins
         description: jenkins stable repo
-        baseurl: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+        baseurl: https://pkg.jenkins.io/redhat-stable
         gpgcheck: yes
 
     - name: Update all system packages before installation
@@ -29,15 +29,16 @@
 
     - name: Start and enable jenkins and firewalld services
       service:
-        name:
-          - jenkins
-          - firewalld
+        name: "{{ item }}"
         state: started
         enabled: yes
+      loop:
+        - jenkins
+        - firewalld
 
     - name: Allow Jenkins service in firewall
       ansible.posix.firewalld:
-        service:
-          - jenkins
+        service: jenkins
         state: enabled
         permanent: true
+        immediate: yes
