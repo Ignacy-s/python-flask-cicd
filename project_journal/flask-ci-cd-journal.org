@@ -1964,3 +1964,71 @@ true
 Now the Jenkins service is properly listed and netcat says it can
 connect to port 8080. The webpage loads too. We can say that the
 deployment of a basic Jenkins installation was successful.
+* Sat 12 Aug 2023 04:33:17 PM CEST
+Needed refreshing information on the theory behind CI/CD. The ULSAH
+(Unix-Linux System Administrator's Handbook) has a concise and
+interesting chapter on it.
+* Thu Sep  7 08:17:31 PM CEST 2023
+Wasted over 30 min because the code for management of Vault is too
+brittle. It should tolerate a situation when a vault image already
+exists and/or a LUKS device has already been created.
+* Fri Sep  8 06:58:54 PM CEST 2023
+Instead of creating my own tools, it might be better to use the ones
+already existing and broadly used in the industry, which I will have
+to learn at some point anyway. I already have a short course on Vault
+from Jakub Mrugalski's educational network. Why not go with that?
+
+It's gonna take a moment and requires running a vault server. I will
+do the Vault course at my own time, but since it would block me for a
+while, I'll just reset the stuff by hand and keep working on the
+project.
+* Sat Sep  9 11:59:03 AM CEST 2023
+Updating the ansible playbook to also install Jenkins Configuration as
+Code plugin. Can't automatically (as Code) install other plugins
+without this plugin being installed first.
+
+Looks like the most straightforward method (apart from using
+Geerlingguy's Jenkins role) is to use Jenkins CLI on the server.
+
+Looking over Geerlingguy's code I've noticed that he makes sure
+Jenkins server is up and running before he installs plugins. Might
+have to add some kind of delay or check, or eventually just separate
+Jenkins installation from Jenkins configuration steps.
+
+It was difficult to crack this "chicken and egg" problem. Online
+solutions aren't widely available, as most people either use the ready
+Ansible role prepared by Jeff Gerling or the Jenkins docker image.
+
+At first I tried using Jenkins CLI. But it requires authentication
+which itself requires some initial server configuration.
+
+Have another idea - just have any version of JCasC (Jenkins plugin for
+configuration as code) downloaded and ready to by pushed to the server
+by Ansible. Then, this plugin can be used to configure the server,
+including updating of itself (the JCasC plugin). With the plugin
+installed, rest of the configuration is performed with a yaml file.
+
+Jenkins needs to be restarted after the plugins and configuration
+files are pushed to the server. But if we restart Jenkins during the
+initial startup, we can damage the installation. A solution would be
+to use Ansible's 'wait_for' module. It's documentation even mentions
+waiting for a port to be open after a Java application is installed! I
+wonder if it was written with Jenkins in mind.
+
+* Mon Sep 11 07:09:48 PM CEST 2023
+I'm starting Jenkins to play a little with it.
+
+Installed recommended plugins, but that's what I wasn't supposed to
+do. I need a clean install and just the JCasC plus it's
+dependencies. To make it easier to see it's dependencies.
+
+Have a fresh install with just JCasC and it's dependencies. It's
+almost 3MB total, which is a lot, but at the same time, in 2023 it's
+almost nothing.
+
+Permissions for all plugins are 644 jenkins:jenkins.
+
+Have all the plugins in a .tgz file in /jenkins_config directory.
+There is one problem, they got tarred along with their full path, so
+it might be easier/harder to extract, depending on whether I remember
+about it.

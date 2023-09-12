@@ -114,7 +114,8 @@ Added all networking infrastructure code to main.tf.
 *** To protect the secrets, a trap will be added to playtrough.sh script so that on script exit, the vault can be locked again.
 *** Since vault starts as empty, we need to check if it(file with secrets)'s there and generate the file if it doesn't exist yet.
 
-* TODO Set up Jenkins part 2: install Jenkins using Ansible.
+* DONE Set up Jenkins part 2: install Jenkins using Ansible.
+CLOSED: [2023-08-04 Fri 21:44]
 ** DONE Find good instructions on how to install Jenkins in it's documentation or from some other credible source
 CLOSED: [2023-07-28 Fri 19:13]
 *** https://www.jenkins.io/doc/book/installing/linux/#fedora
@@ -173,8 +174,33 @@ CLOSED: [2023-08-04 Fri 10:36]
 *** There were issues with nearly each task in this short playbook. The way Ansible tasks are defined is very similar to bash, but it's not identical. I've also made a YAML newbie mistake of supplying a one-element list instead of a string.
 Notes from troubleshooting/debugging can be found in the project
 journal under Fri Aug 4 10:45:00 AM CEST 2023
-* Set up Jenkins part 3: Configure Jenkins using JCasC
+* TODO Set up Jenkins part 3: Configure Jenkins using JCasC
+** DONE Find some good sources on Jenkins as Code
+   CLOSED: [2023-09-05 Tue 19:52]
+*** Found both in Unix/Linux SysAdmin's Handbook (ULSAH):
+**** jenkins pipeline as code
+https://devopscube.com/jenkins-pipeline-as-code/
+
+https://www.jenkins.io/doc/book/pipeline-as-code/
+
+Looks like the Pipeline as Code is a concept of creating a project
+related Jenkins workflow, called a pipeline, defined in
+code. Alternative would be to click it out in GUI, but having it in
+code along with the project is more tidy. It's super popular.
+**** jenkins configuration as code
+Is a not-so-popular way to configure a Jenkins server, which then
+needs another Pipeline as Code configuration to run jobs. It's not
+that popular, but it's the way to go for an automated deployment.
+** TODO Manually configure Jenkins
+** TODO Update the Ansible playbook for Jenkins installation to include the JCasC plugin
+*** It wasn't easy because installing a plugin automatically on a new Jenkins installation can be challenging.
+*** It seems that the most straightforward method would be to download the JCasC plugin on the Ansible host and then have Ansible push it to the server once it's up.
+*** Ansible's 'wait_for' module waits for a port to open when an application starts up.
+*** Got the JCasC plugin and it's dependencies packed neatly inside a .tgz file in the /jenkins_config directory
+** Export the configuration in the JCasC format
+** Modify the Ansible playbook to place the configuration file on the Jenkins server
 * Create a Jenkinsfile in the Flask web application repository
+
 * Deploy the Flask web application
 
 * TODO's (non-mission critical):
