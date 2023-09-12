@@ -42,3 +42,12 @@
         state: enabled
         permanent: true
         immediate: yes
+
+    - name: Install Helper Packages (locate)
+      dnf:
+        name:
+          - mlocate
+        state: present
+
+    - name: Update locate database
+      command: updatedb
