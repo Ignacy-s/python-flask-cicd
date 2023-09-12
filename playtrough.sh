@@ -11,7 +11,7 @@
 ROOT_DIR_MARKER=".flask-ci-cd-project-root-marker"
 # File that marks the ssh-key vault
 VAULT_ACCESS_MARKER=".ssh-vault-marker"
-VAULT_LOCATION="vault/my_ssh_key_mount"
+VAULT_LOCATION="vault"
 SSH_KEY_NAME="id_25519_aws_flaskcicd"
 
 # FUNCTIONS
