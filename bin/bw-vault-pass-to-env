@@ -1,0 +1,1 @@
+export VAULT_PASSPHRASE="$( bw get password flaskcicd.com )"
