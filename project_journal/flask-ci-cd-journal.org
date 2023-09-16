@@ -2032,3 +2032,86 @@ Have all the plugins in a .tgz file in /jenkins_config directory.
 There is one problem, they got tarred along with their full path, so
 it might be easier/harder to extract, depending on whether I remember
 about it.
+
+* Tue Sep 12 08:15:08 PM CEST 2023
+Committed all the hanging changes to declutter git status output (or
+rather the magit-status window in Emacs).
+
+Just realized that I can't really have a working Jenkins configuration
+before I create the pipeline and export it as Pipeline as Code. On the
+other hand, the configuration doesn't have to be "working" to create
+the initial version of mechanisms to push it to the server with
+Ansible. I'll just nuke the Vagrant machine, reinstall Jenkins and do
+a manual installation of default plugins and create a pipeline by
+hand.
+
+This one-liner destroys the vagrant machine, updates local .ssh/config
+to include login credentials for the machine (using a script), removes
+ssh fingerprint of the previous machine, copies the project's ssh key
+onto the machine, and then runs the Ansible playbook against it (now
+that it contains the ssh key that Ansible knows about).
+
+#+BEGIN_SRC bash
+# To be run in the /vagrant dir.
+vagrant destroy -f \
+&& vagrant up \
+&& update_ssh_config.sh \
+&& ssh-keygen -f "/home/igi/.ssh/known_hosts" -R "10.11.12.5" \
+&& sshpass -p 'vagrant' \
+  ssh-copy-id -i ../vault/id_25519_aws_flaskcicd.pub \
+  vagrant@10.11.12.5 \
+&& ANSIBLE_CONFIG=../ansible/ansible.cfg \
+  ansible-playbook -i ../ansible/hosts.ini \
+  ../ansible/playbook.yml
+#+END_SRC
+
+* Fri Sep 15 12:08:57 PM CEST 2023
+Going to bind the python-flask-cicd-code repo with Jenkins.
+
+Not sure how. I'll go with the Jenkins tutorials from here:
+https://www.jenkins.io/doc/tutorials/
+
+** Installing Docker Pipeline plugin
+Clicking trough the Web UI
+** Created a Jenkinsfile in the code repo
+Copied from Python example from the tutorial
+** Installing Emacs Jenkins major mode
+Noticed there is no syntax highlighting in the Jenkinsfile. Fixed by
+downloading a plugin from packages list. There was also Butler - a
+plugin to manage the Jenkins server from Emacs. Can find out how to
+use it later on.
+
+* Sat Sep 16 01:28:32 PM CEST 2023
+Looks like I overlooked some things in planning of the third part of
+the project, mostly due to being unaware of the complexity of it. I
+determined that the 'code-repo' side of the project to be trivial. It
+is however a bunch of separate tasks, so I have to rewrite the plan
+and divide the Jenkins setup and the Jenkins pipeline setup into
+smaller tasks and/or reorder them.
+
+This is because I feel a block when thinking about making the code
+repo into something that can produce an artifact (in this case a
+docker image, artifact is a product of the ci-cd pipeline, a ready
+compiled program or something that can later be tested and
+deployed). A block is feeling based. It's either fear or anxiety, and
+anxiety is usually a sign of complexity or too many paths forward to
+be able to comfortably determine what is the best action right now. A
+way to reduce the anxiety is to reduce the surface of possible
+actions, by for example being a little more specific in planning. So
+planning it is.
+
+* Sat Sep 16 01:44:38 PM CEST 2023
+Looks like what caused the problem was wrong order of tasks. You can't
+configure Jenkins automatically if you don't know what to configure
+for. For that you need to have a finished and working Jenkins
+pipeline. For that you need the code repo to contain the code to
+manually generate the artifact. So the proper order would be:
+1. Code repo has all it needs to produce a working artifact, in this
+   case that would most likely be a Dockerfile.
+2. Code repo contains a Jenkinsfile which is just the automated
+   creation of the artifact mentioned in previous step (normally it
+   would also include testing, before creating the artifact and after,
+   but this would add too much complexity).
+3. Jenkins installation can be configured to create the pipeline for
+   the code-repo based on a Jenkinsfile in the repo.
+

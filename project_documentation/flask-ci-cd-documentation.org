@@ -174,7 +174,14 @@ CLOSED: [2023-08-04 Fri 10:36]
 *** There were issues with nearly each task in this short playbook. The way Ansible tasks are defined is very similar to bash, but it's not identical. I've also made a YAML newbie mistake of supplying a one-element list instead of a string.
 Notes from troubleshooting/debugging can be found in the project
 journal under Fri Aug 4 10:45:00 AM CEST 2023
-* TODO Set up Jenkins part 3: Configure Jenkins using JCasC
+* TODO Part 3: Create a Jenkinsfile in the Flask web application repository
+** TODO Improve the python-flask-cicd-code repository so that it can output a docker image
+** Test, debug and make sure it works when run manually
+** Manually upload the docker image either to AWS or Dockerhub
+** Describe the process in a declarative Jenkinsfile, automating the process of docker image creation in a manually setup Jenkins
+** Automate uploading of the docker image either to AWS or Dockerhub
+** Test, debug and make sure it works with a manually set up Jenkins server
+* Part 4: Configure Jenkins using JCasC
 ** DONE Find some good sources on Jenkins as Code
    CLOSED: [2023-09-05 Tue 19:52]
 *** Found both in Unix/Linux SysAdmin's Handbook (ULSAH):
@@ -192,18 +199,19 @@ Is a not-so-popular way to configure a Jenkins server, which then
 needs another Pipeline as Code configuration to run jobs. It's not
 that popular, but it's the way to go for an automated deployment.
 ** TODO Manually configure Jenkins
-** TODO Update the Ansible playbook for Jenkins installation to include the JCasC plugin
+** DONE Update the Ansible playbook for Jenkins installation to include the JCasC plugin
+CLOSED: [2023-09-16 Sat 13:41]
 *** It wasn't easy because installing a plugin automatically on a new Jenkins installation can be challenging.
 *** It seems that the most straightforward method would be to download the JCasC plugin on the Ansible host and then have Ansible push it to the server once it's up.
 *** Ansible's 'wait_for' module waits for a port to open when an application starts up.
 *** Got the JCasC plugin and it's dependencies packed neatly inside a .tgz file in the /jenkins_config directory
-** Export the configuration in the JCasC format
+** Export the configuration in the JCasC format and create a new JCasC configuration based on that export
 ** Modify the Ansible playbook to place the configuration file on the Jenkins server
-* Create a Jenkinsfile in the Flask web application repository
-
-* Deploy the Flask web application
-
-* TODO's (non-mission critical):
+** Test, debug and make sure it works
+* Part 5: Deploy the Flask web application to Amazon EKS
+** Automate the deployment of the app when a new version of Dockerfile appears
+** Test, debug and make sure it works
+* TODO's (non mission-critical):
 ** Create a secret's file in the vault, as described [[Create a file with secrets in the vault][here]] in part 1 of the project.
 ** vault_management.sh (low priority, because using Hashicorp's Vault will make this script obsolete):
 *** Vault management script could detect if container is already created/closed/open and not report an error if container state is already as requested.
@@ -242,3 +250,5 @@ I used just the [GROUPNAME], instead of this:
 #ansible_user=ec2-user
 ansible_user=vagrant
 ansible_ssh_private_key_file="../vault/id_25519_aws_flaskcicd"
+
+** Not refactoring the plan often enough. As we go deeper into the project, we gain knowledge and experience. In the light of newfound knowledge, the old plan becomes obsolete and should be replaced with more refined new plan. It doesn't mean that I was stupid by making the wrong plan in the beginning. Acting incompetently is the only way to gain competence to start acting competently.
