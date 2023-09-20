@@ -175,13 +175,51 @@ CLOSED: [2023-08-04 Fri 10:36]
 Notes from troubleshooting/debugging can be found in the project
 journal under Fri Aug 4 10:45:00 AM CEST 2023
 * TODO Part 3: Create a Jenkinsfile in the Flask web application repository
-** TODO Improve the python-flask-cicd-code repository so that it can output a docker image
-** Test, debug and make sure it works when run manually
-** Manually upload the docker image either to AWS or Dockerhub
-** Describe the process in a declarative Jenkinsfile, automating the process of docker image creation in a manually setup Jenkins
+** DONE Improve the python-flask-cicd-code repository so that it can output a docker image
+CLOSED: [2023-09-18 Mon 15:34]
+*** Can't copy all files inside the repo onto the docker image, but found a solution - .dockerignore
+*** Some issues with dependencies resolved by unpinning the dependencies
+**** More issues kept coming up. I can deploy this fancy blog in a later iteration. For now a simple flask hello world will suffice.
+*** DONE Writing a simple Flask Hello World with help of ChatGPT
+CLOSED: [2023-09-18 Mon 15:34]
+Build a docker image with it and run it to make sure that it works,
+and it does.
+** DONE Test, debug and make sure it works when run manually
+CLOSED: [2023-09-18 Mon 15:35]
+** DONE Manually upload the docker image either to AWS or Dockerhub
+CLOSED: [2023-09-18 Mon 17:59]
+** DONE Describe the process in a declarative Jenkinsfile, automating the process of docker image creation in a manually setup Jenkins
+CLOSED: [2023-09-20 Wed 19:18]
+For this followed a tutorial found in Jenkins docs.
+*** DONE First prepare the Jenkins server to use docker
+CLOSED: [2023-09-20 Wed 19:18]
+*** DONE Write a pipeline file (Jenkinsfile) based on web tutorials
+CLOSED: [2023-09-20 Wed 19:18]
+** TODO Update Ansible playbook knowing what was missing from the server:
+*** TODO Summary: How do I need to modify my Ansible playbook?
+
+*** Install repo: https://download.docker.com/linux/centos/docker-ce.repo
+
+*** Remove packages:
+podman
+buildah
+
+*** Install packages:
+bash-completion (for debugging and usability)
+docker-ce docker-ce-cli containerd.io
+git
+
+*** Add jenkins user to docker group, !! jenkins service shouldn't be started before jenkins is added to the docker group !!
+
+*** Start and enable the docker.service
+
 ** Automate uploading of the docker image either to AWS or Dockerhub
+*** DONE Choose a deployment method: Decided to use AWS ECS with Fargate which is a very straightforward method of deploying a docker container to the cloud
+CLOSED: [2023-09-20 Wed 10:08]
+*** TODO Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
 ** Test, debug and make sure it works with a manually set up Jenkins server
 * Part 4: Configure Jenkins using JCasC
+** Find out what needs to be done to use AWS permissions and secret store to give the least permissions required to have Jenkins auto deploy the container to ECS Fargate
 ** DONE Find some good sources on Jenkins as Code
    CLOSED: [2023-09-05 Tue 19:52]
 *** Found both in Unix/Linux SysAdmin's Handbook (ULSAH):
@@ -252,3 +290,59 @@ ansible_user=vagrant
 ansible_ssh_private_key_file="../vault/id_25519_aws_flaskcicd"
 
 ** Not refactoring the plan often enough. As we go deeper into the project, we gain knowledge and experience. In the light of newfound knowledge, the old plan becomes obsolete and should be replaced with more refined new plan. It doesn't mean that I was stupid by making the wrong plan in the beginning. Acting incompetently is the only way to gain competence to start acting competently.
+* Extras:
+** TODO Following a Jenkins Tutorial to learn how to make pipelines based on Jenkinsfiles
+*** DONE Set the goal: Jenkinsfile building my docker image and hosting it on ECS Fargate
+CLOSED: [2023-09-20 Wed 11:05]
+*** DONE Starting with tutorial titled "How to Use Jenkins to Build and Run an Image Using Docker"
+CLOSED: [2023-09-20 Wed 18:58]
+
+*** DONE Preparing the Jenkins Controller Instance to also server as a Docker building agent (manually for now, but later need to modify the ansible and eventually JCasC configuration):
+CLOSED: [2023-09-20 Wed 14:06]
+**** Suggested requirements to run docker:
+***** Docker Engine: This is the core component required to build Docker images. You don't need to run containers, but the Docker engine must be installed to execute the docker build command.
+
+***** Docker CLI: This is typically bundled with the Docker Engine installation. It provides the command-line interface to interact with Docker, including building images.
+
+***** Jenkins Docker Plugin (optional): While not strictly necessary if you're using shell commands in Jenkins to build images, the Docker plugin can provide better integration and additional features for Docker within Jenkins.
+
+***** Appropriate Permissions: The user under which Jenkins is running needs to have permissions to interact with the Docker daemon. This is often achieved by adding the Jenkins user to the docker group.
+**** Summary: steps taken:
+***** Install CentOS docker repo:
+$ sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+***** Remove conflicting packages preinstalled on AlmaLinux
+sudo dnf remove podman buildah -y
+***** Install docker packages
+sudo dnf install docker-ce docker-ce-cli containerd.io
+***** Start docker service
+sudo systemctl enable --now docker.service
+***** Add jenkins (and vagrant) users to docker group
+sudo usermod -aG docker jenkins
+***** Install git package
+***** Restart Jenkins service after changing the group.
+
+**** Summary: How do I need to modify my Ansible playbook?
+
+Install repo: https://download.docker.com/linux/centos/docker-ce.repo
+
+Remove packages:
+podman
+buildah
+
+Install packages:
+bash-completion (for debugging and usability)
+docker-ce docker-ce-cli containerd.io
+git
+
+Add jenkins user to docker group
+!! jenkins service shouldn't be started before jenkins is added to the
+docker group !!
+
+Start and enable the docker.service
+
+
+*** Writing the Jenkinsfile:
+Shamelessly copying the example from the YouTube video.
+*** Fixing agent to 'any' to allow building on the Jenkins controller
+*** Installing git
+

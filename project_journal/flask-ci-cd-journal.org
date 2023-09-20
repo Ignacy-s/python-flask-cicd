@@ -2114,4 +2114,264 @@ manually generate the artifact. So the proper order would be:
    but this would add too much complexity).
 3. Jenkins installation can be configured to create the pipeline for
    the code-repo based on a Jenkinsfile in the repo.
+* Sun Sep 17 03:18:55 PM CEST 2023
+Getting into the weeds with python flask docker images. Following a
+youtube tutorial from Hitesh Choudhary called "How to build docker
+image for python flask app".
 
+** .dockerignore
+First issue that popped up is that I have all the code from CoreyMS's
+(an online programming teacher) GitHub repo inside the flask app repo
+directory and can't simply copy it all onto the docker image. Testing
+a solution called .dockerignore which seems to work like .gitignore.
+
+** Dependency Hell
+This are the dependencies:
+#+BEGIN_SRC ruby
+bcrypt==3.1.4
+blinker==1.4
+certifi==2016.2.28
+cffi==1.11.5
+click==6.7
+Flask==1.0
+Flask-Bcrypt==0.7.1
+Flask-Login==0.4.1
+Flask-Mail==0.9.1
+Flask-SQLAlchemy==2.3.2
+Flask-WTF==0.14.2
+itsdangerous==0.24
+Jinja2==2.10
+MarkupSafe>=1.0
+Pillow==5.3.0
+pycparser==2.18
+six==1.11.0
+SQLAlchemy==1.2.7
+Werkzeug==0.14.1
+WTForms==2.1
+#+END_SRC
+
+*** Timeboxing
+Since I can choose any other python project and I'd rather have
+something that works with current versions of libraries due to
+security concerns, I'll try to solve the dependency issues in 1h. If
+it's not working by that time, I'll choose a different project.
+
+*** Error from python - complaining on lack of compilation tools - switching base image to python
+Maybe what's missing is only missing in the thin alpine image.
+
+Didn't work.
+*** Pasted the errors to ChatGPT and found out that it's a dependency issue, most likely due to old libraries being pinned.
+I'm going to unpin the version, see if PIP will just pull the latest.
+
+Changed Markupsafe dependency to >=1.0 from ==1.0
+It worked.
+*** Now there are errors with cffi. Trying the same as with Markupsafe, changing the dependency from equal to greater than equal. Success!
+** Errors with the app
+Wasn't sure what was wrong and since right now the focus is not
+learning Python but publishing any app in a docker image, I'm getting
+the code from the latest version of the Python Flask tutorial.
+** Another dependency error. It's a third one. I'm unpinning all dependencies.
+#+BEGIN_SRC bash
+sed -i 's/==/>=/' requirements.txt
+#+END_SRC
+** Problem with DB credentials not being set
+Still debugging in the same way, by building the image, running it,
+hoping it will show up in 'docker ps' output (because it would mean it
+is running and didn't die right after startup). If it's not visible in
+ps output, I get it's name from ps -a and run docker logs against it's
+hash.
+
+Looks like to go further with it I would need to co-deploy a
+database. It would be cool, but for now I'll just mock the fully
+fledged blog with a ChatGPT generated code that returns Hello World!
+on HTTP requests.
+* Mon Sep 18 12:43:09 PM CEST 2023
+Going for a simple Hello World generated with ChatGPT.
+
+The Hello World python code seems legit for what I can I know of
+python which is not much.
+Even though I had a Dockerfile ready, I've looked at what ChatGPT
+suggested and there were some things I asked more about:
+** --no-cache-dir option for pip install -r requirements
+This would be an equivalent to 'apt clean' run after installing apps
+inside the docker image (inside a Dockerfile) and is meant to stop pip
+from saving downloaded packages in cache for later use, as there will
+be no later use and it only bloats the image.
+** ENV FLASK_ENV=production
+Flask has two modes of operation, 'development' and 'production',
+with the development mode having additional debugging features
+activated. These shouldn't be active in an internet facing app, hence
+the production setting to disable them.
+** CMD ["python", "app.py"] instead of CMD python app.py
+I remember vaguely from a Docker course, that it's just about what is
+the typical way to set it up. ChatGPT explained that when run with
+arguments not in brackets, the shell form, a shell is called and
+performs a an "sh -c 'arguments here'", while the exec form doesn't
+call a shell, but most likely performs an exec, where the container
+process becomes the binary in the first argument and gets run without
+the extra shell overhead.
+* Mon Sep 18 03:32:56 PM CEST 2023
+The flask app works, docker image builds and the container based on
+that image stays open and keeps returning "Hello, World!" when poked.
+* Mon Sep 18 04:28:53 PM CEST 2023
+Issues trying to push the code repo. Github denies the public
+key. Troubleshooting by trying the 'ssh git@github.com'
+command. Spoiler: same error.
+
+Looks like GitHub is not accepting my ssh key. I also don't have an
+ssh/config entry for github.com, which I now fixed.
+
+Added .pub part of the main ssh key from my laptop. Strange that it
+didn't come up earlier.
+
+
+Pushed the image to dockerhub.com without issues.
+* Tue Sep 19 10:36:24 AM CEST 2023
+Time to follow tutorial from Jenkins site at create a Jenkins Pipeline
+as Code (aka Jenkinsfile) and save it in the repo along with the flask
+app code.
+
+* Wed Sep 20 10:07:03 AM CEST 2023
+Turned out I had the AWS services names and usage wrong. There are
+actually multiple ways to deploy a container to the cloud. For a very
+simple setup with one container, the most straightforward method to
+use is to couple AWS ECS (Elastic Container Service) with Fargate
+(serverless engine for containers). They can be managed with Terraform.
+
+* Wed Sep 20 11:03:30 AM CEST 2023
+Following online tutorials to learn how to make pipelines based on
+Jenkinsfiles. Most important thing to do is setting a clear goal, and
+here it is:
+Writing a Jenkinsfile that will build a docker image with given
+Dockerfile and deploying it to ECS Fargate.
+
+Starting with a YouTube tutorial from CloudBees, Jenkins authors,
+titled "How to Use Jenkins to Build and Run an Image Using Docker".
+
+Need to prepare my Jenkins Controller (so that's how mater server is
+called) to be able to build docker images. For that I'm going to do a
+regular docker install. I also need to give the jenkins user
+permission to use docker by assigning him the docker group.
+
+There are a ton of methods to install docker on CentOS (which is
+closes to Alma Linux I've chosen for this project). But to make it
+more straightforward, I'll just install Docker from already existing
+repos and test it with 'docker run hello-world'. If it doesn't work,
+we can look at more complicated methods of installation.
+
+First finding docker packages with 'dnf search docker'. Fun: dnf
+search command get's killed. An 'echo $?' returns '137'. Rebooting the
+server, so I don't have to search for the reason why it doesn't
+work. I'm working with Jenkins server installed to a Vagrant VM with
+Ansible.
+
+Looks like the Fun persists between reboots. How much time should I
+put to the issue before nuking and reinstalling the server with
+Ansible? Until the end of this pomodoro and one more. This is still a
+chance to learn something on Linux Administration.
+
+Logs show a ton of jenkins entries connected to the python flask
+job. Looks like misconfigured Jenkins job uses up all the resources on
+system. Strange because the 'free' command still shows some RAM left.
+Trying to delete the job using Jenkins UI.
+
+Job was deleted, tail -f on /var/log/messages shows that jenkins is
+still bombarding the server with some request:
+Sep 20 09:57:01 jenkins-master jenkins[1065]: 2023-09-20
+09:57:01.054+0000
+[id=18]#011WARNING#011hudson.security.csrf.CrumbFilter#doFilter: No
+valid crumb was included in request for
+/job/python-flask-app/widget/ExecutorsWidget/ajax by
+admin. Returning 403.
+
+I'm working on a laptop, maybe there is a browser window with Jenkins
+opened on the desktop machine that keeps trying to access Jenkins
+using old session data?
+
+That was exactly the case.
+
+Another problem - there is no regular docker on AlmaLinux. RedHat
+derivatives stopped using docker because of security issues. Running
+docker service as root is not safe, so they switched to podman. Doing
+a Vagrant halt & up, and then trying if just installing podman will
+work. Else I can add docker repo and go with this method.
+
+After reboot performed from host, dnf works normally.
+After installing podman, and running 'docker run hello-world' we get a
+'hello podman world' message from a podman container. Good enough for
+now, tho I have a hunch that this can be a source of Fun in the
+future.
+
+Looks like I can't push the container. Leaving learning how to replace
+docker with podman for later. Now I will just add the docker repo and
+install a regular docker.
+
+Removing podman first.
+
+The VM hanged again. Now I see why people use Jenkins in Docker.
+It required accepting some fingerprint. Hope that Ansible can deal
+with it automatically.
+
+Starting docker service and adding myself and jenkins to docker group.
+Still doesn't work, but that's because groups are assigned on
+login. Need to relog.
+Works!
+
+* Wed Sep 20 02:10:56 PM CEST 2023
+Now that the Jenkins server is prepared to build docker images and I
+have documented the steps (Ansible playbook not yet updated) I can
+write the Jenkinsfile and commit it along with the code.
+
+And it's done and committed. Now I should create a Jenkins job or
+whatever it's called on the Jenkins server.
+
+* Wed Sep 20 03:05:19 PM CEST 2023
+
+I sort of know I should use a Jenkins multi-branch pipeline but that's
+pretty much it. Time to watch some more YouTube tutorials! But before
+I launch on this adventure, just checking online if there is a simple
+Jenkins tutorial on how to create a pipeline based on a
+Jenkinsfile. Manually in Jenkins GUI.
+
+Not many tutorials, but I just clicked trough a multi-branch pipeline
+setup and filled sane defaults.
+
+Got first error, Jenkins doesn't like my # prepended comments. Need to
+find out what's the proper way to comment inside a
+Jenkinsfile. Answer: It's C++ style comments:
+#+BEGIN_SRC c++
+  // double dash for one line
+  /* dash - asterisk start and asterisk dash at the end
+   for multi-line comments */
+#+END_SRC
+
+So I'm making updates to the Jenkinsfile and iterating it, but there
+might be some details I'm missing that I don't even know that I could
+ask about. I'm going to just watch 4 episode long Jenkins Tutorial
+from "TechWorld with Nana", which is only 3 years old. The part on
+Jenkins set up (she uses a docker image) will go at 2x speed.
+
+So far nothing special done by Nana except for using a regexp to
+decide which branches should get their pipelines. She used
+"^master|dev|feature.*$" so only the master, dev and feature branches
+will be selected.
+
+She also used 'agent any' instead of 'agent { label "linux" }' which
+should allow building on the main Jenkins server.
+
+* Wed Sep 20 06:57:28 PM CEST 2023
+Changed the agent to 'any'. Now there is another issue, looks like git
+is not installed on the Jenkins server. 'git --version' returns 'git
+not found'. Oops.
+
+Git is there now. Another problem, Jenkins seems to be missing
+permissions to use docker. But I've added Jenkins to docker
+group. However, for an already logged in user, permissions don't
+change. User needs to re-log. Trying with 'systemctl restart
+jenkins'. That was it.
+
+Had to remove the "run" step, as it would hang the pipeline. It could
+work with a one-shot app, but this container contains a web server
+which will just keep running indefinitely.
+
+It builds!
