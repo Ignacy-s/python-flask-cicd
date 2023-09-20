@@ -85,7 +85,7 @@ data "aws_key_pair" "existing" {
 resource "aws_key_pair" "jenkins-key" {
   count         = data.aws_key_pair.existing != null ? 0 : 1
   key_name      = "cicd-project-key"
-  public_key    = file("../vault/my_ssh_key_mount/id_25519_aws_flaskcicd.pub")
+  public_key    = file("../vault/id_25519_aws_flaskcicd.pub")
 }
 
 
