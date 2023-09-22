@@ -2555,7 +2555,6 @@ works. Incidentally, this is how Ansible Pilot adds the
 repository. Actually, I could do just what he does, using Ansible
 facts to supply $releasever and $basearch. I wonder if this would
 work.
-
 Ansible Pilot says that '$releasever' and '$basearch' will be expanded
 directly by yaml dnf.
 
@@ -2565,3 +2564,36 @@ matter now. This is also the reason why Configuration as Code is the
 king. After I'm done debugging the manual process, I'll be able to
 configure whole Jenkins instance with Jenkins as Code and if the
 Jenkins server starts acting up - just nuke and pave it.
+
+I had a thought when the playbook was being executed. In this specific
+case, I started the jenkins.service only after changing the group
+setting for the jenkins user (adding him to docker group). But if the
+server was already running, this would fail without restarting the
+jenkins service. So there should be a hook or post task (don't
+remember the Ansible name for it) activated by the group changing task
+to restart the Jenkins server. But then, it would be even more
+complicated as we cannot simply restart the jenkins service (or maybe
+we can, I'm not sure). Because if we restarted the service on it's
+first run, when it's performing it's bootstrapping process, creating
+directories and such, we could damage the installation. Proper way to
+do this would be to only restart the server after it has become
+responsive.
+
+It works, but Jenkins didn't see JCasC plugin as
+installed. Installation took 0.01 seconds, everything was instantly
+downloaded, a sign that the packages copied by Ansible were recognized
+as correct.
+
+Task uploading the plugins was at the end of the playbook, so the
+plugins were copied after Jenkins was already started. Jenkins only
+recognizes new plugins on startup. So the right way would be to have
+the task automatically trigger restarting of the jenkins.service. This
+is the second time that not using it causes some extra work.
+I've just checked, this is called "notifying a handler", it's done by
+adding (at indent level of the task name, not task parameters)
+'notify: Handler Name' at the end of task description. These special
+tasks are called handlers. They are commonly used to restart
+services. Another thing to note about handlers is that they are only
+executed if all tasks in playbook succeeded. We can change this
+behavior in ansible.cfg, as an option when calling ansible-playbook or
+inside the playbook.
