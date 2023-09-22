@@ -27,7 +27,7 @@
         name: docker
         description: official docker repo
         baseurl: "https://download.docker.com/linux/\
-          centos/docker-ce.repo"
+          centos/$releasever/$basearch/stable"
         enabled: true
         gpgcheck: true
 

@@ -2556,3 +2556,12 @@ repository. Actually, I could do just what he does, using Ansible
 facts to supply $releasever and $basearch. I wonder if this would
 work.
 
+Ansible Pilot says that '$releasever' and '$basearch' will be expanded
+directly by yaml dnf.
+
+Yay! Success! Of course, it didn't go without errors. Looks like I get
+some disconnected error on the manual jenkins VM. But it doesn't
+matter now. This is also the reason why Configuration as Code is the
+king. After I'm done debugging the manual process, I'll be able to
+configure whole Jenkins instance with Jenkins as Code and if the
+Jenkins server starts acting up - just nuke and pave it.
