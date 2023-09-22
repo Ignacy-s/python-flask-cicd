@@ -2375,3 +2375,184 @@ work with a one-shot app, but this container contains a web server
 which will just keep running indefinitely.
 
 It builds!
+
+* Thu Sep 21 09:16:34 AM CEST 2023
+Right now I could start learning how to use Terraform to deploy to ECS
+Fargate, but first I'll finish updating the Ansible playbook. I get
+anxious thinking that the current server configuration starts
+diverging from my configuration as code. It started diverging already,
+because I've added changes that were very Vagrant specific. A Vagrant
+plugin, which updated set of packages that helps with host-VM
+communication, required libraries to build these packages. I installed
+them by hand and didn't document what was installed. That could've
+been solved differently. Even though these changes are Vagrant
+specific and as such shouldn't end up in the Jenkins server playbook,
+I could've added them to a separate playbook. Or have their execution
+activated by some label. Next time I'll do better.
+
+** Value of making clean notes
+While troubleshooting the Jenkinsfile I've learned what's missing from
+the server and made a clean list of requirements - how the playbook
+needs to be modified. Most of these changes are just to install
+Docker. While all the steps for installation of software from external
+repositories are similar, I still searched for a tutorial to see how a
+pro would do it, just to make sure there are no caveats I'm
+missing.
+
+** Ansible tutorial from Ansible Pilot YouTube channel
+Found "Install Docker in RedHat-like systems - Ansible module rpm_key"
+from Ansible Pilot YouTube channel.
+
+Generalized list of tasks to install from external repo:
+1. Download GPG key for the repo (to make sure that packaged we
+   downloaded were not tampered with)
+2. Add the repo using it's URL
+3. Refresh packages list and install the packages (done in the same
+   step on RedHat systems)
+
+** Full module names (example - 'ansible.builtin.rpm_key') - a good practice
+Ansible Pilot host uses full names for all modules, that is, including
+their source and middle name (maybe group?) in addition to the module
+name, all three separated with dots. I guess that if somebody uses
+Ansible heavily, using multiple namespaces is not uncommon. It doesn't
+really take so much more time to use full names for modules,
+especially if fixing them after the fact might take more than a couple
+of sed commands.
+
+** Setting the distribution name using 'ansible.builtin.set_fact'
+Host uses an interesting construction, using a conditional statement
+and a pipe (and 'lowercase' command) to set the value of the
+'mydistribution' variable so that our playbook can be used for all the
+RedHat variants that existed year ago, namely CentOS, Fedora and RHEL.
+
+#+BEGIN_SRC yaml
+  - name: set mydistribution
+    ansible.builtin.set_fact:
+      mydistribution: "{{ 'rhel' if (ansible_distribution == 'Red Hat Enterprise Linux') else (ansible_distribution | lower) }}"
+#+END_SRC
+
+*** I don't like the length of that line and wonder if it's possible to refactor it into a more readable form
+An online YAML linter says this is correct:
+#+BEGIN_SRC yaml
+      - name: set mydistribution
+        ansible.builtin.set_fact:
+          mydistribution: >-
+            {{
+            'rhel' if (ansible_distribution == 'Red Hat Enterprise Linux')
+            else (ansible_distribution | lower)
+            }}
+#+END_SRC
+
+The '>-' is a subcategory of YAML folded style ('>') strings, which
+replace newline characters with spaces. The minus '-' sign says that
+we don't want to put a trailing newline at the end of this long
+one-line string.
+
+There is also a way to shorten very long strings that would normally
+span more than 72 characters (like URLs).
+Instead of this:
+"an example of veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeery long string"
+We can do this:
+"an example of "
+"veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeery "
+"long string"
+
+Note the extra spaces at the end of each sub-string. When
+concatenating strings, there are no spaces added in place for
+newlines. This is why it would work with URLs too.
+
+Video author puts the source address of the GPG key as a parameter for
+the yum_repository command. I omitted it, let's see what
+happens. Jenkins installed without it. Maybe an older version of
+yum_repository wasn't that smart? I added docker-compose-plugin to the
+list of installed packages. I'm not using compose in this project, but
+if I ever reuse this code, I'd like it to be here, just in case.
+
+Note that Ansible Pilot adds a dnf module parameter, 'update_cache:
+true'. This way we explicitly say that we want to re-download packages
+list from repositories. I'm guessing that Ansible's optimizations
+could cause problems if cache wasn't updated after adding a new
+repository.
+
+Time to test the playbook. I've made multiple changes without
+committing and testing them. This is an anti-pattern, as it often
+wastes more time than it saves.
+
+* Fri Sep 22 12:13:59 PM CEST 2023
+Rewritten the Vagrantfile to create two VMs. This way I can test the
+playbook without loosing the manually configured Jenkins server.
+
+Had issues with the playbook, specifically, multi-line string.
+There are a few ways to separate a long parameter into multiple lines
+in YAML.
+We have the '>' and '|', folded scalar and literal scalar, which would
+take multi-line unquoted string and put it either into a single line,
+replacing newlines with spaces or just take it as is, with newlines in
+place of newlines. Both of them need a '-' afterwards, like this '>-'
+to not place a newline at the end of the created string.
+
+But this doesn't work for URLs and strings where we want to preserve
+them as they are, without additional spaces.
+
+Testing some other method to divide long strings into multiple lines.
+https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
+Exactly this answer: https://stackoverflow.com/a/21699210 (from above
+question)
+
+I'm really glad I've found it, I tried before and haven't seen it
+explained like that. ChatGPT failed to provide proper answer, even
+with a longer conversation and wrangling of the prompt.
+
+Had some issues with Vagrant. Had reload the machines, because
+changing the Vagrantfile messed up network settings for the existing
+machine. Afterwards had problems with the amazing plugin that fixes
+guest additions on the client VM from host by building it on the
+client. Had to disable it, but saving it's name so I can easily find
+it again: 'vagrant plugin uninstall vagrant-vbguest'.
+Finally, my script that updated ~/.ssh/config with details of the new
+machines stopped working. I had a replacement on a laptop, which uses
+a more "correct" form of putting new files in config.d directory. But
+that required adding an Include directive at the beginning of
+~/.ssh/config on the desktop, like that:
+#+BEGIN_SRC bash
+sed -i '1iInclude config.d\/\*' ~/.ssh/config
+ #+END_SRC
+
+Made a typo in yum_repository command. The 'enabled' parameter was
+called 'enable'. I really like the way the Ansible Pilot writes his
+Ansible tasks. They are very explicit, nothing is left for
+chance. Compare these two yum_repository tasks, one from Ansible
+Pilot, the other from some Jenkins tutorial (or me, don't remember).
+
+#+BEGIN_SRC yaml
+    - name: Add the Jenkins repo
+      yum_repository:
+        name: jenkins
+        description: jenkins stable repo
+        baseurl: https://pkg.jenkins.io/redhat-stable
+        gpgcheck: yes
+
+    - name: Add the Docker repo
+      yum_repository:
+        name: docker
+        description: official docker repo
+        baseurl: "https://download.docker.com/linux/\
+          centos/docker-ce.repo"
+        enabled: true
+        gpgcheck: true
+
+#+END_SRC
+
+Another issue, this time problem with the repo address for
+docke. Looks like dnf can't find a repo on that specific address. Need
+to check that the URL is correct. URL was correct, but not for Ansible
+(or it's dnf plugin). Looks like a repo can be defined in multiple
+ways. One of them is less explicit and depends on system parameters to
+choose the full path. But it doesn't work in this case, since Docker
+repos don't support AlmaLinux. I will try with a full repo address,
+that includes the system version and architecture and see if it
+works. Incidentally, this is how Ansible Pilot adds the
+repository. Actually, I could do just what he does, using Ansible
+facts to supply $releasever and $basearch. I wonder if this would
+work.
+

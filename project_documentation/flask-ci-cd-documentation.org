@@ -195,28 +195,41 @@ For this followed a tutorial found in Jenkins docs.
 CLOSED: [2023-09-20 Wed 19:18]
 *** DONE Write a pipeline file (Jenkinsfile) based on web tutorials
 CLOSED: [2023-09-20 Wed 19:18]
-** TODO Update Ansible playbook knowing what was missing from the server:
-*** TODO Summary: How do I need to modify my Ansible playbook?
+** DONE Update Ansible playbook knowing what was missing from the server:
+CLOSED: [2023-09-21 Thu 18:22]
+*** DONE Summary: How do I need to modify my Ansible playbook?
+CLOSED: [2023-09-21 Thu 18:22]
 
-*** Install repo: https://download.docker.com/linux/centos/docker-ce.repo
+*** DONE Install repo: https://download.docker.com/linux/centos/docker-ce.repo
+CLOSED: [2023-09-21 Thu 18:22]
 
-*** Remove packages:
+*** DONE Remove packages:
+CLOSED: [2023-09-21 Thu 18:22]
 podman
 buildah
 
-*** Install packages:
+*** DONE Install packages:
+CLOSED: [2023-09-21 Thu 18:22]
 bash-completion (for debugging and usability)
 docker-ce docker-ce-cli containerd.io
 git
 
-*** Add jenkins user to docker group, !! jenkins service shouldn't be started before jenkins is added to the docker group !!
+*** DONE Add jenkins user to docker group, !! jenkins service shouldn't be started before jenkins is added to the docker group !!
+CLOSED: [2023-09-21 Thu 18:22]
 
-*** Start and enable the docker.service
+*** DONE Start and enable the docker.service
+CLOSED: [2023-09-21 Thu 18:22]
 
 ** Automate uploading of the docker image either to AWS or Dockerhub
 *** DONE Choose a deployment method: Decided to use AWS ECS with Fargate which is a very straightforward method of deploying a docker container to the cloud
 CLOSED: [2023-09-20 Wed 10:08]
+*** Read up documentation and tutorials:
+**** AWS Docs: Building a serverless Jenkins environment on AWS Fargate https://aws.amazon.com/blogs/devops/building-a-serverless-jenkins-environment-on-aws-fargate/
+This is not exactly my use case, but it will be useful. It talks about
+deploying Jenkins to ECS Fargate. But it includes info on temporary
+credentials for 'AWS ECS Cluster access role' and 'Deployment role'. 
 *** TODO Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
+
 ** Test, debug and make sure it works with a manually set up Jenkins server
 * Part 4: Configure Jenkins using JCasC
 ** Find out what needs to be done to use AWS permissions and secret store to give the least permissions required to have Jenkins auto deploy the container to ECS Fargate
