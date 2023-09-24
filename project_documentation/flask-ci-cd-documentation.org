@@ -174,7 +174,8 @@ CLOSED: [2023-08-04 Fri 10:36]
 *** There were issues with nearly each task in this short playbook. The way Ansible tasks are defined is very similar to bash, but it's not identical. I've also made a YAML newbie mistake of supplying a one-element list instead of a string.
 Notes from troubleshooting/debugging can be found in the project
 journal under Fri Aug 4 10:45:00 AM CEST 2023
-* TODO Part 3: Create a Jenkinsfile in the Flask web application repository
+* DONE Part 3: Create a Jenkinsfile in the Flask web application repository
+CLOSED: [2023-09-24 Sun 14:12]
 ** DONE Improve the python-flask-cicd-code repository so that it can output a docker image
 CLOSED: [2023-09-18 Mon 15:34]
 *** Can't copy all files inside the repo onto the docker image, but found a solution - .dockerignore
@@ -220,19 +221,29 @@ CLOSED: [2023-09-21 Thu 18:22]
 *** DONE Start and enable the docker.service
 CLOSED: [2023-09-21 Thu 18:22]
 
-** Automate uploading of the docker image either to AWS or Dockerhub
-*** DONE Choose a deployment method: Decided to use AWS ECS with Fargate which is a very straightforward method of deploying a docker container to the cloud
+* TODO Part 4: Deploy the Flask web application to ECS Fargate
+** DONE Choose a deployment method: Decided to use AWS ECS with Fargate which is a very straightforward method of deploying a docker container to the cloud
 CLOSED: [2023-09-20 Wed 10:08]
-*** Read up documentation and tutorials:
-**** AWS Docs: Building a serverless Jenkins environment on AWS Fargate https://aws.amazon.com/blogs/devops/building-a-serverless-jenkins-environment-on-aws-fargate/
+** DONE Read up documentation and tutorials:
+CLOSED: [2023-09-24 Sun 14:05]
+*** AWS Docs: Building a serverless Jenkins environment on AWS Fargate https://aws.amazon.com/blogs/devops/building-a-serverless-jenkins-environment-on-aws-fargate/
 This is not exactly my use case, but it will be useful. It talks about
 deploying Jenkins to ECS Fargate. But it includes info on temporary
 credentials for 'AWS ECS Cluster access role' and 'Deployment role'. 
-*** TODO Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
-
+*** Summary:
+I need to start with a simple example of deploying a hello world to
+ECS Fargate, then do it with Terraform (or maybe even start with
+Terraform), then do it with Terraform from inside a Jenkinsfile and
+lastly, do it from a Jenkinsfile with safely configured permissions
+and credentials, so it can safely sit for a moment in the cloud.
+** TODO Deploy a hello-world to ECS Fargate without Terraform
+** Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
+** Put the Terraform code in a Jenkinsfile
 ** Test, debug and make sure it works with a manually set up Jenkins server
-* Part 4: Configure Jenkins using JCasC
 ** Find out what needs to be done to use AWS permissions and secret store to give the least permissions required to have Jenkins auto deploy the container to ECS Fargate
+** Automate the deployment of the app when a new version of Dockerfile appears
+** Test, debug and make sure it works
+* Part 5: Configure Jenkins using JCasC
 ** DONE Find some good sources on Jenkins as Code
    CLOSED: [2023-09-05 Tue 19:52]
 *** Found both in Unix/Linux SysAdmin's Handbook (ULSAH):
@@ -259,9 +270,7 @@ CLOSED: [2023-09-16 Sat 13:41]
 ** Export the configuration in the JCasC format and create a new JCasC configuration based on that export
 ** Modify the Ansible playbook to place the configuration file on the Jenkins server
 ** Test, debug and make sure it works
-* Part 5: Deploy the Flask web application to Amazon EKS
-** Automate the deployment of the app when a new version of Dockerfile appears
-** Test, debug and make sure it works
+* Part 6: Fully automate whole Jenkins deployment, configuration and pipeline setup using the 'playtrough.sh'
 * TODO's (non mission-critical):
 ** Create a secret's file in the vault, as described [[Create a file with secrets in the vault][here]] in part 1 of the project.
 ** vault_management.sh (low priority, because using Hashicorp's Vault will make this script obsolete):

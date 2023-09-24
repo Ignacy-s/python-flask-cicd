@@ -2597,3 +2597,13 @@ services. Another thing to note about handlers is that they are only
 executed if all tasks in playbook succeeded. We can change this
 behavior in ansible.cfg, as an option when calling ansible-playbook or
 inside the playbook.
+
+* Sun Sep 24 02:14:59 PM CEST 2023
+I've read up on what I need to do to deploy the container to the
+cloud. I'm going to use ECS Fargate. For that I will need to define
+some additional cloud infrastructure, some networks and some domains
+and maybe even a certificate. I've divided the work required for small
+tasks. Where a task felt too complicated, I removed it's core and
+created a new task with a simplified version of the hard task. This
+way I can start with something easy and iterate over it until I get
+something of satisfying complexity.
