@@ -245,8 +245,44 @@ simplified and more user friendly alternative to AWS CLI.
 CLOSED: [2023-09-26 Tue 18:52]
 Had to install Copilot and AWS CLI and set up tab-completions.
 
+** DONE Read enough ECS docs to know how to deploy to cloud using AWS CLI
+CLOSED: [2023-09-29 Fri 21:48]
+** TODO Upload Docker image to ECR
+*** DONE Find out how to push to ECR with Docker/AWS CLI
+CLOSED: [2023-10-14 Sat 15:50]
+https://stackoverflow.com/a/68668097
+This assumes we already have an ECR repo.
+*** DONE Test the code on a local machine. Part 1: Create an ECR repo with Terraform
+CLOSED: [2023-10-15 Sun 13:12]
+Looks like we need to create the repo first. It's more straightforward
+to use AWS CLI for this.
+Need to remember that a local command assumes the default region from
+the profile. A proper way would be to define the region explicitly in
+the 'aws' command.
+
+By mistake (I had 2 weeks break with the project) I've
+started working on how to do the Terraform part of CI/CD. After
+research, I've decided not to delay project further by learning on how
+to use modules and just create separate Terraform projects in it's own
+directories.
+
+Since the hardest part of programming is done already (researching
+available options, choosing the right alternatives, planning on how to
+do things) and all that's left to crate an ECR repo with Terraform is
+coding the solution, I'll skip the step of creating an ECR repo with
+aws-cli.
+
+Using the Terraform files from the Jenkins deployment as templates.
+*** DONE Test the code on a local machine. Part 2: Push the image to the repo with Docker
+CLOSED: [2023-10-22 Sun 12:04]
+It worked, with some small issues.
+*** TODO Note that the playbook will have to be updated (with AWS CLI installation and jq)
+
 ** Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
-** Put the Terraform code in a Jenkinsfile
+*** Write a Task Definition
+*** Read on ECS module for Terraform
+*** Write Terraform code deploying container to ECS
+** Put the Terraform code in a Jenkinsfile, maybe create few more steps, so that it's easier to see where exactly is the pipeline execution. Also use more descriptive names for steps, like 'Build Docker Image' instead of just 'Build'.
 ** Test, debug and make sure it works with a manually set up Jenkins server
 ** Find out what needs to be done to use AWS permissions and secret store to give the least permissions required to have Jenkins auto deploy the container to ECS Fargate
 ** Automate the deployment of the app when a new version of Dockerfile appears
@@ -320,6 +356,8 @@ ansible_user=vagrant
 ansible_ssh_private_key_file="../vault/id_25519_aws_flaskcicd"
 
 ** Not refactoring the plan often enough. As we go deeper into the project, we gain knowledge and experience. In the light of newfound knowledge, the old plan becomes obsolete and should be replaced with more refined new plan. It doesn't mean that I was stupid by making the wrong plan in the beginning. Acting incompetently is the only way to gain competence to start acting competently.
+** Not reading up enough of previous documentation when coming back to project after a break. This led to duplicate work and thinking that the current task is more complicated than it was, in effect causing a longer delay in the project.
+
 * Extras:
 ** TODO Following a Jenkins Tutorial to learn how to make pipelines based on Jenkinsfiles
 *** DONE Set the goal: Jenkinsfile building my docker image and hosting it on ECS Fargate
