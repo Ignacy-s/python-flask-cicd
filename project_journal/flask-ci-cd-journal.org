@@ -2607,3 +2607,140 @@ tasks. Where a task felt too complicated, I removed it's core and
 created a new task with a simplified version of the hard task. This
 way I can start with something easy and iterate over it until I get
 something of satisfying complexity.
+
+* Sun Sep 24 05:33:44 PM CEST 2023
+Beginning with a hello-world deployment to ECS Fargate.
+Hard to find just a hello-world example. I'll just go on the AWS web
+console and click it trough. And just when I gave up on searching,
+found this
+https://docs.aws.amazon.com/AmazonECS/latest/developerguide/getting-started-aws-copilot-cli.html
+
+* Mon Sep 25 07:34:01 PM CEST 2023
+First have to install AWS Copilot. They want me to just run a one
+liner on my machine. But it's legit, because it's hosted on GitHub and
+additionally, by a big company.
+
+#+BEGIN_SRC bash
+sudo curl -Lo /usr/local/bin/copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux \
+   && sudo chmod +x /usr/local/bin/copilot \
+   && copilot --help
+#+END_SRC
+
+Wow there are EMOTICONS in the --help output. ?!?!
+"  Getting Started 🌱" I guess the future really is now.
+
+It has shell completion. I'm a big fan, so that's first I'm gonna set
+up.
+I've also installed AWS CLI on laptop.
+And run 'aws configure'.
+
+They want us to clone the repo, but since I'm inside the repo and it's
+hosted on GitHub, it makes sense to download a zipped version of the
+main branch instead. Main branch is called master. So this URL
+https://github.com/aws-samples/amazon-ecs-cli-sample-app becomes this
+command:
+'wget
+https://github.com/aws-samples/amazon-ecs-cli-sample-app/archive/master.zip'
+which downloads an archive that can be extracted with an unzip
+command.
+
+Running 'copilot init'
+
+Had to fill in some details. It takes ages to self setup. But it
+abstracts out a lot of work. Maybe I'll use this time to send some AWS
+ECS docs to my kindle to read from a more eye friendly machine.
+
+It spat out a link under which the docker image is available.
+
+* Tue Sep 26 07:58:53 PM CEST 2023
+Reading more about ECS. It's like a managed service to host your
+containers. There are some concepts worth noting:
+** Task Definition - like a docker-compose file that also mentions hardware requirements
+Biggest difference is that it uses JSON and you can define CPU and RAM
+requirements.
+** Task - a working, self sufficient instance of your workload, made up of multiple cooperating containers. Like a Kubernetes Pod.
+** Cluster - like a Kubernetes instance, this is a group of EC2 instances where the Tasks are executed/run
+** More ECS info:
+ECS uses Amazon's Load Balancer service, ELB. It integrates well with
+other AWS services.
+
+To run a task on ECS we create a cluster (if we already have a VPC),
+then we create a Task Definition and then run a Service in our
+cluster, using the Task Definition as a blueprint. Task Definitions
+have to be uploaded to AWS before they can be used. So we save them in
+a local file and then upload using AWS CLI.
+
+* Fri Sep 29 09:47:00 PM CEST 2023
+Had kind of a block. Too many possible things to do. Tried to solve it
+trough reading ECS documentation, but that didn't work. What actually
+solved the block was talking to a senior colleague. I've also used
+ChatGPT for some rubber ducking. Incidentally, they both pointed me to
+do the same things.
+
+* Sat Sep 30 01:47:22 PM CEST 2023
+So, Terraform is not meant to be used to pushing images to a
+repo. That's why it was so hard to find how to do it. The search
+however resulted with [[https://stackoverflow.com/a/68668097][this nice SO answer]], where an user asking about
+how to push using Terraform, is shown how to do it the "right way"
+with AWS CLI and Docker. He also mentions that Packer can be used for
+just that and has a great integration with Terraform. Downside of
+using Packer is that it would require learning about another tool.
+So AWS/Docker it is.
+
+For starters I'll just test the example code verbatim.
+
+#+BEGIN_SRC bash
+docker build -t ${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${REPO} .
+
+aws ecr get-login-password \
+    --region ${REGION} \
+| docker login \
+    --username AWS \
+    --password-stdin ${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com
+
+docker push ${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${REPO}
+#+END_SRC
+
+To test this code I'd need to define the three variables in the shell
+first.
+
+Need to remember to explicitly set the target region. Each region has
+it's own registry, which is a group of repos.
+
+* Fri Oct 13 07:38:28 AM CEST 2023
+Getting the variables like this:
+#+BEGIN_SRC bash
+ACCOUNT=$(aws sts get-caller-identity | jq -r .Account)
+REGION='eu-north-1'
+REPO='flask_cicd_repo'
+#+END_SRC
+
+* Sat Oct 14 02:34:50 PM CEST 2023
+Started to work on how to create the repository with
+Terraform. Decided to drop Terraform modules and just create multiple
+Terraform projects in separate directories.
+
+Ok, looks like a mistake. I should've had created the ECR repo with
+AWS cli. 'aws ecr create-repository help' command explained how to do
+it. Also, I came upon the 'create-repository' part by typing first
+'aws ecr' and then pressing tab. I've setup tab completions for
+aws-cli as part of this project. I love tab completions and use them
+as often as possible. I am also quite proficient at setting it up, and
+doing it properly, that is by adding small files to .bashrc.d/
+directory, and not by editing the .bashrc file itself.
+
+So, since most of the work for the Terraform setup is done, I'll
+modify the journal to change the task to writing a simple, one
+resource, Terraform project to create the ECR repository, as I would
+have to do it later anyway and this will make cleaning up after the
+project has run it's course much easier.
+
+* Sun Oct 15 01:08:36 PM CEST 2023
+Pushing the image worked, but not without issues. First I forgot to
+update the dockerignore file and ended up exploding the image.
+
+Afterwards I wanted to change the container name (repo name) but
+couldn't delete the old repo, even when editing the settings in
+main.tf to allow deleting repos that are not empty. Looks like the
+force_delete parameter for ECR repos has to be set when creating the
+repo.

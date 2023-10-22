@@ -236,7 +236,15 @@ ECS Fargate, then do it with Terraform (or maybe even start with
 Terraform), then do it with Terraform from inside a Jenkinsfile and
 lastly, do it from a Jenkinsfile with safely configured permissions
 and credentials, so it can safely sit for a moment in the cloud.
-** TODO Deploy a hello-world to ECS Fargate without Terraform
+** DONE Deploy a hello-world to ECS Fargate without Terraform
+CLOSED: [2023-09-26 Tue 19:51]
+https://docs.aws.amazon.com/AmazonECS/latest/developerguide/getting-started-aws-copilot-cli.html
+This is a simplified deployment using AWS Copilot which is a
+simplified and more user friendly alternative to AWS CLI.
+*** DONE Fulfill requirements
+CLOSED: [2023-09-26 Tue 18:52]
+Had to install Copilot and AWS CLI and set up tab-completions.
+
 ** Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
 ** Put the Terraform code in a Jenkinsfile
 ** Test, debug and make sure it works with a manually set up Jenkins server
