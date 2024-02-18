@@ -2744,3 +2744,45 @@ couldn't delete the old repo, even when editing the settings in
 main.tf to allow deleting repos that are not empty. Looks like the
 force_delete parameter for ECR repos has to be set when creating the
 repo.
+
+* Sun Oct 22 12:13:14 PM CEST 2023
+Have to install AWS cli and jq on Jenkins server with Ansible. I
+should've made notes when installing these tools.
+
+[[https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html][This is a link for instructions on how to install the AWS CLI on Linux.]]
+
+#+BEGIN_SRC bash
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+#+END_SRC
+* Tue Nov  7 01:16:16 PM CET 2023
+
+There are just a few steps. Because the instructions for Linux assume
+the user is using terminal, it's not very challenging to translate
+them into Ansible tasks. In few of the steps I even already know the
+Ansible modules which can help make the commands idempotent.
+
+First I've added 'jq' to the list of installed packages. That's the
+name of the package on Debian based systems. I'm not 100% sure that
+the package has the same name on dnf family systems. Will test it when
+I have internet. Just verified that it's the same - jq.
+
+Now I can perform the 4 tasks for AWS CLI installation. I might start
+with running a command to get the current version of the 'aws' binary,
+I've read about a method to perform it in Gerling's Ansible book, but
+it can be done later. For now, reinstalling on each playbook run is
+fine.
+
+Download and installation task will be joined into one. I might create
+a temp dir to store the installation files in /var/tmp to make sure
+they get deleted at some point after the installation.
+
+Not sure on what to supply for mode of the extracted AWS files.
+
+* sø. 18. feb. 15:38:41 +0100 2024
+
+Had to use Ansible command module, because unarchive doesn't work for
+zip (kinda funny that AWS hosts a file for installation on Linux
+systems that is not native to Linux, while other compression programs
+are).

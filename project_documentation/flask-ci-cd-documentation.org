@@ -276,7 +276,7 @@ Using the Terraform files from the Jenkins deployment as templates.
 *** DONE Test the code on a local machine. Part 2: Push the image to the repo with Docker
 CLOSED: [2023-10-22 Sun 12:04]
 It worked, with some small issues.
-*** TODO Note that the playbook will have to be updated (with AWS CLI installation and jq)
+*** TODO Note that the playbook will have to be updated (with AWS CLI and jq installation)
 
 ** Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
 *** Write a Task Definition
