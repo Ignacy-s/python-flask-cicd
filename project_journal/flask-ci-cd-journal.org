@@ -2786,3 +2786,44 @@ Had to use Ansible command module, because unarchive doesn't work for
 zip (kinda funny that AWS hosts a file for installation on Linux
 systems that is not native to Linux, while other compression programs
 are).
+
+* Sun Feb 25 02:51:02 PM CET 2024
+Fixed date options. Had to set system wide locale variable. Used two
+methods. Changed something in configuration files and also used 'sudo
+update-locale LC_TIME=en_US.UTF-8'.
+
+* Tue Mar 12 04:09:13 PM CET 2024
+Need to fix my testing environment. Had to restart vagrant
+machines. Also, I had a nice one-liner to insert public keys into
+authorized_keys on the VMs to let Ansible connect with the same key as
+used on AWS. Used an ugly hack to have Ansible use the Vagrant key,
+but it's ugly and it's a hack.
+
+Trying to get that one-liner again. I remember using some strange ssh
+command to automatically submit password to ssh.
+
+Good that I saved another one-liner as a script - the one getting
+vault pass from my password manager.
+
+It worked without much exotics, ssh-copy-id with the (-f) forced
+flag. I don't know why it wouldn't install the key without the -f
+flag (it claimed that the key was already there, but then it didn't
+work when trying to connect).
+
+Might've been because of two potential problems here:
+Me forgetting to use 'vagrant' as the user  - on most of systems I use
+I have the same user and I'm just used to giving only the name of the
+system for the ssh command.
+Another, less likely is that the server has a different host key
+(which is kind of a fingerprint used by ssh to re-recognize server
+that we connected to before), since the server has been destroyed and
+rebuild.
+
+
+#+BEGIN_SRC bash
+for i in jenkins playbook-test-jenkins ; do ssh-copy-id -f -i
+./vault/id_25519_aws_flaskcicd.pub vagrant@${i} ; done
+#+END_SRC
+
+I'll move some constants out as variables and add it to the repo.
+
