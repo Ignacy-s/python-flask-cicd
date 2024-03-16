@@ -14,6 +14,14 @@ EOF
   return
 }
 
+
+# Update ssh/config with credentials for all running vagrant machines
+# TODO make it work from other places inside the project
+../bin/update-ssh-config.sh
+# Script requires that machines can be connected to (with vagrant
+# credentials/ssh key) and the connection details being stored in
+# ~/.ssh/config.
+
 # Todo: make the list creation automatic
 MACHINES_LIST=(
   "jenkins"

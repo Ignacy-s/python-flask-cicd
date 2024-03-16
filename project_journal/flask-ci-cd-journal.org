@@ -2827,3 +2827,40 @@ for i in jenkins playbook-test-jenkins ; do ssh-copy-id -f -i
 
 I'll move some constants out as variables and add it to the repo.
 
+* Tue Mar 12 10:28:18 PM CET 2024
+The playbook would crash when trying to start the Jenkins service. I
+reinstalled the jenkins package with dnf and tried again. It took a
+long time (maybe even one minute ) but worked. I know that Jenkins is
+a Java app and can therefore take long time to start. Jenkins is also known
+to require a lot of time for the first run.
+
+* Wed Mar 13 03:12:01 PM CET 2024
+Have an idea - systemd is starting Jenkins and crashing. But we can
+read how it does it and do the same, just so it does the initial start
+and then close it and start it with systemd.
+
+Need to determine how to know that it started properly.
+
+To speed up testing, I'm saving a snapshot of an Alma VM with latest
+packages and the public ssh key in authorized_keys using a Vagrant
+command 'vagrant snapshot save jenkins'. Without creating a new
+Vagrant box however, this command needs to be run for each machine.
+
+Had issues with completions using vagrant. There was a typo in the way
+Vagrant completions are added to .bashrc. Couldn't find where in
+Vagrant code it is located so I just wrote in an old issue about it
+that the problem still persists.
+
+* Sat Mar 16 02:36:47 PM CET 2024
+Tried snapshotting the other VM (playbook-test-jenkins), with updated
+packages and the ansible ssh key installed, but installation of the
+ssh key didn't work. I realized, that the machine was destroyed and
+rebuild, but afterwards it's ssh credentials (that we use when
+connecting to the machine with 'vagrant ssh $VM_NAME') were not
+updated into ssh/config and I couldn't just 'ssh $VM_NAME' because
+computer didn't know the new key (the key that vagrant auto
+generates).
+
+So I added the script that usually does it for me into the project's
+bin dir. And then updated the copy-ssh-key script to run that script
+first.
