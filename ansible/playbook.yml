@@ -4,26 +4,26 @@
 
   tasks:
     - name: Add key for Jenkins repo
-      rpm_key:
+      ansible.builtin.rpm_key:
         state: present
         key: "https://pkg.jenkins.io/redhat-stable/\
           jenkins.io-2023.key"
 
     - name: Add the Jenkins repo
-      yum_repository:
+      ansible.builtin.yum_repository:
         name: jenkins
         description: jenkins stable repo
         baseurl: https://pkg.jenkins.io/redhat-stable
         gpgcheck: yes
 
     - name: Add key for Docker repo
-      rpm_key:
+      ansible.builtin.rpm_key:
         key: "https://download.docker.com/linux/\
           centos/gpg"
         state: present
 
     - name: Add the Docker repo
-      yum_repository:
+      ansible.builtin.yum_repository:
         name: docker
         description: official docker repo
         baseurl: "https://download.docker.com/linux/\
@@ -32,13 +32,12 @@
         gpgcheck: true
 
     - name: Update all system packages before installation
-      
-      dnf:
+      ansible.builtin.dnf:
         name: "*"
         state: latest
 
     - name: Remove conflicting packages
-      dnf:
+      ansible.builtin.dnf:
         name:
           - podman
           - buildah
@@ -48,7 +47,7 @@
         state: absent
             
     - name: Install required packages
-      dnf:
+      ansible.builtin.dnf:
         name:
           - java-17-openjdk
           - jenkins
@@ -64,40 +63,53 @@
         update_cache: true
 
     - name: Add the jenkins user to docker group
-      user:
+      ansible.builtin.user:
         name: jenkins
         groups: docker
         append: yes
 
-    - name: Create a temp dir for AWS CLI installation files
-      ansible.builtin.tempfile:
-        state: directory
-        path: /var/tmp
-      register: temp_dir
+    - name: Check if AWS CLI is installed
+      ansible.builtin.shell:
+        cmd:         "type aws"
+      become:        no
+      register:      aws_presence_result
+      ignore_errors: true
+      changed_when:  false
 
-    - name: Download AWS CLI installation archive
-      ansible.builtin.get_url:
-        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
-        dest: "{{ temp_dir.path }}/awscliv2.zip"
 
-    - name: Unzip AWS CLI installation archive
-      ansible.builtin.command:
-        cmd: unzip "{{ temp_dir.path}}/awscliv2.zip" -d "{{ temp_dir.path }}"
-      args:
-        creates: "{{ temp_dir.path }}/aws"
+    # This block installs AWS CLI if it hasn't been installed before
+    - block:
+      - name: Create a temp dir for AWS CLI installation files
+        ansible.builtin.tempfile:
+          state: directory
+          path: /var/tmp
+        register: temp_dir
+  
+      - name: Download AWS CLI installation archive
+        ansible.builtin.get_url:
+          url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+          dest: "{{ temp_dir.path }}/awscliv2.zip"
+  
+      - name: Unzip AWS CLI installation archive
+        ansible.builtin.command:
+          cmd: unzip "{{ temp_dir.path}}/awscliv2.zip" -d "{{ temp_dir.path }}"
+        args:
+          creates: "{{ temp_dir.path }}/aws"
 
-    - name: Install the AWS CLI
-      ansible.builtin.command:
-        cmd: ./install
-        chdir: "{{ temp_dir.path }}/aws"
+      - name: Install the AWS CLI
+        ansible.builtin.command:
+          cmd: ./install
+          chdir: "{{ temp_dir.path }}/aws"
+  
+      - name: Remove the temporary directory
+        ansible.builtin.file:
+          path: "{{ temp_dir.path }}"
+          state: absent
 
-    # - name: Remove the temporary directory
-    #   ansible.builtin.file:
-    #     path: "{{ temp_dir.path }}"
-    #     state: absent
+      when: aws_presence_result.rc != 0
 
     - name: Copy JCasC plugin onto Jenkins server
-      unarchive:
+      ansible.builtin.unarchive:
         src: ../jenkins_config/jcasc_and_deps.tgz
         dest: /
         mode: 0644
@@ -106,7 +118,7 @@
 
 
     - name: Copy JCasC plugin onto Jenkins server
-      unarchive:
+      ansible.builtin.unarchive:
         src: ../jenkins_config/jcasc_and_deps.tgz
         dest: /
         mode: 0644
@@ -114,7 +126,7 @@
         group: jenkins
 
     - name: Start and enable services
-      service:
+      ansible.builtin.service:
         name: "{{ item }}"
         state: started
         enabled: yes
@@ -131,11 +143,11 @@
         immediate: yes
 
     - name: Install Helper Packages (locate & completions)
-      dnf:
+      ansible.builtin.dnf:
         name:
           - mlocate
           - bash-completion
         state: present
 
     - name: Update locate database
-      command: updatedb
+      ansible.builtin.command: updatedb

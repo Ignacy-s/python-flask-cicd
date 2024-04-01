@@ -2792,6 +2792,17 @@ Fixed date options. Had to set system wide locale variable. Used two
 methods. Changed something in configuration files and also used 'sudo
 update-locale LC_TIME=en_US.UTF-8'.
 
+* Mon Feb 26 07:46:42 PM CET 2024
+Need to use a conditional expression in the playbook, because there
+will be an error if we run the playbook on a server where the aws-cli
+is already installed.
+
+First I read the chapter on variables. Variables can be defined in
+various ways before the playbook is run. We can also store some
+command output with the 'register' keyword. This is what I'm going to
+need to make an if/else statement so that we only upgrade the aws-cli
+if it's already installed.
+
 * Tue Mar 12 04:09:13 PM CET 2024
 Need to fix my testing environment. Had to restart vagrant
 machines. Also, I had a nice one-liner to insert public keys into
@@ -2864,3 +2875,91 @@ generates).
 So I added the script that usually does it for me into the project's
 bin dir. And then updated the copy-ssh-key script to run that script
 first.
+
+* Tue Mar 19 09:00:14 PM CET 2024
+It seems that the playbook is getting stuck on the task called "Start
+and enable services" which loops over multiple services. I'll check
+what happens if I remove some of the services.
+
+AWS CLI installation quits with an error, because there already is an
+AWS CLI installed. To make this task idempotent we need an if
+statement that lets it run only if there is none AWS CLI installed.
+
+Had the idea that maybe Jenkins failed to start because it was out of
+memory?  Checked free memory on the system and it said it was just
+98MB. I know that sometimes system reports free memory in a weird way,
+not counting all free memory as free. So just to find out, I've upped
+the RAM on the VMs from 2 to 3 GBs. This way I can only have one
+running at the same time on the laptop, but maybe that's what's
+needed.
+
+* Sat Mar 23 11:44:43 AM CET 2024
+Was reading about how to better use the 'register' keyword in Ansible
+(in the Gerling's book) and the section about conditional statements
+and Python builtin functions included an example on acting when the
+major version of a program is of a certain value. This is exactly what
+I would need to handle AWS CLI installations properly - that is not
+only not trying to reinstall if we already have it, but also to update
+if the version on the server is very old.
+
+I don't know how to create a block of code inside a playbook. I'd need
+to put all the AWS CLI installation code into a block activated with
+the conditional, but all the examples in the book are with a single
+task.
+
+There is a primer on blocks at the end of the playbooks chapter in the
+book, which should be enough. There are also other interesting
+playbook options/commands/abilities (TODO fix wording) which make more
+sense now after dabbling a little more in Ansible. This calls for
+(TODO fix wording) chapter re-read, as things will make much more
+sense now and can be better understood.
+
+
+* Sun Mar 31 05:39:14 PM CEST 2024
+Some issues with syncing between machines. Guessed it was problems
+with system time. Found a solution for fixing it using chrony and
+saved this solution as a script.
+
+Turned out the Syncthing stopped because laptop got down to 20% free
+space on /home. Changed Syncthing to use 15% instead.
+
+Copied file from PC to a temp dir and run a diff to compare files to
+test them. It works now.
+
+* Mon Apr  1 01:49:18 PM CEST 2024
+I've read up on how to write Ansible code. That is Jinja, YAML, code
+blocks in playbooks and using plays' (each Ansible command is called
+a play) output in conditionals. The process of understanding might
+have been faster with just experimenting and trying blocks,
+conditionals and register variable alone and then combining them
+instead of trying to use all of them at once.
+
+Tried putting the 'when' keyword at the beginning of a playbook block,
+but it didn't work. Spent a while trying to rewrite conditional until
+I guessed the conditional was fine and it's just the 'when' that has
+to be at the end of the block.
+
+Issues with the 'type -a' command. (Side note: debugging ansible
+playbooks is much harder than debugging bash.)
+Registering output of a simple 'type' check is really complicated in
+Ansible:
+#+BEGIN_SRC yaml
+    - name: Check if AWS CLI is installed
+      ansible.builtin.shell:
+        cmd:         "type aws"
+      become:        no
+      register:      aws_presence_result
+      ignore_errors: true
+      changed_when:  false
+#+END_SRC
+We need to:
+1. remember to ignore_errors (in case our check fails - otherwise
+   it would stop the playbook execution),
+2. tell ansible that this task doesn't change anything on the
+   server with 'changed_when',
+3. had to "unbecome" root for this task (aws was not in root's PATH),
+4. use 'register' keyword at the correct level of indentation.
+
+So, the command is for the shell module, but all else (become,
+register, ignore, changed) is for the task. Indentation is crazy.
+
