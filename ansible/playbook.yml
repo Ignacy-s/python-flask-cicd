@@ -151,3 +151,4 @@
 
     - name: Update locate database
       ansible.builtin.command: updatedb
+      changed_when:  false
