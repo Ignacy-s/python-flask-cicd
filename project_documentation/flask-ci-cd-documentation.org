@@ -276,7 +276,8 @@ Using the Terraform files from the Jenkins deployment as templates.
 *** DONE Test the code on a local machine. Part 2: Push the image to the repo with Docker
 CLOSED: [2023-10-22 Sun 12:04]
 It worked, with some small issues.
-*** TODO Note that the playbook will have to be updated (with AWS CLI and jq installation)
+*** DONE Note that the playbook will have to be updated (with AWS CLI and jq installation)
+CLOSED: [2024-05-10 Fri 10:30]
 **** DONE Add 'jq' to the list of installed packages
 CLOSED: [2023-11-07 Tue 13:33]
 **** DONE Make the playbook install AWS CLI if it's not installed
@@ -286,6 +287,9 @@ CLOSED: [2024-04-01 Mon 15:36]
 ***** Extract them
 ***** Run the installation script with elevated privileges
 ***** Verify the installation
+**** DONE Debug the playbook so that it works on both a fresh machine and on a machine where it was already installed (the playbook is indempotent)
+CLOSED: [2024-05-10 Fri 10:30]
+There were issues with starting Jenkins after dropping the plugins in. Looks like it's not as easy as copying the files onto the server. Need to solve the problem in a different way - using Jenkins command line interface.
 
 
 ** Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
@@ -315,12 +319,14 @@ Is a not-so-popular way to configure a Jenkins server, which then
 needs another Pipeline as Code configuration to run jobs. It's not
 that popular, but it's the way to go for an automated deployment.
 ** TODO Manually configure Jenkins
-** DONE Update the Ansible playbook for Jenkins installation to include the JCasC plugin
+** DONE (Mistake - can't install plugins this way) Update the Ansible playbook for Jenkins installation to include the JCasC plugin
 CLOSED: [2023-09-16 Sat 13:41]
 *** It wasn't easy because installing a plugin automatically on a new Jenkins installation can be challenging.
 *** It seems that the most straightforward method would be to download the JCasC plugin on the Ansible host and then have Ansible push it to the server once it's up.
 *** Ansible's 'wait_for' module waits for a port to open when an application starts up.
 *** Got the JCasC plugin and it's dependencies packed neatly inside a .tgz file in the /jenkins_config directory
+** Install a Jenkins plugin from a command line (without Ansible)
+** Update playbook to install the JCasC plugin with Jenkins CLI
 ** Export the configuration in the JCasC format and create a new JCasC configuration based on that export
 ** Modify the Ansible playbook to place the configuration file on the Jenkins server
 ** Test, debug and make sure it works
@@ -373,7 +379,9 @@ ansible_ssh_private_key_file="../vault/id_25519_aws_flaskcicd"
 *** Using a shell builtin with ansible command module - only the shell module has bash builtins.
 ** Not refactoring the plan often enough. As we go deeper into the project, we gain knowledge and experience. In the light of newfound knowledge, the old plan becomes obsolete and should be replaced with more refined new plan. It doesn't mean that I was stupid by making the wrong plan in the beginning. Acting incompetently is the only way to gain competence to start acting competently.
 ** Not reading up enough of previous documentation when coming back to project after a break. This led to duplicate work and thinking that the current task is more complicated than it was, in effect causing a longer delay in the project.
-
+** Jenkins:
+*** Tried to configure Jenkins the same way I once configured Icinga server in an automatic deployment - by dropping in configuration files from a preconfigured working server. Instead I should've looked for a more classic solution.
+The right way to do it was trough Jenkins CLI. I tried the drop in method to avoid learning how to use JCasC. If the plugin installation was that straightforward, I coul've finished the project without learning how to configure Jenkins with CLI (with the JCasC updating itself and installing other plugins from IaC).
 
 * Extras:
 ** TODO Following a Jenkins Tutorial to learn how to make pipelines based on Jenkinsfiles

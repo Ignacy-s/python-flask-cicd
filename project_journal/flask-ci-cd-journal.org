@@ -2963,3 +2963,117 @@ We need to:
 So, the command is for the shell module, but all else (become,
 register, ignore, changed) is for the task. Indentation is crazy.
 
+Looks like there are more issues with the playbook - can't install the
+Jenkins repo key. Looks like it was some temporary error fixed by
+machine reboot after snapshot reloading.
+
+Still have issues with starting of the Jenkins service. I'm guessing
+that adding the Jenkins plugins extends the first start time for the
+Jenkins Java app significantly, which makes systemd service handler
+fail.
+
+I'm not sure we should copy the JCasC plugin every time playbook is
+executed.
+
+Tried moving the block starting the services in the playbook after the
+block setting firewall rules for Jenkins.
+
+* Tue Apr  2 06:30:25 PM CEST 2024
+There are issues with Jenkins service not starting. It can be that
+server is taking more time to start if it has many plugins, but only
+on the first run. If the server is restarted, it works.
+
+Trying with a fresh server and commenting out the section of the
+playbook that copies the plugins onto the server.
+
+It takes a lot of time on the laptop. Maybe it is getting too old for
+this?
+
+Updated Vagrant snapshots so that the Ansible playbook doesn't have to
+spend time updating the system packages on the server.
+
+Due to a pasting typo I commented out JCasC play but at the same time
+pasted it again, so had to go trough the whole process second time.
+
+Ansible is not very informative when it's running playbooks. I wonder
+if -v added to the ansible-playbook command would change something or
+if I'd have to add a lot of debug variables to make it more
+talkative. There could be some knowledge on it inside the "Debugging
+Playbooks" chapter in Ansible for DevOps book.
+
+Test results are in - Jenkins server as systemd service does work if
+the plugins are not there. What should I do? Start Jenkins before
+copying the plugins and then stop it, copy the plugins and start it
+again? Might be less time efficient, but it sounds easier and more
+straightforward then modifying systemd service file or starting
+Jenkins without systemd (which would require finding out as what user
+it's started, with what location as the working directory and then how
+to do it inside of an Ansible playbook).
+
+Trying the start plugin-less, stopping, installing plugins, starting.
+Updating the snapshot saved a lot of time when testing the playbook
+on a fresh install.
+
+It still doesn't work. It fails when trying to start the Jenkins
+service after extracting the JCasC plugin. I must admit that it's
+a quite brutal way to install plugins. But let's log in to the server
+and look at the logs. Why does Jenkins fail to start, but then, after
+some time it works. Or does it work after server (machine) restart.
+
+* Sat Apr  6 11:28:50 AM CEST 2024
+Trying to find out the issue with starting jenkins.service after
+installation of the plugins. Found something in the /var/log/messages:
+
+#+BEGIN_SRC syslog
+Apr  2 17:44:03 playbook-test-jenkins systemd[1]: Starting Jenkins Continuous Integration Server...
+Apr  2 17:44:03 playbook-test-jenkins systemd[11601]: jenkins.service: Changing to the requested working directory failed: Permission denied
+Apr  2 17:44:03 playbook-test-jenkins systemd[11601]: jenkins.service: Failed at step CHDIR spawning /usr/bin/jenkins: Permission denied
+Apr  2 17:44:03 playbook-test-jenkins systemd[1]: jenkins.service: Main process exited, code=exited, status=200/CHDIR
+Apr  2 17:44:03 playbook-test-jenkins systemd[1]: jenkins.service: Failed with result 'exit-code'.
+Apr  2 17:44:03 playbook-test-jenkins systemd[1]: Failed to start Jenkins Continuous Integration Server.
+#+END_SRC
+
+Does the playbook set permissions after copying the files? Are these
+permissions correct?
+
+Play that copies the plugins:
+#+BEGIN_SRC yaml
+    - name: Copy JCasC plugin onto Jenkins server
+      ansible.builtin.unarchive:
+        src: ../jenkins_config/jcasc_and_deps.tgz
+        dest: /
+        mode: 0644
+        owner: jenkins
+        group: jenkins
+#+END_SRC
+
+It does set the owner and group. But it might be a good idea to verify
+it by hand, maybe the jenkins user and/or service has a different name
+on the server.
+
+* Fri May 10 10:05:03 AM CEST 2024
+Looks like copying the files was not the right way to install the
+JCasC plugin after all. I tried to do it like I configured an Icinga
+server in another project. Jenkins doesn't accept drop in
+plugins. They would also be quite out of date. Using latest versions
+might cause issues on a production server, but I believe that in a
+proof of concept setup like this, it will make things easier. Need to
+update the "roadmap" and remove or mark parts about placing the
+configuration as not relevant, but will first test if the playbook
+works without the plugin's insertion. This way I can mark currently
+worked on part of the roadmap as done.
+
+There are still positives coming out of that dead end - I was forced
+to learn about and become proficient using Vagrant snapshots. While
+provisioning time was acceptable on PC, nuking boxes and
+re-provisioning them to test the playbook took too long. Loading a
+snapshot was much faster.
+
+After destroying and vagrant upping a new machine, I need to run
+update-ssh-config.sh to put the server info in ~/.ssh/config (so the
+Ansible can connect to it easily), then run
+copy-ssh-key-onto-machines.sh with the ssh key from vault as an
+argument (and the vault has to be opened). It could be added to the
+playtrough script.
+
+Playbook works after removing the JCasC bruteforce installation.
