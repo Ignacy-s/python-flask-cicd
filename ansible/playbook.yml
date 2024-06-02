@@ -31,6 +31,16 @@
         enabled: true
         gpgcheck: true
 
+    - name: Add Hashicorp repository
+      ansible.builtin.yum_repository:
+        name: hashicorp
+        description: official hashicorp repo
+        baseurl: "https://rpm.releases.hashicorp.com/\
+          RHEL/$releasever/$basearch/stable"
+        enabled: true
+        gpgcheck: true
+        gpgkey: "https://rpm.releases.hashicorp.com/gpg"
+
     - name: Update all system packages before installation
       ansible.builtin.dnf:
         name: "*"
@@ -57,6 +67,7 @@
           - containerd.io
           - docker-buildx-plugin
           - docker-compose-plugin
+          - terraform
           - jq
           - unzip
         state: present

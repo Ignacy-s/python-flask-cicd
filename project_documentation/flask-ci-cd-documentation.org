@@ -221,7 +221,7 @@ CLOSED: [2023-09-21 Thu 18:22]
 *** DONE Start and enable the docker.service
 CLOSED: [2023-09-21 Thu 18:22]
 
-* TODO Part 4: Deploy the Flask web application to ECS Fargate
+* Part 4: Deploy the Flask web application to ECS Fargate
 ** DONE Choose a deployment method: Decided to use AWS ECS with Fargate which is a very straightforward method of deploying a docker container to the cloud
 CLOSED: [2023-09-20 Wed 10:08]
 ** DONE Read up documentation and tutorials:
@@ -247,7 +247,7 @@ Had to install Copilot and AWS CLI and set up tab-completions.
 
 ** DONE Read enough ECS docs to know how to deploy to cloud using AWS CLI
 CLOSED: [2023-09-29 Fri 21:48]
-** TODO Upload Docker image to ECR
+** Upload Docker image to ECR
 *** DONE Find out how to push to ECR with Docker/AWS CLI
 CLOSED: [2023-10-14 Sat 15:50]
 https://stackoverflow.com/a/68668097
@@ -290,11 +290,17 @@ CLOSED: [2024-04-01 Mon 15:36]
 **** DONE Debug the playbook so that it works on both a fresh machine and on a machine where it was already installed (the playbook is indempotent)
 CLOSED: [2024-05-10 Fri 10:30]
 There were issues with starting Jenkins after dropping the plugins in. Looks like it's not as easy as copying the files onto the server. Need to solve the problem in a different way - using Jenkins command line interface.
-*** TODO Playbook should also install Terraform
+*** DONE Playbook should also install Terraform
+CLOSED: [2024-06-02 Sun 19:49]
 Instructions on [[https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli][Hashicorp's website]] for RHEL family Linux systems is pretty straightforward. It is also almost identical to how we install docker - add a repo and then install a package from that repo.
 **** Had some issues with adding the hashicorp repo with ansible, but found out the reason trough comparisition with regular bash instructions
+**** While working on the above I've introduced another bug into the playbook, but successfully resolved it too.
+When dividing long URLs (or strings in general) over two lines, you
+need to remember to place a backslash at the end of the first (and
+really each) line, if you want them to be later coalesced into one
+string without any newlines.
 
-
+*** TODO Test the code again, on a newly provisioned machine
 ** Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
 *** Write a Task Definition
 *** Read on ECS module for Terraform

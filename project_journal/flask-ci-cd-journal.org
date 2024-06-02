@@ -3286,3 +3286,122 @@ the problem.
 What an annoying thing. How was I supposed to know not to use spaces
 in the name?
 
+* Sun Jun  2 06:04:15 PM CEST 2024
+Looks like there is one more issue with the Hashicorp repo. Playbook
+went trough all steps until new packages installation and ended with a
+Byzantine error:
+
+
+** Error MSG
+#+BEGIN_SRC bash
+TASK [Install required packages]
+
+An exception occurred during task execution. To see the full traceback, use -vvv. The error was: OSError: Empty mirrorlist and no basepath specified!
+fatal: [playbook-test-jenkins]: FAILED! => {"changed": false, "module_stderr": "Connection to 10.11.12.6 closed.\r\n", "module_stdout": "Traceback (most recent call last):\r\n  File \"/usr/lib/python3.9/site-packages/dnf/util.py\", line 113, in _urlopen\r\n    repo._repo.downloadUrl(url, fo.fileno())\r\n  File \"/usr/lib64/python3.9/site-packages/libdnf/repo.py\", line 433, in downloadUrl\r\n    return _repo.Repo_downloadUrl(self, url, fd)\r\nRuntimeError: Empty mirrorlist and no basepath specified!\r\n\r\nDuring handling of the above exception, another exception occurred:\r\n\r\nTraceback (most recent call last):\r\n  File \"/home/vagrant/.ansible/tmp/ansible-tmp-1717343997.6279154-268908-74966212707374/AnsiballZ_dnf.py\", line 107, in <module>\r\n    _ansiballz_main()\r\n  File \"/home/vagrant/.ansible/tmp/ansible-tmp-1717343997.6279154-268908-74966212707374/AnsiballZ_dnf.py\", line 99, in _ansiballz_main\r\n    invoke_module(zipped_mod, temp_path, ANSIBALLZ_PARAMS)\r\n  File \"/home/vagrant/.ansible/tmp/ansible-tmp-1717343997.6279154-268908-74966212707374/AnsiballZ_dnf.py\", line 47, in invoke_module\r\n    runpy.run_module(mod_name='ansible.modules.dnf', init_globals=dict(_module_fqn='ansible.modules.dnf', _modlib_path=modlib_path),\r\n  File \"/usr/lib64/python3.9/runpy.py\", line 225, in run_module\r\n    return _run_module_code(code, init_globals, run_name, mod_spec)\r\n  File \"/usr/lib64/python3.9/runpy.py\", line 97, in _run_module_code\r\n    _run_code(code, mod_globals, init_globals,\r\n  File \"/usr/lib64/python3.9/runpy.py\", line 87, in _run_code\r\n    exec(code, run_globals)\r\n  File \"/tmp/ansible_ansible.legacy.dnf_payload_o95os63i/ansible_ansible.legacy.dnf_payload.zip/ansible/modules/dnf.py\", line 1365, in <module>\r\n  File \"/tmp/ansible_ansible.legacy.dnf_payload_o95os63i/ansible_ansible.legacy.dnf_payload.zip/ansible/modules/dnf.py\", line 1354, in main\r\n  File \"/tmp/ansible_ansible.legacy.dnf_payload_o95os63i/ansible_ansible.legacy.dnf_payload.zip/ansible/modules/dnf.py\", line 1325, in run\r\n  File \"/tmp/ansible_ansible.legacy.dnf_payload_o95os63i/ansible_ansible.legacy.dnf_payload.zip/ansible/modules/dnf.py\", line 1229, in ensure\r\n  File \"/usr/lib/python3.9/site-packages/dnf/base.py\", line 2531, in _get_key_for_package\r\n    keys = dnf.crypto.retrieve(keyurl, repo)\r\n  File \"/usr/lib/python3.9/site-packages/dnf/crypto.py\", line 185, in retrieve\r\n    with dnf.util._urlopen(keyurl, repo=repo) as handle:\r\n  File \"/usr/lib/python3.9/site-packages/dnf/util.py\", line 117, in _urlopen\r\n    raise IOError(str(e))\r\nOSError: Empty mirrorlist and no basepath specified!\r\n", "msg": "MODULE FAILURE\nSee stdout/stderr for the exact error", "rc": 1}
+#END_SRC
+** dnf output on the server
+Importing GPG key 0xA621E701:
+ Userid     : "HashiCorp Security (HashiCorp Package Signing) <security+packaging@hashicorp.com>"
+ Fingerprint: 798A EC65 4E5C 1542 8C8E 42EE AA16 FCBC A621 E701
+ From       : https://rpm.releases.hashicorp.com/gpg
+Is this ok [y/N]: 
+
+
+After logging in onto the server and trying to manually install
+terraform with dnf, I got asked to confirm the repo key fingerprint.
+Is there a bug in the task adding the Hashicorp repo?
+
+I will confirm the fingerprint but cancel the installation and re-run
+the playbook.
+
+A thought - is this why in many tutorials actions of adding a repo
+and it's key are divided into separate tasks?
+
+Still failed. Going to ask ChatGPT to look at the playbook code, tho
+to me it looks the same as other repo adding tasks. Here is code for
+docker repo and Hashicorp repo tasks:
+
+#+BEGIN_SRC yaml
+    - name: Add the Docker repo
+      ansible.builtin.yum_repository:
+        name: docker
+        description: official docker repo
+        baseurl: "https://download.docker.com/linux/\
+          centos/$releasever/$basearch/stable"
+        enabled: true
+        gpgcheck: true
+        gpgkey: "https://download.docker.com/linux/
+          centos/gpg"
+
+    - name: Add Hashicorp repository
+      ansible.builtin.yum_repository:
+        name: hashicorp
+        description: official hashicorp repo
+        baseurl: "https://rpm.releases.hashicorp.com/\
+          RHEL/$releasever/$basearch/stable"
+        enabled: true
+        gpgcheck: true
+        gpgkey: "https://rpm.releases.hashicorp.com/gpg"
+
+#+END_SRC
+
+But before I ask ChatGPT, I'll change the "RHEL" in baseurl for
+Hashicorp repo into "centos" like in the docker baseurl. No, it
+doesn't work like that, here is the error msg:
+
+#+BEGIN_SRC bash
+fatal: [playbook-test-jenkins]: FAILED! => {"changed": false, "msg": "Failed to download metadata for repo 'hashicorp': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried", "rc": 1, "results": []}
+#+END_SRC
+
+Maybe should read the docs/instructions for the
+ansible.builtin.yum_repository module?
+
+What if the issue is because I've run the playbook with wrong name
+once before running it again? I forgot that even though the Repo
+Ansible Module is idempotent, it's not magic and if we change name of
+the repo, it will loose track of it. Let's try again after reverting
+to a snapshot of a fresh system install.
+
+Note: (not correct) when running command `vagrant snapshot restore
+$SNAPSHOT_NAME`, vagrant will attempt to retrieve snapshot
+$SNAPSHOT_NAME for each VM. Dangerous but useful. On the other hand,
+it's probably not the behavior for when the target VM is explicitly
+named in the command. Ok, looks like it's a bug, because the snapshot
+change is only attempted for the first VM. To restore a snapshot to
+another I most likely need to explicitly name it.
+
+Found the error, it's actually not in the Hashicorp repo. The error
+message was a big wall of text, very difficult to read. By sheer luck
+my eyes fell on a message I've missed, that is: "Cannot download
+centos/gpg". This message is relevant only for the Docker Repo task:
+
+#+BEGIN_SRC yaml
+    - name: Add the Docker repo
+      ansible.builtin.yum_repository:
+        name: docker
+        description: official docker repo
+        baseurl: "https://download.docker.com/linux/\
+          centos/$releasever/$basearch/stable"
+        enabled: true
+        gpgcheck: true
+        gpgkey: "https://download.docker.com/linux/
+          centos/gpg"
+#+END_SRC
+
+This is the only task that has centos/gpg in it's key address. But why
+is the full URL of the address not present in the error message?
+Because there is a mistake in escaping the "newline". A backslash (\)
+is missing, which makes Ansible think that gpgkey received a list of
+two parameters instead of one string divided over two lines. Good to
+know.
+
+Fixing it and testing again.
+
+Works! Yuppi!
+
+Re-read the project's task list. I was stuck on some not essential
+sub section of Part 4, Deploying the Flask Web app to
+Fargate. Specifically, "Upload Docker image to ECR". It is now marked
+as DONE, but since so much time passed since I've done it, I should
+create the repo and upload it again before moving on to the next.
+Just to be sure added a new task and marked it as TODO.
