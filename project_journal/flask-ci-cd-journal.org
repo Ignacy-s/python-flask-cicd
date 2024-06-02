@@ -3405,3 +3405,11 @@ Fargate. Specifically, "Upload Docker image to ECR". It is now marked
 as DONE, but since so much time passed since I've done it, I should
 create the repo and upload it again before moving on to the next.
 Just to be sure added a new task and marked it as TODO.
+
+I've made two modifications to the Ansible playbook that provisions
+the main Jenkins server and initially wanted to commit them both at
+the same time. But commits should be atomic, and since these were two
+distinct changes, I've divided them into two commits. One for adding
+Terraform installation and another for changing how repositories' keys
+are added. Thanks to Emacs - Magit package it is very easy to commit
+only some lines of changes to a file.

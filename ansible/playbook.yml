@@ -3,24 +3,16 @@
   become: yes
 
   tasks:
-    - name: Add key for Jenkins repo
-      ansible.builtin.rpm_key:
-        state: present
-        key: "https://pkg.jenkins.io/redhat-stable/\
-          jenkins.io-2023.key"
 
     - name: Add the Jenkins repo
       ansible.builtin.yum_repository:
         name: jenkins
         description: jenkins stable repo
-        baseurl: https://pkg.jenkins.io/redhat-stable
+        baseurl: "https://pkg.jenkins.io/redhat-stable"
+        enabled: true
         gpgcheck: yes
-
-    - name: Add key for Docker repo
-      ansible.builtin.rpm_key:
-        key: "https://download.docker.com/linux/\
-          centos/gpg"
-        state: present
+        gpgkey: "https://pkg.jenkins.io/redhat-stable/\
+          jenkins.io-2023.key"
 
     - name: Add the Docker repo
       ansible.builtin.yum_repository:
@@ -30,6 +22,8 @@
           centos/$releasever/$basearch/stable"
         enabled: true
         gpgcheck: true
+        gpgkey: "https://download.docker.com/linux/\
+          centos/gpg"
 
     - name: Add Hashicorp repository
       ansible.builtin.yum_repository:
