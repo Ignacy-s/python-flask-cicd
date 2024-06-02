@@ -3077,3 +3077,212 @@ argument (and the vault has to be opened). It could be added to the
 playtrough script.
 
 Playbook works after removing the JCasC bruteforce installation.
+
+* Fri May 10 04:17:05 PM CEST 2024
+We need Terraform on the Jenkins server. Time to update the playbook.
+[[https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli][Installation instructions from Hashicorp]].
+
+* Sat May 11 04:45:30 PM CEST 2024
+Look what happened after just copying the .repo link from the instructions:
+fatal: [jenkins]: FAILED! => {"changed": false, "msg": "Failed to download metadata for repo 'hashicorp': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried", "rc": 1, "results": []}
+
+I remember this error. It has something to do with directory structure
+and how different tools need different links. Either this link is too
+specific or not specific enough. Need to look at other tasks that add
+a repo with the yum_repo ansible builtin.
+Looking at tasks didn't help, but a look at the [[sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo][file]] that was linked
+shows this:
+
+#+BEGIN_SRC conf
+[hashicorp]
+name=Hashicorp Stable - $basearch
+baseurl=https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable
+enabled=1
+gpgcheck=1
+gpgkey=https://rpm.releases.hashicorp.com/gpg
+
+[hashicorp-test]
+name=Hashicorp Test - $basearch
+baseurl=https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/test
+enabled=0
+gpgcheck=1
+gpgkey=https://rpm.releases.hashicorp.com/gpg
+#+END_SRC
+This file has fields that correspond to fields in a repository adding
+task:
+
+#+BEGIN_SRC yaml
+    - name: Add the Docker repo
+      ansible.builtin.yum_repository:
+        name: docker
+        description: official docker repo
+        baseurl: "https://download.docker.com/linux/\
+          centos/$releasever/$basearch/stable"
+        enabled: true
+        gpgcheck: true
+#+END_SRC
+
+Looks like I need to copy the baseurl link. And I can add this to the
+list of mistakes, so it will be easier to find later on. And easier to
+remember. I wonder if I really should add the key in a separate task?
+Let's see if there will be an error.
+Also, what if we submitted the gpg key as an entry in the repo adding
+task?
+
+The previous repo (one with wrong URL) causes errors. Can we delete it
+from the playbook with this?:
+
+#+BEGIN_SRC yaml
+    - name: Remove wrong Hashicorp repository
+      ansible.builtin.yum_repository:
+        name: hashicorp
+        present: false
+#+END_SRC
+
+fatal: [playbook-test-jenkins]: FAILED! => {"changed": false, "msg":
+"Unsupported parameters for (ansible.builtin.yum_repository) module:
+present. Supported parameters include: async, attributes, bandwidth,
+baseurl, cost, deltarpm_metadata_percentage, deltarpm_percentage,
+description, enabled, enablegroups, exclude, failovermethod, file,
+gpgcakey, gpgcheck, gpgkey, group, http_caching, include, includepkgs,
+ip_resolve, keepalive, keepcache, metadata_expire,
+metadata_expire_filter, metalink, mirrorlist, mirrorlist_expire, mode,
+module_hotfixes, name, owner, password, priority, protect, proxy,
+proxy_password, proxy_username, repo_gpgcheck, reposdir, retries,
+s3_enabled, selevel, serole, setype, seuser, skip_if_unavailable,
+ssl_check_cert_permissions, sslcacert, sslclientcert, sslclientkey,
+sslverify, state, throttle, timeout, ui_repoid_vars, unsafe_writes,
+username (attr, ca_cert, client_cert, client_key, validate_certs)."}
+
+No, we can't. But we received a list of supported parameters. 'gpgkey'
+is present. Also, there is a state parameter. I'm guessing that the
+'absent' state is what will remove the repo.
+
+#+BEGIN_SRC yaml
+    - name: Remove wrong Hashicorp repository
+      ansible.builtin.yum_repository:
+        name: hashicorp
+        state: absent
+#+END_SRC
+
+And it worked.
+
+I should also modify other repo-adding tasks, to keep the style
+consistent throughout the playbook.
+
+The 'terraform' package is missing. I'll log in to the server and try
+to run a `dnf search` to see if I can find the package myself.
+
+
+[root@jenkins-master vagrant]# dnf update
+Bad id for repo: Hashicorp Stable - x86_64 (Hashicorp Stable -
+$basearch), byte =   9
+
+So maybe I can't use bash variables in the repo name after all?
+
+Changing this: "name: Hashicorp Stable - $basearch"
+To plain "Hashicorp Stable".
+The idempotent nature of Ansible should allow to just change the name
+in the playbook - the command will guess that what I'd like is to just
+change the name of the repo. Will it?
+
+[root@jenkins-master vagrant]# dnf update
+Bad id for repo: Hashicorp Stable, byte =   9
+Bad id for repo: Hashicorp Stable - x86_64 (Hashicorp Stable -
+$basearch), byte =   9
+
+No, it just added another repo. And it's till wrong. Time to search
+for an answer... No conclusive answer, but some people had similar
+issues and solved them by clearing the dnf cache.
+
+Didn't work. But the instructions that use the higher level link
+probably work. I just need to swap the yum command to an updated dnf
+version. ChatGPT says that dnf equivalent for `yum-config-manager` is
+the `dnf config-manager` which then accepts an `--add-repo` flag.
+
+Successfully added the repo and `dnf search terraform` successfully
+finds Terraform packages now. I just need to look at the installed
+repository configurations on the system and spot the difference.
+
+* Mon May 13 03:01:03 PM CEST 2024
+** Asked ChatGPT about how DNF stores repository info.
+User
+How does DNF store repository info on a rhel/centos system?
+ChatGPT
+
+On a RHEL/CentOS system, DNF (Dandified YUM) stores repository information in the form of .repo files located in the /etc/yum.repos.d/ directory. These files contain configuration information for enabling or disabling repositories, as well as URLs where the packages are located.
+
+Here's a breakdown of how DNF uses these .repo files:
+
+    Repository Files: Each .repo file can contain one or more repository sections. Each section begins with [repositoryid] and includes directives like name, baseurl, enabled, and gpgcheck.
+
+    Cache: DNF maintains a cache of enabled repositories and their metadata to speed up operations without fetching data each time. This cache is located under /var/cache/dnf/.
+
+    DNF Configuration: The main configuration for DNF is located in /etc/dnf/dnf.conf. This file includes global settings that affect all repositories.
+
+    Variables: DNF allows the use of variables (like $releasever and $basearch) in the .repo files, which are dynamically replaced with the appropriate values based on the system and environment.
+** So, going to compare the .repo files. But first will clear the cache manually.
+No luck clearing out /var/cache/dnf.
+
+Looking at the /etc/yum.repos.d/ gives an interesting info:
+
+
+#+BEGIN_SRC bash
+[vagrant@jenkins-master ~]$ ls /etc/yum.repos.d/
+'Hashicorp Stable - $basearch.repo'
+'Hashicorp Stable.repo'
+ almalinux-appstream.repo
+ almalinux-baseos.repo
+ almalinux-crb.repo
+ almalinux-extras.repo
+ almalinux-highavailability.repo
+ almalinux-nfv.repo
+ almalinux-plus.repo
+ almalinux-resilientstorage.repo
+ almalinux-rt.repo
+ almalinux-sap.repo
+ almalinux-saphana.repo
+ docker.repo
+ hashicorp.repo
+ jenkins.repo
+#+END_SRC
+
+At first I thought that Ansible inserted single quotes for the
+Hashicorp repo, but it didn't for the other it installed. Then I
+remembered that for a few years, `ls` put's names containing spaces in
+quotes.
+
+I thought that the quotes are what messes up the repo name, but there
+is another character that does show in the repo added by me and
+doesn't show in the others - spaces.
+
+Will now check if removing the spaces from the names will help.
+
+It didn't.
+
+Going to compare the working file installed by 'dnf config-manager
+--add-repo' with the one I told Ansible to add.
+
+Looks like there is a difference in a different parameter, without a
+name.
+1,6c1,6
+< [hashicorp]
+< name=Hashicorp Stable - $basearch
+< baseurl=https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable
+< enabled=1
+< gpgcheck=1
+< gpgkey=https://rpm.releases.hashicorp.com/gpg
+---
+> [Hashicorp Stable]
+> baseurl = https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable
+> enabled = 1
+> gpgcheck = 1
+> gpgkey = https://rpm.releases.hashicorp.com/gpg
+> name = official hashicorp repo
+
+Changed the thing in the brackets to something without spaces solved
+the problem.
+
+What an annoying thing. How was I supposed to know not to use spaces
+in the name?
+

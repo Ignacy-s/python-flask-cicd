@@ -290,6 +290,9 @@ CLOSED: [2024-04-01 Mon 15:36]
 **** DONE Debug the playbook so that it works on both a fresh machine and on a machine where it was already installed (the playbook is indempotent)
 CLOSED: [2024-05-10 Fri 10:30]
 There were issues with starting Jenkins after dropping the plugins in. Looks like it's not as easy as copying the files onto the server. Need to solve the problem in a different way - using Jenkins command line interface.
+*** TODO Playbook should also install Terraform
+Instructions on [[https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli][Hashicorp's website]] for RHEL family Linux systems is pretty straightforward. It is also almost identical to how we install docker - add a repo and then install a package from that repo.
+**** Had some issues with adding the hashicorp repo with ansible, but found out the reason trough comparisition with regular bash instructions
 
 
 ** Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
@@ -319,8 +322,7 @@ Is a not-so-popular way to configure a Jenkins server, which then
 needs another Pipeline as Code configuration to run jobs. It's not
 that popular, but it's the way to go for an automated deployment.
 ** TODO Manually configure Jenkins
-** DONE (Mistake - can't install plugins this way) Update the Ansible playbook for Jenkins installation to include the JCasC plugin
-CLOSED: [2023-09-16 Sat 13:41]
+** (Mistake - can't install plugins this way) Update the Ansible playbook for Jenkins installation to include the JCasC plugin
 *** It wasn't easy because installing a plugin automatically on a new Jenkins installation can be challenging.
 *** It seems that the most straightforward method would be to download the JCasC plugin on the Ansible host and then have Ansible push it to the server once it's up.
 *** Ansible's 'wait_for' module waits for a port to open when an application starts up.
