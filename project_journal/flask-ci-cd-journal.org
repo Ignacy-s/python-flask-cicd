@@ -3413,3 +3413,14 @@ distinct changes, I've divided them into two commits. One for adding
 Terraform installation and another for changing how repositories' keys
 are added. Thanks to Emacs - Magit package it is very easy to commit
 only some lines of changes to a file.
+
+* Tue Jun 11 09:25:28 AM CEST 2024
+I've provisioned a new container repository using Terraform, but did
+it on the development machine. It's good enough.
+
+Need to solve the issue of getting my AWS credentials to the Jenkins
+server machine(s). I've written a sourced script to get the secrets
+from Bitwarden with just a one command. In theory, installing
+Bitwarden on such a machine would allow to use it. Since the script is
+setting global variables, it has to be sourced. It has an inbuilt
+check that makes sure that it's used correctly.

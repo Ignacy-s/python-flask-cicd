@@ -221,7 +221,7 @@ CLOSED: [2023-09-21 Thu 18:22]
 *** DONE Start and enable the docker.service
 CLOSED: [2023-09-21 Thu 18:22]
 
-* Part 4: Deploy the Flask web application to ECS Fargate
+* TODO Part 4: Deploy the Flask web application to ECS Fargate
 ** DONE Choose a deployment method: Decided to use AWS ECS with Fargate which is a very straightforward method of deploying a docker container to the cloud
 CLOSED: [2023-09-20 Wed 10:08]
 ** DONE Read up documentation and tutorials:
@@ -247,7 +247,7 @@ Had to install Copilot and AWS CLI and set up tab-completions.
 
 ** DONE Read enough ECS docs to know how to deploy to cloud using AWS CLI
 CLOSED: [2023-09-29 Fri 21:48]
-** Upload Docker image to ECR
+** TODO Upload Docker image to ECR
 *** DONE Find out how to push to ECR with Docker/AWS CLI
 CLOSED: [2023-10-14 Sat 15:50]
 https://stackoverflow.com/a/68668097
@@ -300,7 +300,13 @@ need to remember to place a backslash at the end of the first (and
 really each) line, if you want them to be later coalesced into one
 string without any newlines.
 
-*** TODO Test the code again, on a newly provisioned machine
+*** DONE Test the code again, on a newly provisioned machine
+CLOSED: [2024-06-11 Tue 09:34]
+Tested it on my development machine. Don't want to put my secrets on
+working servers until I find a secure way to handle them. Also, AWS
+EC2 instances don't need the secrets, as they get authorized to deploy
+into cloud with AIM policies. AIM - Amazon Identity Management.
+
 ** Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
 *** Write a Task Definition
 *** Read on ECS module for Terraform
