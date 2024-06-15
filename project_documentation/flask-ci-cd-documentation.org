@@ -300,12 +300,24 @@ need to remember to place a backslash at the end of the first (and
 really each) line, if you want them to be later coalesced into one
 string without any newlines.
 
-*** DONE Test the code again, on a newly provisioned machine
-CLOSED: [2024-06-11 Tue 09:34]
-Tested it on my development machine. Don't want to put my secrets on
+*** TODO Test the code again, on a newly provisioned machine
+**** DONE Setting up image repository
+CLOSED: [2024-06-12 Wed 11:02]
+Tested it on my development machine. Didn't want to put my secrets on
 working servers until I find a secure way to handle them. Also, AWS
 EC2 instances don't need the secrets, as they get authorized to deploy
 into cloud with AIM policies. AIM - Amazon Identity Management.
+**** DONE Running Jenkins pipeline to check if it can upload the image.
+CLOSED: [2024-06-12 Wed 19:12]
+There was no Jenkins pipeline saved that would upload the image.
+**** DONE Modify playbook to allow usage of Bitwarden and project's /bin scripts on Jenkins server
+CLOSED: [2024-06-15 Sat 16:01]
+Modified the playbook to do a sparse checkout on the project's repo
+and copy downloaded scripts into /usr/local/bin so they can be easily
+accessed. This solves the credentials problem, as we just run a script
+that copies AWS credentials into environment variables, pulling them
+via bitwarden-cli.
+**** TODO Manually upload the image from docker, following the tutorial
 
 ** Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
 *** Write a Task Definition
@@ -452,4 +464,6 @@ Start and enable the docker.service
 Shamelessly copying the example from the YouTube video.
 *** Fixing agent to 'any' to allow building on the Jenkins controller
 *** Installing git
-
+** Refactor /bin downloading task in the playbook to not say "changed" on each run
+The task doesn't properly recognize when changes were made. Journal
+entry from Sat Jun 15 contains a modification suggested by ChatGPT.

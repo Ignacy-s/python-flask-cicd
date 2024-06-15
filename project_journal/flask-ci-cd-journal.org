@@ -1,3 +1,10 @@
+Coding Journal for the python-flask-cicd learning project. This are my
+notes. Writing helps with thinking and also makes it easier to repeat
+something done over two weeks ago.
+
+#+OPTIONS: num:nil
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+
 * Sat 25 Mar 2023 08:25:40 PM CET
 First conversation with ChatGPT on the project.
 ** Write a step by step guide to create a most basic devops project to show in portfolio. Fully automated, using most popular technologies. It is just a simplest pipeline in jenkins or circleci. It should be deployed by cloning a git repo and running terraform. Before you start, ask questions about details with possible options and arguments for each choice. Only generate the step by step guide after you have all required data.
@@ -3024,7 +3031,7 @@ some time it works. Or does it work after server (machine) restart.
 Trying to find out the issue with starting jenkins.service after
 installation of the plugins. Found something in the /var/log/messages:
 
-#+BEGIN_SRC syslog
+#+BEGIN_SRC conf
 Apr  2 17:44:03 playbook-test-jenkins systemd[1]: Starting Jenkins Continuous Integration Server...
 Apr  2 17:44:03 playbook-test-jenkins systemd[11601]: jenkins.service: Changing to the requested working directory failed: Permission denied
 Apr  2 17:44:03 playbook-test-jenkins systemd[11601]: jenkins.service: Failed at step CHDIR spawning /usr/bin/jenkins: Permission denied
@@ -3089,9 +3096,9 @@ fatal: [jenkins]: FAILED! => {"changed": false, "msg": "Failed to download metad
 I remember this error. It has something to do with directory structure
 and how different tools need different links. Either this link is too
 specific or not specific enough. Need to look at other tasks that add
-a repo with the yum_repo ansible builtin.
-Looking at tasks didn't help, but a look at the [[sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo][file]] that was linked
-shows this:
+a repo with the yum_repo ansible builtin.  Looking at tasks didn't
+help, but a look at the [[https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo][file]] that was linked in the command `sudo
+yum-config-manager --add-repo $URL` shows this:
 
 #+BEGIN_SRC conf
 [hashicorp]
@@ -3424,3 +3431,130 @@ from Bitwarden with just a one command. In theory, installing
 Bitwarden on such a machine would allow to use it. Since the script is
 setting global variables, it has to be sourced. It has an inbuilt
 check that makes sure that it's used correctly.
+
+* Tue Jun 11 09:39:58 AM CEST 2024
+Forgot that what was to be tested was not only creating a repo but
+also uploading a container image to it.
+
+I think that the initial Jenkins pipeline was doing just that. Not
+sure if the file with pipeline definition is in the repo. Need to
+check. It's not there, that's sad. At the point of working with
+Jenkins I didn't realize the separation between IaC configuration of
+the Jenkins Server itself and pipelines. I thought that both require
+the special JCasC plugin. Now I know that IaC, i.e. saving pipeline
+configuration as code in a Jenkinsfile is already a standard. If I
+only copied what I've set up back then into a file in the repo, I
+could easily duplicate the work.
+
+Now time to check if I have anything about uploading the image in this
+coding journal. I'm going to use git blame on the documentation,
+because the line with the task for uploading the image would have been
+marked as completed in the same commit (or around it) as the sections
+describing it in the journal.
+
+I didn't entry the commands. But there is a link to tutorial I
+used.
+
+** Here is the code again:
+#+BEGIN_SRC bash
+ACCOUNT=$(aws sts get-caller-identity | jq -r .Account)
+REGION='eu-north-1'
+REPO='flask_cicd_repo'
+
+docker build -t ${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${REPO} .
+
+aws ecr get-login-password \
+    --region ${REGION} \
+| docker login \
+    --username AWS \
+    --password-stdin ${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com
+
+docker push ${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${REPO}
+#+END_SRC
+
+I've put it into a script in the python-flask-cicd-code repo. Script
+is called push-image-jenkinsless.sh.
+
+
+* Thu Jun 13 01:43:30 PM CEST 2024
+Still need secrets on the machine. It wasn't difficult to modify the
+playbook to install the bitwarden-cli tool downloaded from
+github. Unarchive ansible builtin can also set permissions and
+unarchive directly where we need our files. I've lost some time
+installing the Bitwarden desktop app instead of CLI, but soon learned
+of my mistake. It seemed weird that a CLI app was 80MB in size.
+
+With the bw-cli, helper scripts related to this project (that pull
+secrets from bitwarden cli) can be used. This will make prototyping
+much more comfortable. Might also come in handy in the future. Helper
+packages and tasks are kept in the same playbook, but separate from
+the other tasks and together, so they can be either removed or moved
+to a conditional block or in some other way decoupled from the
+essential parts of the playbook.
+
+The /bin directory from the server part of the project will be copied
+onto the server, thus simplifying use of the helper scripts.
+
+Interesting, playbook started suddenly failing on bw-cli
+download. Looks like somebody just removed the enterprise and open
+source separation in the binaries and left only one of them, removing
+both "oss" and the other adjective from the file names.
+
+
+* Sat Jun 15 03:49:15 PM CEST 2024
+Modified playbook to perform a sparse checkout of the repo's bin
+directory and copy the pulled scripts into /usr/local/bin (not
+/usr/bin or /usr/sbin, because these directories are managed by
+package manager). There is also an option of replacing these two tasks
+with
+** this alternative task:
+ that doesn't trigger ""changed"" in ansible playbook execution.
+ Did it together with ChatGPT running gpt-4-t.
+#+BEGIN_SRC bash
+
+- name: Sparse checkout and ensure only changes are reported
+  ansible.builtin.shell:
+    cmd: |
+      if [ ! -d "{{ sparse_checkout_path }}/.git" ]; then
+        git clone --filter=blob:none --no-checkout {{ bin_repo_name }} {{ sparse_checkout_path }}
+        cd {{ sparse_checkout_path }}
+        git sparse-checkout init --cone
+        git sparse-checkout set bin/
+      else
+        cd {{ sparse_checkout_path }}
+        git fetch --depth=1
+        BEFORE=$(git rev-parse HEAD)
+        git pull
+        AFTER=$(git rev-parse HEAD)
+        if [ "$BEFORE" == "$AFTER" ]; then
+          echo "No changes detected."
+        else
+          echo "Changes were pulled from the repository."
+        fi
+      fi
+    args:
+      executable: /bin/bash
+  register: git_checkout
+  changed_when: "'Changes were pulled from the repository.' in git_checkout.stdout"
+  become: yes
+  become_user: "{{ regular_user }}"
+#+END_SRC
+
+Explanation
+
+    Directory Check: This script first checks if the directory exists and initializes it as a Git repository only if it doesn't exist. This avoids re-cloning the repository unnecessarily.
+    Fetch and Pull: It then fetches new data from the repository and checks if the latest commit hash changes after a pull. This determines if there were any actual changes.
+    Change Reporting: The task reports a change only if the commit hash changes after the pull, which Ansible tracks via the changed_when condition.
+
+Notes
+
+    {{ bin_repo_name }} should be replaced with your actual repository URL.
+    {{ sparse_checkout_path }} should be the path where you want to checkout the repository, like /home/{{ regular_user }}/sparse_repo.
+    The task uses Bash scripting to control the logic, which is more flexible but requires careful handling to ensure security and proper execution.
+    This task assumes that the environment is set up to handle Git commands and that appropriate SSH keys or access tokens are configured for accessing private repositories.
+
+This setup minimizes playbook complexity by consolidating multiple
+operations into a single task and ensures that changes are only
+reported when they actually occur, keeping your Ansible runs
+idempotent and efficient.
+

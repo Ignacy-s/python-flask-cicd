@@ -2,6 +2,11 @@
 - hosts: all
   become: yes
 
+  vars:
+    # Regular username, to not do unnecessary things as root
+    regular_user: vagrant
+    # Repo with helper scripts to be cloned onto the server
+    bin_repo_name: "https://github.com/Ignacy-s/python-flask-cicd.git"
   tasks:
 
     - name: Add the Jenkins repo
@@ -67,16 +72,67 @@
         state: present
         update_cache: true
 
-    - name: Install Helper Packages (locate & completions)
-      ansible.builtin.dnf:
-        name:
-          - mlocate
-          - bash-completion
-        state: present
 
-    - name: Update locate database
-      ansible.builtin.command: updatedb
-      changed_when:  false
+    # Start of QoL block
+    # This block is not essential and installs packages and binaries
+    # that improve Quality of Life (make development easier)
+    - block:
+      - name: Install Helper Packages (locate & completions)
+        ansible.builtin.dnf:
+          name:
+            - mlocate
+            - bash-completion
+            - unzip
+          state: present
+
+      - name: Download and extract Bitwarden CLI binary
+        ansible.builtin.unarchive:
+          src: "https://github.com/bitwarden/clients/releases/download/\
+            cli-v2024.6.0/bw-linux-2024.6.0.zip"
+          dest: /usr/local/bin/
+          remote_src: yes
+          mode: '0755'
+
+      # - name: Download /bin from project's repo
+      #   ansible.builtin.git:
+      #     repo: "{{ bin_repo_name }}"
+      #     dest: ~
+      #     version: HEAD
+      #     depth: 1
+      #     sparse_checkout: bin/
+      #   become: yes
+      #   become_user: "{{ regular_user }}"
+
+      - name: Initialize git repository for sparse checkout
+        ansible.builtin.git:
+          repo: "{{ bin_repo_name }}"
+          dest: "~/sparse_repo"
+          version: HEAD
+          depth: 1
+        become: yes
+        become_user: "{{ regular_user }}"
+
+      - name: Setup sparse checkout
+        ansible.builtin.shell:
+          cmd: |
+            git sparse-checkout init --cone
+            git sparse-checkout set bin/
+          chdir: "~/sparse_repo"
+        become: yes
+        become_user: "{{ regular_user }}"
+
+      - name: Copy scripts to /usr/local/bin
+        ansible.builtin.copy:
+          src: "/home/{{ regular_user }}/sparse_repo/bin/"
+          dest: "/usr/local/bin/"
+          remote_src: yes
+          mode: '0755'
+
+
+      - name: Update locate database
+        ansible.builtin.command: updatedb
+        changed_when:  false
+      # End of QoL block
 
     - name: Add the jenkins user to docker group
       ansible.builtin.user:
