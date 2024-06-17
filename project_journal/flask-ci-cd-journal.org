@@ -3501,6 +3501,20 @@ source separation in the binaries and left only one of them, removing
 both "oss" and the other adjective from the file names.
 
 
+* Thu Jun 13 07:45:23 PM CEST 2024
+Will continue with pulling of the repo in Ansible later. Now a quick
+detour to make this repo more accessible from GitHub. We need to
+create a git-hook that will automatically export both project journal
+and documentation automatically to html on each commit/stage, and then
+stage the resulting file. This way there can be a nice html file to
+link to from project's README.
+
+To simplify matters, I'm starting with learning how to headlessly
+export an .org file to html. Afterwards will sort out the hooks part.
+
+I can also boost the speed by first manually generating the initial
+.html versions of the journal and documentation.
+
 * Sat Jun 15 03:49:15 PM CEST 2024
 Modified playbook to perform a sparse checkout of the repo's bin
 directory and copy the pulled scripts into /usr/local/bin (not
@@ -3558,3 +3572,22 @@ operations into a single task and ensures that changes are only
 reported when they actually occur, keeping your Ansible runs
 idempotent and efficient.
 
+* Sun Jun 16 04:27:48 PM CEST 2024
+Back to auto-generating the .html file. Or not yet. Need to create a
+README.md first.
+
+Got an initial version of the README generated, had to modify the
+prompt a little. Need to adapt it further to the project. The gpt-4o
+model was better suited for the task. Strange, as I thought that the
+gpt-4-turbo is actually better. Seems the 4t is better for factual
+tasks while 4o better for creative tasks. Might be the models are the
+same, but in the ChatGPT interface they have a different temperature
+setting.
+
+While working on the markdown README I got the idea that maybe
+markdown, as a GitHub native document type, might be better? I didn't
+know Emacs-Org could export to markdown, but it can. On the other
+hand, will markdown really be better for very large files? I don't
+think either .html or .md is any good really. But "na bezrybiu i rak
+ryba" (polish: In the absence of fish, even crayfish is a fish), with
+no other options, anything will do.
