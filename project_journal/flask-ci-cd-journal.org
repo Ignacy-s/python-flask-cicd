@@ -3591,3 +3591,9 @@ hand, will markdown really be better for very large files? I don't
 think either .html or .md is any good really. But "na bezrybiu i rak
 ryba" (polish: In the absence of fish, even crayfish is a fish), with
 no other options, anything will do.
+
+* Mon Jun 17 07:00:09 PM CEST 2024
+Refactoring the README is going well. It's a very nice
+template. Describing the project's structure put to my attention the
+existence of a directory that's not in use anymore -
+jenkins_config. Going to delete it and commit the deletion to git.
