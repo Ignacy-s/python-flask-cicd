@@ -3597,3 +3597,12 @@ Refactoring the README is going well. It's a very nice
 template. Describing the project's structure put to my attention the
 existence of a directory that's not in use anymore -
 jenkins_config. Going to delete it and commit the deletion to git.
+
+* Mon Jun 17 08:22:59 PM CEST 2024
+Finished first iteration of the README, including linking back to main
+project's README from README inside the app code repo. In case I
+forget, to allow Emacs export org to markdown, first enable the
+markdown export backend with M-x `customize-option`
+`org-export-backends`. I'll make git hooks to auto generate actual
+documentation versions later. For now it's just placeholder versions,
+generated today.

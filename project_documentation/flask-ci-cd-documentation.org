@@ -385,18 +385,28 @@ c915e28b-9e1e-4199-9e1c-a5e027333e9e
 The task doesn't properly recognize when changes were made. Journal
 entry from Sat Jun 15 contains a modification suggested by ChatGPT.
 
-** TODO Making the project more presentable (on GitHub) - .org html export
+** TODO Making the project more presentable (on GitHub) - emacs-org to markdown export
 Plan is to add a git hook that will export project docs from .org to
-.html and then stage the new .html file in the commit. This file can
+markdown and then stage the new .md file in the commit. This file can
 than be linked to from the project's README.
 
 Looks like I haven't created a project's README yet.
-*** TODO Create a project's README
+*** DONE Create a project's README
+CLOSED: [2024-06-17 Mon 20:39]
 Generated an initial version with ChatGPT. Will go over it a few times
 to adjust it better to the project.
-
-*** TODO Quick-fix - manually generate a .html and link it in README
-*** TODO Find a way to export .org to .html headlessly
+**** DONE Finished refactoring the README
+CLOSED: [2024-06-17 Mon 20:40]
+Thanks to that amazing template the project is now very well described
+inside the README.
+**** DONE Link to this README from python-flask-cidcd-code's README's
+CLOSED: [2024-06-17 Mon 20:55]
+We want somebody accidentally opening the code repo first to easily
+find the main README. This way the README in the code repo can remain
+simple.
+*** DONE Quick-fix - manually generate a .md and link to it in README
+CLOSED: [2024-06-17 Mon 20:55]
+*** TODO Find a way to export .org to .md headlessly
 *** Decide where exactly to attach the hook
 *** Add the hook
 *** Add links to auto-generated .html files in the project README
