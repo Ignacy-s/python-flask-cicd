@@ -8,7 +8,7 @@ application.
 
 Links to Coding Journal and mini documentation:
 [Project's journal](project_journal/flask-ci-cd-journal.md).
-[Project's documentation](project_documentation/flask-ci-cd-documentation.md).
+[Project's plan](project_plan/flask-ci-cd-plan.md).
 
 It will (hopefully) show some degree of familiarity with:
 - Linux Administration

@@ -3606,3 +3606,7 @@ markdown export backend with M-x `customize-option`
 `org-export-backends`. I'll make git hooks to auto generate actual
 documentation versions later. For now it's just placeholder versions,
 generated today.
+
+* Tue Jun 18 01:57:47 PM CEST 2024
+Renamed project documentation to project plan. Along with links to it
+that were inside the README.
