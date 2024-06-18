@@ -5,6 +5,8 @@
 # Requisite: Script is run in the project's root directory else there
 # will be fun.
 
+# DEBUG FLAG:
+set -x
 
 # VARIABLES
 # File that marks the root dir of the project
@@ -88,9 +90,11 @@ EOF
     # Check if we can access the vault access mark
     if [[ ! -f "${VAULT_LOCATION}/${VAULT_ACCESS_MARKER}" ]]; then
       # Create a vault
-      bin/vault_management.sh create &>/dev/null || die
+      bin/vault_management.sh create &>/dev/null \
+        || die "bin/vault_management.sh create, error code is $?"
       # Open the vault
-      bin/vault_management.sh open &>/dev/null || die
+      bin/vault_management.sh open &>/dev/null  \
+        || die 'bin/vault_management.sh open &>/dev/null '
       # Put a mark in it
       touch "${VAULT_LOCATION}/${VAULT_ACCESS_MARKER}"
       # Test if we can access the vault access mark
@@ -118,7 +122,7 @@ EOF
   fi
 
   STEP=4
-  # Upload the key to AWS
+ 
   if [[ ( START_POINT -le STEP ) && ( LAST_POINT -ge STEP ) ]]; then
     echo "Performing step ${STEP}."
   fi
@@ -130,6 +134,7 @@ EOF
   fi
 
   STEP=6
+  # Upload the key to AWS
   # Set up a VM on AWS using Terraform
   if [[ ( START_POINT -le STEP ) && ( LAST_POINT -ge STEP ) ]]; then
     echo "Performing step ${STEP}."

@@ -38,7 +38,7 @@ CLOSED: [2023-07-21 Fri 14:54]
 *** Move the region name to a variable.
 ** Create a script to create and open/close LUKS container (which can hold the SSH key).
 ** Write out pseudocode for a script that would execute the whole project.
-** Put the initial steps (vault creation, SSH key generation and uploading and Jenkins VM spin up) into the playtrough script.
+** Put the initial steps (vault creation, SSH key generation and uploading and Jenkins VM spin up) into the playthrough script.
 *** 1: Vault creation - done
 *** 2: SSH key generation - done
 *** 3: SSH key uploading & VM spin up - need to finish some things first:
@@ -111,7 +111,7 @@ Added all networking infrastructure code to main.tf.
 *** Temporarily solved by having Terraform update Ansible's inventory file on each execution of 'terraform apply'.
 *** We can keep some kind of state file there so that Terraform, Ansible and later Jenkins can communicate with each other or find out details on how to run the project.
 *** File will be in bash, so that it can be sourced to read all the variables into memory.
-*** To protect the secrets, a trap will be added to playtrough.sh script so that on script exit, the vault can be locked again.
+*** To protect the secrets, a trap will be added to playthrough.sh script so that on script exit, the vault can be locked again.
 *** Since vault starts as empty, we need to check if it(file with secrets)'s there and generate the file if it doesn't exist yet.
 
 * DONE Set up Jenkins part 2: install Jenkins using Ansible.
@@ -293,7 +293,7 @@ There were issues with starting Jenkins after dropping the plugins in. Looks lik
 *** DONE Playbook should also install Terraform
 CLOSED: [2024-06-02 Sun 19:49]
 Instructions on [[https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli][Hashicorp's website]] for RHEL family Linux systems is pretty straightforward. It is also almost identical to how we install docker - add a repo and then install a package from that repo.
-**** Had some issues with adding the hashicorp repo with ansible, but found out the reason trough comparisition with regular bash instructions
+**** Had some issues with adding the hashicorp repo with ansible, but found out the reason through comparisition with regular bash instructions
 **** While working on the above I've introduced another bug into the playbook, but successfully resolved it too.
 When dividing long URLs (or strings in general) over two lines, you
 need to remember to place a backslash at the end of the first (and
@@ -356,13 +356,13 @@ that popular, but it's the way to go for an automated deployment.
 ** Export the configuration in the JCasC format and create a new JCasC configuration based on that export
 ** Modify the Ansible playbook to place the configuration file on the Jenkins server
 ** Test, debug and make sure it works
-* Part 6: Fully automate whole Jenkins deployment, configuration and pipeline setup using the 'playtrough.sh'
+* Part 6: Fully automate whole Jenkins deployment, configuration and pipeline setup using the 'playthrough.sh'
 * TODO's (non mission-critical):
 ** Create a secret's file in the vault, as described [[Create a file with secrets in the vault][here]] in part 1 of the project.
 ** vault_management.sh (low priority, because using Hashicorp's Vault will make this script obsolete):
 *** Vault management script could detect if container is already created/closed/open and not report an error if container state is already as requested.
 *** Add an option to destroy the existing vault.
-** playtrough.sh
+** playthrough.sh
 *** If the variables in the vault are not set, interview the user about required project details at the beginning of the script.
 *** DONE Both sub points can be achieved checking for presence of a dotfile.
 CLOSED: [2023-06-15 Thu 13:50]
@@ -371,13 +371,13 @@ CLOSED: [2023-06-15 Thu 13:50]
 *** DONE Get password from a file or source other than user's input.
 CLOSED: [2023-06-13 Tue 12:05]
 If an environment variable with password is already defined,
-playtrough.sh will not ask for the password.
+playthrough.sh will not ask for the password.
 
-*** Mention the opt-in to the Alma Linux AMI in playtrough.sh
+*** Mention the opt-in to the Alma Linux AMI in playthrough.sh
  Error: creating EC2 Instance: OptInRequired: In order to use this AWS Marketplace product you need to accept terms and subscribe. To do so please visit https://aws.amazon.com/marketplace/pp?sku=3kukoxmnoighcsbjd0u4nq9ds
 │       status code: 401, request id:
 c915e28b-9e1e-4199-9e1c-a5e027333e9e
-**** Maybe it will be enough to warn the user? Would be cool to somehow force this subscription as one of the steps in the playtrough.sh. Maybe even test for it.
+**** Maybe it will be enough to warn the user? Would be cool to somehow force this subscription as one of the steps in the playthrough.sh. Maybe even test for it.
 
 ** Ansible (Jenkins server configuration):
 *** Check aws binary version to avoid reinstalling the same version
@@ -436,7 +436,7 @@ ansible_ssh_private_key_file="../vault/id_25519_aws_flaskcicd"
 ** Not reading up enough of previous documentation when coming back to project after a break. This led to duplicate work and thinking that the current task is more complicated than it was, in effect causing a longer delay in the project.
 ** Jenkins:
 *** Tried to configure Jenkins the same way I once configured Icinga server in an automatic deployment - by dropping in configuration files from a preconfigured working server. Instead I should've looked for a more classic solution.
-The right way to do it was trough Jenkins CLI. I tried the drop in method to avoid learning how to use JCasC. If the plugin installation was that straightforward, I coul've finished the project without learning how to configure Jenkins with CLI (with the JCasC updating itself and installing other plugins from IaC).
+The right way to do it was through Jenkins CLI. I tried the drop in method to avoid learning how to use JCasC. If the plugin installation was that straightforward, I coul've finished the project without learning how to configure Jenkins with CLI (with the JCasC updating itself and installing other plugins from IaC).
 
 * Extras:
 ** DONE Following a Jenkins Tutorial to learn how to make pipelines based on Jenkinsfiles

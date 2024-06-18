@@ -6,9 +6,9 @@ This repository is a personal endeavor, aimed at exploring and
 showcasing foundational DevOps skills through practical
 application.
 
-Links to Coding Journal and mini documentation:
+Links to Coding Journal and Project plan:
 [Project's journal](project_journal/flask-ci-cd-journal.md).
-[Project's plan](project_plan/flask-ci-cd-plan.md).
+[Project plan](project_plan/flask-ci-cd-plan.md).
 
 It will (hopefully) show some degree of familiarity with:
 - Linux Administration
@@ -28,7 +28,7 @@ including Infrastructure as Code (IaC) principles and continuous
 integration/continuous deployment (CI/CD) techniques.
 
 ## Project Overview
-This project features a simple Flask application, integrated into a fully automated CI/CD pipeline. To simplify the usage of Jenkins, project is separated into two repositories. The one you're browsing right now (python-flask-cicd) is dedicated to the deployment and provisioning of a Jenkins server. The other repo (python-flask-cicd-code) is dedicated to the Flask application and code required for it's CI/CD (Jenkinsfiles, Terraform for container deployment). Key components include:
+This project features a simple Flask application, integrated into a fully automated CI/CD pipeline. To simplify the usage of Jenkins, project is separated into two repositories. The one you're browsing right now (python-flask-cicd) is dedicated to the deployment and provisioning of a Jenkins server. The other repo (python-flask-cicd-code) is dedicated to the Flask application and code required for its CI/CD (Jenkinsfiles, Terraform for container deployment). Key components include:
 
 - **Jenkins**: Orchestrates the CI/CD pipeline, ensuring code is tested and deployed seamlessly.
 - **Ansible**: Manages configuration and deployment of the Jenkins server, ensuring consistent set up.
@@ -41,7 +41,7 @@ This project features a simple Flask application, integrated into a fully automa
 
 
 ## WIP: Getting Started
-Warning: playtrough.sh script is not ready, so you're not getting
+Warning: playthrough.sh script is not ready, so you're not getting
 started.  
 To get started with this project, follow these steps:
 
@@ -54,14 +54,14 @@ To get started with this project, follow these steps:
     Ensure you have Python, Ansible, Terraform, and AWS-cli installed on your machine.
 
 3.  **Run the application**:
-    Change into the app's main directory, and run the 'playtrough.sh' script.
+    Change into the app's main directory, and run the 'playthrough.sh' script.
     ```bash
     cd python-flask-cicd
-    ./playtrough.sh
+    ./playthrough.sh
     ```
 4.  **Follow the instructions in the script**
-    The script will take you trough:
-    1. creating a LUKS encrypted vault (and it's password),
+    The script will take you through:
+    1. creating a LUKS encrypted vault (and its password),
     2. generating an ssh key and uploading it to AWS,
     3. using Terraform for provisioning cloud infrastructure required
        for the project (both the EC2 instance and Networking, as the
@@ -75,59 +75,59 @@ To get started with this project, follow these steps:
 
 ### python-flask-cicd (Jenkins server repo):
 
-    playtrough.sh: equivalent of the main function of a program
-    script that takes the user on a journey trough the project, asking
+- playthrough.sh: equivalent of the main function of a program
+    script that takes the user on a journey through the project, asking
     for required info and running functions and scripts in the required order.
-    ansible/: playbook for configuration of the Jenkins server
+- ansible/: playbook for configuration of the Jenkins server
     (including installation of plugins and the CI/CD pipeline setup).
-    bin/: scripts used in the project (and helper scripts)
+- bin/: scripts used in the project (and helper scripts)
     helper scripts that make the development easier (if I found myself
     doing something repeatedly, I'd put it in a script) and scripts
-    used by playtrough.sh to run the project.
-    blog-tf-subnet-setup/: code used in a Terraform subnet tutorial
+    used by playthrough.sh to run the project.
+- blog-tf-subnet-setup/: code used in a Terraform subnet tutorial
     As learning of basics of Terraform network provisioning was part
     of the project, I just put the code here instead of creating a
     separate project.
-    .flask-ci-cd-project-root-marker: an empty file
+- flask-ci-cd-project-root-marker: an empty file
     It's used to avoid bombing things on the user's system if the
     project was not started in it's root directory.
-    project_documentation/: contains the .org file with project's plan
-    project_journal/: contains project's journal
-    Thanks to commiting journal notes along with code, it's easy to
+- project_plan/: contains the .org file with project plan
+- project_journal/: contains project's journal
+    Thanks to committing journal notes along with code, it's easy to
     understand thinking behind past decisions or how some actions were performed.
-    terraform/: IaC scripts for Jenkins server & AWS VPC
+- terraform/: IaC scripts for Jenkins server & AWS VPC
     provisioning resources of the Jenkins server and the VPC used for
     the project (but not the deployment of the Flask app)
-    vagrant/: vagrant machines for Ansible playbook testing
-    Vagrantfile's for provisioning of the machines used for
-    testing. Much cheaper and faster to locally test the parts of the
+- vagrant/: vagrant machines for Ansible playbook testing
+    Vagrantfiles for provisioning of the machines used for
+    testing. It is much cheaper and faster to locally test parts of the
     projects that can be tested locally.
-    vault:/ vault for ssh keys and secrets
+- vault:/ vault for ssh keys and secrets
     To avoid having potentially dangerous secrets just laying
     around unencrypted. To be replaced with a Hashicorp's Vault at
     some point (or never).
-    vault.img: encrypted vault's image
+- vault.img: encrypted vault's image
 
 ### python-flask-cicd-code (Flask app & CI/CD Pipeline repo):
 
-    app.py/: application code
+- app.py/: application code
     The Flask app is as simple as possible, not much to see there.
-    Dockerfile: instructions on how to build the app image.
-    .dockerignore: like .gitignore but for docker
+- Dockerfile: instructions on how to build the app image.
+- dockerignore: like .gitignore but for docker
     Didn't know about it before this project. Had to find a way to
     stop Docker from pulling all the unnecessary files inside the
-    image and exploding it's size.
-    Jenkinsfile: defines the Jenkins pipeline
+    image and exploding its size.
+- Jenkinsfile: defines the Jenkins pipeline
     This way our CI/CD setup is version controlled along with the
     application code. Another bonus is that we can easily move our
     pipeline between Jenkins servers.
-    push-image-jenkinsless.sh: test image upload w/o Jenkins
+- push-image-jenkinsless.sh: test image upload w/o Jenkins
     Image pushing part of the project was done before the Jenkins
     pipeline was ready.
-    terraform/: terraform scripts for CD
+- terraform/: terraform scripts for CD
     The scripts to create image repository and deploy the image onto
     ECS
-    requirements.txt: required by the Flask app.
+- requirements.txt: required by the Flask app.
 
 
 ## Journal
@@ -140,7 +140,7 @@ version (and fully actual once I get a git hook working) is available [here](pro
 
 ### Contributing
 
-As this is a personal learning yourney, contributions are not actively sought. However, feedback and suggestions are always welcome!
+As this is a personal learning journey, contributions are not actively sought. However, feedback and suggestions are always welcome!
 
 ### License
 

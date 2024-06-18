@@ -536,7 +536,7 @@ account both short-term needs related to completing the project at
 hand and long-term career growth considerations for a junior DevOps
 professional.
 
-This is what can be found in the book, right now I'm halfway trough the second chapter.
+This is what can be found in the book, right now I'm halfway through the second chapter.
 Chapter 2, “Getting Started with Terraform”
 Installing Terraform; an overview of Terraform syntax; an overview of
 the Terraform CLI tool; how to deploy a single server; how to deploy a
@@ -1109,11 +1109,11 @@ and testing if a new container has been build and pushed out.
 It will probably become more detailed as the project develops.
 
 Because there is a DJ playing at the airport where I'm sitting now,
-and the master script is going play trough all the points in the
-script, I'm renaming it to playtrough.sh.
+and the master script is going play through all the points in the
+script, I'm renaming it to playthrough.sh.
 
 * Thu 08 Jun 2023 04:58:58 PM CEST
-Defined some more steps in the playtrough.sh.
+Defined some more steps in the playthrough.sh.
 
 * Sat 10 Jun 2023 02:58:43 PM CEST
 Consultation with a friend revealed that using a LUKS Vault for
@@ -1123,9 +1123,9 @@ vault_management.sh is kind of pointless (if a similar amount of work
 can be put into learning to use an industry standard tool).
 * Sun 11 Jun 2023 12:21:44 PM CEST
 For testing purposes (integration testing of the whole project and
-it's elements), it would be cool to have a kind of fall trough switch
+it's elements), it would be cool to have a kind of fall through switch
 statement. So that we could (knowing first which number belongs to
-which step in project's playtrough) execute only certain chain of
+which step in project's playthrough) execute only certain chain of
 steps, maybe starting in the middle or not going all the way to the
 end.
 
@@ -1204,7 +1204,7 @@ recently entered. There is a way to check for cached sudo password
 with a non interactive sudo command, (sudo -n), for example `sudo -n
 true` and then testing the result.
 
-Running `playtrough.sh 1 2` (to execute steps 1 and 2) works well,
+Running `playthrough.sh 1 2` (to execute steps 1 and 2) works well,
 whether user has exported a vault passphrase or types it in. Vault
 creation and access test works, whether it had to be created, opened
 or just accessed. Can commit changes.
@@ -1225,7 +1225,7 @@ really matter if we use the passphrase in addition to the vault's
 password. To make things simpler, I'm not using passphrase for now.
 
 * Wed 14 Jun 2023 04:53:32 PM CEST
-Now it's time to add the SSH key uploading step to playtrough.sh.
+Now it's time to add the SSH key uploading step to playthrough.sh.
 
 [[Upload the generated public key to AWS using Terraform][This AI generated snippet]] for uploading the SSH key differs a little
 from documentation at
@@ -1296,7 +1296,7 @@ a potential user chooses a different AWS region.
 Automatic AMI finder doesn't work, because it gets too many hits and
 then chooses the most recent out of them. I could remove the order to
 choose the most recent and do something to limit the amount of
-hits. Maybe somehow pin a specific version of AWS Linux trough some
+hits. Maybe somehow pin a specific version of AWS Linux through some
 version number? Or some regex? Or some main version number and regex
 to still allow for automatic upgrade to higher versions as they come?
 
@@ -1474,8 +1474,8 @@ Added all networking infrastructure code to main.tf.
 **** I'd rather not store AWS access keys. Maybe they can be exported to a environment variable, like the way I'm authorizing at the moment?
 **** If we could somehow test if we have AWS access to stand up a virtual machine? Then there would be no need to ask for the AWS keys. There are a few ways one can authorize Terraform to work on his behalf.
 *** At first the data will be entered manually.
-*** Later on there also will be an option to start the playtrough.sh script with an interview asking for all the required settings.
-*** To keep things safe, a trap can be added to playtrough.sh that would close the files.
+*** Later on there also will be an option to start the playthrough.sh script with an interview asking for all the required settings.
+*** To keep things safe, a trap can be added to playthrough.sh that would close the files.
 
 * Sat 08 Jul 2023 04:29:38 PM CEST
 ** Having a shot at doing some tests with Ansible using given ssh key.
@@ -1849,7 +1849,7 @@ In the process cleaned up the installation script a little.
 
 Found Jenkins service. Reloading firewall and testing if it works.
 It works, have to remember about the --permanent option and to reload the firewall afterwards. Added these to the script.
-** Had some error when changed the name of the mountpoint in the playtrough.sh. Used 'sudo rm /dev/mapper/LUKS_CONTAINER_NAME' to delete the old container that didn't want to cooperate.
+** Had some error when changed the name of the mountpoint in the playthrough.sh. Used 'sudo rm /dev/mapper/LUKS_CONTAINER_NAME' to delete the old container that didn't want to cooperate.
 Maybe I could add a check for it in the vault management script.
 The 'rm' command wasn't enough. What did the job was using 'cryptsetup close my_project_container'.
 * Fri Aug  4 10:40:53 AM CEST 2023
@@ -2079,7 +2079,7 @@ Not sure how. I'll go with the Jenkins tutorials from here:
 https://www.jenkins.io/doc/tutorials/
 
 ** Installing Docker Pipeline plugin
-Clicking trough the Web UI
+Clicking through the Web UI
 ** Created a Jenkinsfile in the code repo
 Copied from Python example from the tutorial
 ** Installing Emacs Jenkins major mode
@@ -2340,7 +2340,7 @@ I launch on this adventure, just checking online if there is a simple
 Jenkins tutorial on how to create a pipeline based on a
 Jenkinsfile. Manually in Jenkins GUI.
 
-Not many tutorials, but I just clicked trough a multi-branch pipeline
+Not many tutorials, but I just clicked through a multi-branch pipeline
 setup and filled sane defaults.
 
 Got first error, Jenkins doesn't like my # prepended comments. Need to
@@ -2618,7 +2618,7 @@ something of satisfying complexity.
 * Sun Sep 24 05:33:44 PM CEST 2023
 Beginning with a hello-world deployment to ECS Fargate.
 Hard to find just a hello-world example. I'll just go on the AWS web
-console and click it trough. And just when I gave up on searching,
+console and click it through. And just when I gave up on searching,
 found this
 https://docs.aws.amazon.com/AmazonECS/latest/developerguide/getting-started-aws-copilot-cli.html
 
@@ -2679,7 +2679,7 @@ a local file and then upload using AWS CLI.
 
 * Fri Sep 29 09:47:00 PM CEST 2023
 Had kind of a block. Too many possible things to do. Tried to solve it
-trough reading ECS documentation, but that didn't work. What actually
+through reading ECS documentation, but that didn't work. What actually
 solved the block was talking to a senior colleague. I've also used
 ChatGPT for some rubber ducking. Incidentally, they both pointed me to
 do the same things.
@@ -3000,7 +3000,7 @@ Updated Vagrant snapshots so that the Ansible playbook doesn't have to
 spend time updating the system packages on the server.
 
 Due to a pasting typo I commented out JCasC play but at the same time
-pasted it again, so had to go trough the whole process second time.
+pasted it again, so had to go through the whole process second time.
 
 Ansible is not very informative when it's running playbooks. I wonder
 if -v added to the ansible-playbook command would change something or
@@ -3081,7 +3081,7 @@ update-ssh-config.sh to put the server info in ~/.ssh/config (so the
 Ansible can connect to it easily), then run
 copy-ssh-key-onto-machines.sh with the ssh key from vault as an
 argument (and the vault has to be opened). It could be added to the
-playtrough script.
+playthrough script.
 
 Playbook works after removing the JCasC bruteforce installation.
 
@@ -3295,7 +3295,7 @@ in the name?
 
 * Sun Jun  2 06:04:15 PM CEST 2024
 Looks like there is one more issue with the Hashicorp repo. Playbook
-went trough all steps until new packages installation and ended with a
+went through all steps until new packages installation and ended with a
 Byzantine error:
 
 
