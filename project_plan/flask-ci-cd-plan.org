@@ -247,7 +247,8 @@ Had to install Copilot and AWS CLI and set up tab-completions.
 
 ** DONE Read enough ECS docs to know how to deploy to cloud using AWS CLI
 CLOSED: [2023-09-29 Fri 21:48]
-** TODO Upload Docker image to ECR
+** DONE Upload Docker image to ECR
+CLOSED: [2024-06-19 Wed 10:31]
 *** DONE Find out how to push to ECR with Docker/AWS CLI
 CLOSED: [2023-10-14 Sat 15:50]
 https://stackoverflow.com/a/68668097
@@ -293,14 +294,15 @@ There were issues with starting Jenkins after dropping the plugins in. Looks lik
 *** DONE Playbook should also install Terraform
 CLOSED: [2024-06-02 Sun 19:49]
 Instructions on [[https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli][Hashicorp's website]] for RHEL family Linux systems is pretty straightforward. It is also almost identical to how we install docker - add a repo and then install a package from that repo.
-**** Had some issues with adding the hashicorp repo with ansible, but found out the reason through comparisition with regular bash instructions
+**** Had some issues with adding the hashicorp repo with ansible, but found out the reason through comparison with regular bash instructions for how to add the repo
 **** While working on the above I've introduced another bug into the playbook, but successfully resolved it too.
 When dividing long URLs (or strings in general) over two lines, you
 need to remember to place a backslash at the end of the first (and
 really each) line, if you want them to be later coalesced into one
 string without any newlines.
 
-*** TODO Test the code again, on a newly provisioned machine
+*** DONE Test the code again, on a newly provisioned machine
+CLOSED: [2024-06-19 Wed 10:30]
 **** DONE Setting up image repository
 CLOSED: [2024-06-12 Wed 11:02]
 Tested it on my development machine. Didn't want to put my secrets on
@@ -317,10 +319,17 @@ and copy downloaded scripts into /usr/local/bin so they can be easily
 accessed. This solves the credentials problem, as we just run a script
 that copies AWS credentials into environment variables, pulling them
 via bitwarden-cli.
-**** TODO Manually upload the image from docker, following the tutorial
+**** DONE Manually upload the image from docker, following the tutorial
+CLOSED: [2024-06-19 Wed 10:28]
+Had to manually create the ECR repo again, but it was just a matter of
+cloning the app code repo and doing a `terraform init` and `terraform
+apply`. Had to add vagrant user to the docker group.
+Had to modify the repo name in the push-image-jenkinsless.sh script.
+The name used to distinguish the repo differs between Terraform and
+Docker.
 
-** Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
-*** Write a Task Definition
+** TODO Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
+*** TODO Write a Task Definition
 *** Read on ECS module for Terraform
 *** Write Terraform code deploying container to ECS
 ** Put the Terraform code in a Jenkinsfile, maybe create few more steps, so that it's easier to see where exactly is the pipeline execution. Also use more descriptive names for steps, like 'Build Docker Image' instead of just 'Build'.

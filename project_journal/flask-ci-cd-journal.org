@@ -3610,3 +3610,79 @@ generated today.
 * Tue Jun 18 01:57:47 PM CEST 2024
 Renamed project documentation to project plan. Along with links to it
 that were inside the README.
+
+Also fixed a lot of typos throughout the project.
+
+Attempting to manually build and upload the image from docker. Don't
+need to copy any AWS credentials by hand because I can just run one of
+the helper scripts to put them into environment variables.
+
+Looks like the scripts and Bitwarden were not yet installed on the
+laptop version of Jenkins VM. Run the playbook to have it done.
+
+Needed to clone in the app repo, but it was pretty quick. At vagrant
+user's home, run 'git clone
+https://github.com/Ignacy-s/python-flask-cicd-code'
+This got the repo in a second and then from there had to create the
+ECR repository by moving into terraform/ecr_repository and running
+`terraform {init,apply}`
+
+Couldn't run docker commands. The playbook is not adding the default
+(vagrant) user to the docker group. Need to fix it in the
+playbook. It's still much faster thanks to putting things into
+scripts.
+
+After looking at the playbook I've noticed that the jenkins user is in
+the docker group already. I could just su into the jenkins user and
+run it from there. Or even do a sudo -u jenkins?
+`sudo -u jenkins` didn't work. `su jenkins` didn't work either. After
+running `grep jenkins /etc/passwd` I've noticed that Jenkins is a
+special, no login shell user. So it's easier to just give the extra
+group to the vagrant user just for this test. Remember that groups are
+assigned and re-assigned at login. So need to do a `sudo su
+$YOUR_USERNAME` to get the new access. It also means you can't stop
+somebody from accessing his group right by taking the group from him
+if you don't also boot that user from the system.
+
+Had to log out from the server and log in again. Both `bw` and helper
+scripts commands were inaccessible after doing a `sudo su vagrant` to
+perform a soft re-login. Even after running `exec /bin/bash` which
+should in theory restart the shell. `exec` command has some special
+functionality and if used like in the example above, it will make our
+shell "become" the new program, so the new program gets our shell's
+PID and so on). Logging out of the server and ssh-ing back into it
+resulted with a functional shell.
+
+The script however didn't work. It said that there doesn't exist a
+repository with the specified name. Moved to the terraform directory
+to investigate. Didn't remember terraform commands, but trying
+`terraform status` resulted in it suggesting `terraform state`. This
+gave a list of second words for the state command. `terraform state
+list` has shown how my ECR repository is called by terraform:
+aws_ecr_repository.flask_cicd_repo". Knowing this I could run
+`terraform state show aws_ecr_repository.flask_cicd_repo` which has
+shown a JSON like output with this object's details:
+
+#+BEGIN_SRC conf
+    name                 = "flask-cicd"
+#+END_SRC
+
+So I guess that from Docker's perspective, the above name should be
+used, and not the flask_cicd_repo as used in Terraform. I think I've
+included the small variation in names just to cause errors like that,
+as to better know which from which side we access services with which
+names. It might have also been a mistake though.
+
+Thanks to the script using variables, it was easy to change the value
+for REPO.
+
+Now time to push the change in script to GitHub and pull the correct
+version from GitHub on the server.
+
+It worked. Image successfully pushed :)
+
+Looks like I finally moved the project forward one notch. Now it's
+time to write the Terraform code to deploy to the cloud.
+
+
+
