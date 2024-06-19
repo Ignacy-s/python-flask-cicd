@@ -3684,5 +3684,38 @@ It worked. Image successfully pushed :)
 Looks like I finally moved the project forward one notch. Now it's
 time to write the Terraform code to deploy to the cloud.
 
+* Wed Jun 19 10:39:36 AM CEST 2024
+Destroying the existing Terraform infrastructure to avoid incurring
+costs while working with the tutorial.
 
+Watched a YouTube video to revise how ECS works. 
+Summary:
+
+ECS is a container orchestrator like Kubernetes or Docker Swarm. ECS
+works either as a managed service (Fargate) or managed by you
+(EC2). Fargate works more like lambda (servers running the containers
+are abstracted from us) and that's what we are going to use.
+
+From Top to Bottom, we have:
+- ECS Clusters, which can run multiple:
+- Services, which are comprised of one or more:
+- Tasks, which are like docker-compose files, with one or more:
+- Containers
+
+Beginning with testing the application container. Don't want to spend
+hours debugging our setup only to find out that the container was
+misconfigured.
+
+#+BEGIN_SRC bash
+  # Build the container
+    docker build -t test-container .
+  # Run the container
+    docker run -tdi -p 9999:80 test-container
+  # Test the container
+    curl localhost:9999
+  
+  > Hello, World!
+#+END_SRC
+
+It's working :)
 

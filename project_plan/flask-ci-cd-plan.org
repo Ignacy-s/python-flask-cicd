@@ -329,6 +329,9 @@ The name used to distinguish the repo differs between Terraform and
 Docker.
 
 ** TODO Write Terraform code that deploys to the cloud, not worrying about secrets and permissions at first
+Following a [[https://earthly.dev/blog/deploy-dockcontainers-to-awsecs-using-terraform/][tutorial found on earthly.dev]]
+*** DONE Test if container works locally
+CLOSED: [2024-06-19 Wed 16:54]
 *** TODO Write a Task Definition
 *** Read on ECS module for Terraform
 *** Write Terraform code deploying container to ECS
