@@ -1,0 +1,99 @@
+#!/bin/bash
+
+# This are pre-commit hooks, written by Ignacy on 2024-06-20
+#
+# Tasks performed:
+# 1. Hiding IP addresses found in Ansible's hosts.ini
+#    * Addresses are replaced with Xes on commit,
+#      - Original file gets backed up,
+#      - Addresses are replaced with Xes using sed,
+#      - Modified version gets staged,
+#      - Backup is moved back into place of the original.
+#
+# 2. Generating markdown versions of .org docs and staging them
+#    * Emacs is launched in headless mode to perform the task on .org
+#      files. For each file, an .md export is created in the same
+#      directory, with the same name, but an .md extension
+
+
+# # log function for debugging
+# log(){
+#   echo "$(date +%F+%T):${*}" \
+#        >> hook-debug.$(date +%F).log
+# }
+
+# Path to your hosts.ini file
+ANSIBLE_HOSTS="ansible/hosts.ini"
+
+# Paths to project journal and plan, which are to be exported to their
+# markdown version and then also staged along the .org versions
+JOURNAL_ORG="project_journal/flask-ci-cd-journal.org"
+PLAN_ORG="project_plan/flask-ci-cd-journal.org"
+
+
+generate_and_stage_markdown_versions(){
+
+  local ORG_FILE
+
+  for ORG_FILE in "${JOURNAL_ORG}" "${PLAN_ORG}"
+  do
+    # Move to next file if the file is not staged
+    if ! git diff --cached --name-only \
+        | grep --quiet "${ORG_FILE}"
+    then
+      return 0
+    fi
+    
+    # Start Emacs in batch mode and export .md in the same place
+    emacs --batch \
+          --eval "(require 'org)" \
+          --eval "(require 'ox-md)" \
+          --eval "(find-file \"${ORG_FILE}\")" \
+          --eval "(org-md-export-to-markdown)" \
+      || echo "Failed .md export with ${ORG_FILE}!" >2
+
+    # Stage the modified file
+    local MARKDOWN_FILE
+    MARKDOWN_FILE="${ORG_FILE%.org}.md"
+    git add "${MARKDOWN_FILE}"
+    
+  done
+
+  # Successfully exported files
+  return 0
+}
+
+hide_ip_addr_in_ansible_hosts(){
+  # Check if hosts.ini is staged
+  if git diff --cached --name-only \
+      | grep --quiet "${ANSIBLE_HOSTS}"
+  then 
+    # Backup original file
+    cp -p "${ANSIBLE_HOSTS}" "${ANSIBLE_HOSTS}.bak"
+
+    # Define a regexp catching IP addresses
+    IP_REGEX='\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}'
+
+    # Replace IP addresses with placeholder
+    sed -i \
+        '/ansible_host="'"${IP_REGEX}"'"/s/=".*"/="XXX"/' \
+        "${ANSIBLE_HOSTS}"
+
+    # Add the modified file to the commit
+    git add "${ANSIBLE_HOSTS}"
+
+    # Copy back the backup file
+    mv "${ANSIBLE_HOSTS}.bak" "${ANSIBLE_HOSTS}"
+  fi
+
+  # IP Addresses hidden successfully
+  return 0
+}
+
+generate_and_stage_markdown_versions \
+ || echo "Problem with exporting markdown versions of docs!" >2
+
+hide_ip_addr_in_ansible_hosts \
+  || echo "Problem hiding IP addresses in Ansible's hosts.ini!" >2
+
+exit 0

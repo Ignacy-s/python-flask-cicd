@@ -3719,3 +3719,22 @@ misconfigured.
 
 It's working :)
 
+* Thu Jun 20 09:48:59 AM CEST 2024
+Modifying the git pre-commit hook to auto generate markdown versions
+of the docs.
+In next project I could just place them in one directory under docs or
+documentation.
+
+I'll also commit the hooks to repo. But since the hooks are not
+modified THAT often, I'm not going to automate copying from .git/hooks
+to git_hooks.
+
+
+* Wed Jun 19 04:52:29 PM CEST 2024
+
+Now it's time for task definition.
+It's something between a Vagrantfile and a docker-compose file. It
+defines what containers we are using and what ports they want
+exposed and drive mappings.
+It also defines hardware requirements like CPU or RAM.
+
