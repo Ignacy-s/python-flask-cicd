@@ -3732,9 +3732,399 @@ to git_hooks.
 
 * Wed Jun 19 04:52:29 PM CEST 2024
 
-Now it's time for task definition.
-It's something between a Vagrantfile and a docker-compose file. It
-defines what containers we are using and what ports they want
-exposed and drive mappings.
-It also defines hardware requirements like CPU or RAM.
+Now it's time for task definition.  It's something between a
+Vagrantfile and a docker-compose file. It defines what containers we
+are using and what ports they want exposed and drive mappings.  It
+also defines hardware requirements like CPU or RAM.
+
+* Tue Jun 25 08:47:45 PM CEST 2024
+Before a Task Definition is used to deploy to an ECS cluster, we need
+to define such a cluster in Terraform.
+
+Should I define the ECS Cluster in the same file as the ECR
+repository?
+
+And how should I pass the info about the existing infrastructure to
+another file?
+
+1. Using Terraform Remote State, where you setup an S3
+bucket and use it to store the state and access it from multiple
+machines.
+
+2. Using Terraform Data Source (which is local). In it's simplest form
+it requires that the names of the resources are known. This is not a
+problem in this simple, local, PoC project.
+
+* Thu Jun 27 06:58:45 PM CEST 2024
+After re-reading conversation with ChatGPT about ways to exchange data
+between separate local Terraform projects I've decided to use the
+simplest method. I can add an external state in the next iteration of
+the project.
+
+Reading docs about Task Definition:
+[[https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition][- Terraform ECS Module documentation]]
+[[https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html][-Task Definition Parameters (AWS Developers Docs)]]
+
+So, the *family* and *container definitions* are mandatory, and there
+are some other parameters that aren't.
+
+- Family - it's pretty much a name of the task definition, but not
+  specific to any revision of a task. This is important if we auto
+  generate the Task Definitions, as then each subsequent version will
+  get a name that is the family + an increasing number.
+- Container Definitions - This is a whole box of new parameters:
+  - Name
+  - Image
+  - Memory
+  - Port mappings
+  - Private Repository Credentials
+
+Going to read up on them.
+
+* Fri Jun 28 10:52:06 AM CEST 2024
+Explanation of the above parameters:
+** Name
+The name of the container. It's not used to define the image, but it's
+used when for example linking containers together (linked containers
+can see each other on a local network).
+** Image
+This parameter defines our image. If the image is not accessible from
+docker hub it should also contain the link to our repo. It has form
+of:
+**repository-url/image:tag**
+or
+**repository-url/image@digest**
+
+This is the most important part.
+
+Example:
+aws_account_id.dkr.ecr.region.amazonaws.com/my-web-app:latest
+
+** Memory
+Amount of RAM in MB for the container. Optional when using Fargate
+(which is our case).
+** Port mappings
+Used to expose ports from the containers.
+
+Example:
+"portMappings": [
+    {
+        "name": string,
+        "containerPort": integer
+    }
+]
+									
+** Private Repository Credentials
+Required when using non AWS repository. Doesn't apply since we use the
+ECR.
+
+
+** Other parameters:
+There are other parameters that are not as commonly used and mostly
+correspond to docker options and AWS' own metrics and logging:
+    Health check
+    Environment
+    Network settings
+    Storage and logging
+    Security
+    Resource limits
+    Docker labels
+* Fri Jun 28 11:15:02 AM CEST 2024
+There is a template for a Task Definition in the AWS Developer Guide, which can
+be found [[https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-definition-template.html][here]].
+
+I've used a technique of "leaving some work unfinished" which is
+supposed to make it easier to resume work after a break and help "hit
+the ground running". It made it easier to come back into work.
+
+The following task definition can be generated with AWS CLI using `aws
+ecs register-task-definition --generate-cli-skeleton`
+** Template Task Definition
+for a Fargate type instance.
+
+Important
+
+For the Fargate launch type, you must include the operatingSystemFamily parameter with one of the following values:
+
+    LINUX
+
+    WINDOWS_SERVER_2019_FULL
+
+    WINDOWS_SERVER_2019_CORE
+
+    WINDOWS_SERVER_2022_FULL
+
+    WINDOWS_SERVER_2022_CORE
+
+# I'm going to use LINUX
+#+BEGIN_SRC json
+{
+    "family": "",
+    "runtimePlatform": {"operatingSystemFamily": ""},
+    "taskRoleArn": "",
+    "executionRoleArn": "",
+    "networkMode": "awsvpc",
+    "platformFamily": "",
+    "containerDefinitions": [
+        {
+            "name": "",
+            "image": "",
+            "repositoryCredentials": {"credentialsParameter": ""},
+            "cpu": 0,
+            "memory": 0,
+            "memoryReservation": 0,
+            "links": [""],
+            "portMappings": [
+                {
+                    "containerPort": 0,
+                    "hostPort": 0,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "entryPoint": [""],
+            "command": [""],
+            "environment": [
+                {
+                    "name": "",
+                    "value": ""
+                }
+            ],
+            "environmentFiles": [
+                {
+                    "value": "",
+                    "type": "s3"
+                }
+            ],
+            "mountPoints": [
+                {
+                    "sourceVolume": "",
+                    "containerPath": "",
+                    "readOnly": true
+                }
+            ],
+            "volumesFrom": [
+                {
+                    "sourceContainer": "",
+                    "readOnly": true
+                }
+            ],
+            "linuxParameters": {
+                "capabilities": {
+                    "add": [""],
+                    "drop": [""]
+                },
+                "devices": [
+                    {
+                        "hostPath": "",
+                        "containerPath": "",
+                        "permissions": ["read"]
+                    }
+                ],
+                "initProcessEnabled": true,
+                "sharedMemorySize": 0,
+                "tmpfs": [
+                    {
+                        "containerPath": "",
+                        "size": 0,
+                        "mountOptions": [""]
+                    }
+                ],
+                "maxSwap": 0,
+                "swappiness": 0
+            },
+            "secrets": [
+                {
+                    "name": "",
+                    "valueFrom": ""
+                }
+            ],
+            "dependsOn": [
+                {
+                    "containerName": "",
+                    "condition": "HEALTHY"
+                }
+            ],
+            "startTimeout": 0,
+            "stopTimeout": 0,
+            "hostname": "",
+            "user": "",
+            "workingDirectory": "",
+            "disableNetworking": true,
+            "privileged": true,
+            "readonlyRootFilesystem": true,
+            "dnsServers": [""],
+            "dnsSearchDomains": [""],
+            "extraHosts": [
+                {
+                    "hostname": "",
+                    "ipAddress": ""
+                }
+            ],
+            "dockerSecurityOptions": [""],
+            "interactive": true,
+            "pseudoTerminal": true,
+            "dockerLabels": {"KeyName": ""},
+            "ulimits": [
+                {
+                    "name": "msgqueue",
+                    "softLimit": 0,
+                    "hardLimit": 0
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {"KeyName": ""},
+                "secretOptions": [
+                    {
+                        "name": "",
+                        "valueFrom": ""
+                    }
+                ]
+            },
+            "healthCheck": {
+                "command": [""],
+                "interval": 0,
+                "timeout": 0,
+                "retries": 0,
+                "startPeriod": 0
+            },
+            "systemControls": [
+                {
+                    "namespace": "",
+                    "value": ""
+                }
+            ],
+            "resourceRequirements": [
+                {
+                    "value": "",
+                    "type": "GPU"
+                }
+            ],
+            "firelensConfiguration": {
+                "type": "fluentd",
+                "options": {"KeyName": ""}
+            }
+        }
+    ],
+    "volumes": [
+        {
+            "name": "",
+            "host": {"sourcePath": ""},
+            "configuredAtLaunch":true,
+            "dockerVolumeConfiguration": {
+                "scope": "task",
+                "autoprovision": true,
+                "driver": "",
+                "driverOpts": {"KeyName": ""},
+                "labels": {"KeyName": ""}
+            },
+            "efsVolumeConfiguration": {
+                "fileSystemId": "",
+                "rootDirectory": "",
+                "transitEncryption": "ENABLED",
+                "transitEncryptionPort": 0,
+                "authorizationConfig": {
+                    "accessPointId": "",
+                    "iam": "ENABLED"
+                }
+            }
+        }
+    ],
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "",
+    "memory": "",
+    "tags": [
+        {
+            "key": "",
+            "value": ""
+        }
+    ],
+    "ephemeralStorage": {"sizeInGiB": 0},
+    "pidMode": "task",
+    "ipcMode": "none",
+    "proxyConfiguration": {
+        "type": "APPMESH",
+        "containerName": "",
+        "properties": [
+            {
+                "name": "",
+                "value": ""
+            }
+        ]
+    },
+    "inferenceAccelerators": [
+        {
+            "deviceName": "",
+            "deviceType": ""
+        }
+    ]
+}
+#+END_SRC
+
+* Fri Jun 28 10:29:28 PM CEST 2024
+Emacs' flycheck was throwing a lot of errors when I was re-typing task
+definition from the example into my project. Turns out that the
+examples in AWS docs are in raw JSON, however Terraform expects us to
+use HCL.
+
+So we don't quote the keys (just values) and there is an equal sign (=),
+not a colon (:), between keys and values.
+
+There is one big caveat. AWS expects that a part of the task
+definition will be presented in JSON. Therefore, when writing our task
+definition in HCL we need to remember to encapsulate the
+ContainerDefinitions in parenthesis as an argument to a `jsonencode`
+function, like this:
+
+#+BEGIN_SRC hcl
+  container_definitions = jsonencode([
+    {
+      name      = "my-container"
+      image     = "myrepo/myimage:latest"
+      essential = true
+      portMappings = [
+        {
+          containerPort = 80
+#+END_SRC         
+
+* Sat Jun 29 01:46:13 PM CEST 2024
+There are more differences between HCL and JSON task
+definitions. Maybe I should take a look and base my task definition on
+a HCL example instead.
+
+* Sun Jun 30 08:48:12 PM CEST 2024
+
+I've read trough the tutorial on [[https://earthly.dev/blog/deploy-dockcontainers-to-awsecs-using-terraform/][Deploying to ECS with Terraform from
+Earthly]]. There is quite a lot of network configuration before we can
+deploy to ECS. I think I'll just re-use the networks from the Jenkins
+side of the project. In production, we would either use a separate VPC
+altogether, or at least a separate subnet. But here it's not
+important. Maybe in another iteration.
+
+Not sure how I should use resources from a different Terraform
+project, but I'm guessing that we just need to "declare" them with a
+`data` object before we can use them. And then they need to have a
+known name.
+
+I've noticed something that's grabbing attention in the Terraform code
+in the Flask side of the repo. All the names are hard-coded. I think
+they should be later replaced with variables. I'm just not sure if it
+should affect the terraform-side resources names. Not even sure if
+these resources CAN have names assigned using variables.
+
+After feeding the above journal entry to ChatGPT I've got a reply,
+that the Terraform's resource names have to be static and unique in
+each module. That means we can have identically named resources in
+each module and it will not pose a problem with interoperability.
+
+You cannot directly refer to a resource from another module. However,
+you can refer to specific attributes of a resource from another module
+under two conditions. First, the attribute must be defined in an
+output block in the source module. Second, the source module must be
+*sourced* in the module that needs to access these attributes.
+
+It reminds me of bash, where we can source other scripts inside a
+script to be able to use their functions or variables.
+
 

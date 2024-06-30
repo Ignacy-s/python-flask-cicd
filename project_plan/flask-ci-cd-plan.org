@@ -333,9 +333,13 @@ CLOSED: [2024-06-20 Thu 14:36]
 Following a [[https://earthly.dev/blog/deploy-dockcontainers-to-awsecs-using-terraform/][tutorial found on earthly.dev]]
 *** DONE Test if container works locally
 CLOSED: [2024-06-19 Wed 16:54]
-*** TODO Write a Task Definition
-*** Read on ECS module for Terraform
-*** Write Terraform code deploying container to ECS
+*** TODO Write Terraform code deploying container to ECS
+**** DONE Read on ECS/Fargate deployments with Terraform
+CLOSED: [2024-06-30 Sun 22:14]
+**** TODO Create an ECS Cluster with Terraform
+**** TODO Write a Task Definition
+**** TODO Re-use the Jenkins' network if it's possible
+
 ** Put the Terraform code in a Jenkinsfile, maybe create few more steps, so that it's easier to see where exactly is the pipeline execution. Also use more descriptive names for steps, like 'Build Docker Image' instead of just 'Build'.
 ** Test, debug and make sure it works with a manually set up Jenkins server
 ** Find out what needs to be done to use AWS permissions and secret store to give the least permissions required to have Jenkins auto deploy the container to ECS Fargate
