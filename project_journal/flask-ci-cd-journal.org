@@ -4095,12 +4095,13 @@ a HCL example instead.
 
 * Sun Jun 30 08:48:12 PM CEST 2024
 
-I've read trough the tutorial on [[https://earthly.dev/blog/deploy-dockcontainers-to-awsecs-using-terraform/][Deploying to ECS with Terraform from
-Earthly]]. There is quite a lot of network configuration before we can
-deploy to ECS. I think I'll just re-use the networks from the Jenkins
-side of the project. In production, we would either use a separate VPC
-altogether, or at least a separate subnet. But here it's not
-important. Maybe in another iteration.
+I've read trough the tutorial on
+[[https://earthly.dev/blog/deploy-dockcontainers-to-awsecs-using-terraform/][Deploying
+to ECS with Terraform from Earthly]]. There is quite a lot of network
+configuration before we can deploy to ECS. I think I'll just re-use
+the networks from the Jenkins side of the project. In production, we
+would either use a separate VPC altogether, or at least a separate
+subnet. But here it's not important. Maybe in another iteration.
 
 Not sure how I should use resources from a different Terraform
 project, but I'm guessing that we just need to "declare" them with a
@@ -4127,4 +4128,54 @@ output block in the source module. Second, the source module must be
 It reminds me of bash, where we can source other scripts inside a
 script to be able to use their functions or variables.
 
+* Mon Jul  1 08:28:25 PM CEST 2024
+
+It's still a little complicated and a little overwhelming (the ECS
+Fargate deployment). I had a chat with the artificially intelligent
+rubber duck and decided to reduce complexity as much as possible. I
+will move all the networking Terraform code from the main.tf in the
+Jenkins project to a networking.tf. And maybe also create variables
+for all the names.
+
+Added some comments to the main.tf, but didn't separate it yet and
+didn't move all stuff into variables.
+
+Have to finish up describing the SSH key trick in the next coding
+session.
+
+* Tue Jul  2 12:53:42 PM CEST 2024
+I've described the ssh key uploading trick a little and copied the
+code into ChatGPT. It suggested even more verbose comments. I also
+asked about whether it's better to have very verbose comments, or not
+to use them at all (because the code is 'self documenting'). I've got
+an interesting reply. In short, it depends, and the preffered amount
+(and verbosity) of comments depends on 3 key factors: Audience
+Expertise, Language and Technology complexity, Purpose of the Code,
+Best Practices and Personal Preference.
+
+When writing code by and for beginners, it's OK to include more
+comments about how the tasks are performed and not limiting us to why
+we have chosen some solution over the other. Another situation asking
+for more comments would be when our team has some people on more
+junior level. Then having more comments will allow the whole team to
+contribute and maintain code.
+
+Some languages are inherently more cryptic, complex and difficult to
+grasp, while others are more clear. In the former we should comment
+more.
+
+* Wed Jul  3 01:06:37 PM CEST 2024
+Continuing refactoring of the Terraform code in the Jenkins
+project. Starting by finishing the comments in main.tf.
+
+I've finished comments on all the code blocks in main.tf. Especially
+explaining cryptic solutions typical for Terraform that would be
+difficult to grasp for newcomers.
+
+I've also added a retry option for the "null_resource" which runs a
+script updating Ansible's inventory file by calling an external
+script.
+
+Next I should move the variables out from the main.tf into the vars.tf
+file.
 
