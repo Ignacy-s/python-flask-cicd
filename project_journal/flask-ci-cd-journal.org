@@ -4179,3 +4179,79 @@ script.
 Next I should move the variables out from the main.tf into the vars.tf
 file.
 
+* Thu Jul  4 09:17:53 AM CEST 2024
+I don't really remember how to create variables, but I remember that
+there are some examples already in vars.tf. So I'll open screens side
+by side and go for it.  However, before I start making any more
+changes, I'll just run the code once to make sure I didn't introduce
+any bugs when working with the comments. You never know, but the less
+changes to check for bugs, the easier it is to find them.
+
+Gotcha! There is a bug in the 'retry' logic in the 'null
+resource'. Looks like the only options for the 'on_failure' are either
+'continue' or 'fail'. I hope there is a way to make the retry logic
+work, so I'll just comment it out for now. Also adding a TODO comment
+to remember to fix it or remove it at some point.
+
+It works. Once again putting passwords in Bitwarden and scripting the
+process of pulling the local vault (for the ssh key) and AWS
+credentials from password manager saved a lot of time.
+
+* Fri Jul  5 12:26:45 PM CEST 2024
+Starting by re-organizing variables, separating networking and
+non-networking variables.
+
+While creating variables, ChatGPT suggested I use object type
+variables, built from multiple variables. I will revise that part from
+the book.
+
+* Sat Jul  6 02:12:33 PM CEST 2024
+OK, revised. There's not much about variables themselves, or
+rather, there is an intro into variables. There is also some about
+'local variables' (what I called variables until now is actually called
+'input variables'). Some values, that shouldn't be changed by the user can be
+defined in the scope of a module (and if we don't use modules, all
+our code is in the one default module).
+
+So, summarizing:
+ - input variables - Used to separate variable values from rest of
+   the code to avoid 'magic constants' - some fixed values in the code
+   that are not self explanatory. Additionally, these can (or have to
+   if defaults are not set) be provided by the user when running
+   `terraform apply`. 
+ - object type variable - a variable with internal structure that is
+   made of other variables. Might be better to gather all variables
+   for a certain service in one object variable.
+ - local variables - same as above, avoid 'magic constants', but also
+   avoid repetition in our code. Local variables are for things that
+   we don't want the user to change (like catchall for all IPs used
+   when defining network traffic rules - "0.0.0.0/0").
+
+ChatGPT told me about object type variables when I asked to suggest a
+way to create a boolean variable (because I didn't remember if it's
+called bool or boolean by Terraform).
+
+Now I probably should rewrite all the previous variables to conform to
+the object variable style. And also decide which variables should be
+defined as 'local variables' instead of 'input variables'. But that is
+the perfectionist speaking. I think that while this should be done at
+some point, I should just continue moving 'magic constants' from code
+into variables in 'vars.tf'. And next time I move variables for some
+object, like for example a subnet, I will use the object type
+variable. Changing variables into local variables can be left for
+later.
+
+Moved some more constants into variables. Might need to rename some
+resources for a more universal names (instead of having "Jenkins" for
+a name everywhere).
+
+* Sun Jul  7 12:03:27 PM CEST 2024
+I will first move all the constants into variables. Changing names
+from Jenkins_this or that can be done later.
+
+Moved most of constants to variables. Decided not to make the Wildcard
+CIDR block (0.0.0.0/0) a variable. I think it would reduce the
+readability. Going to change the "Jenkins+STH" resource names
+next. Afterwards should move the "networking" code to a separate file,
+maybe networking.tf?
+

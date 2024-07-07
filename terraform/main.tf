@@ -6,10 +6,9 @@ provider "aws" {
 }
 # Setup a VPC for Jenkins project with a CIDR block
 resource "aws_vpc" "jenkins" {
-  cidr_block = "10.0.0.0/16"
-
+  cidr_block = var.vpc_cidr_block
   tags = {
-    Name = "JenkinsVPC"
+    Name = var.vpc_name
   }
 }
 
@@ -19,11 +18,13 @@ resource "aws_vpc" "jenkins" {
 # and remote management.
 resource "aws_subnet" "jenkins" {
   vpc_id                  = aws_vpc.jenkins.id
-  cidr_block              = "10.0.1.0/24"
+  # A CIDR block for subnet that must be within the VPC CIDR block
+  cidr_block              = var.public_subnet_cidr_block
   # Setting responsible for public IP assignment
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = var.is_public_subnet_public
   tags = {
-    Name = "JenkinsSubnet"
+    # Name used to refer to this subnet from other TF modules/projects
+    Name = var.public_subnet_name
   }
 }
 
@@ -33,7 +34,8 @@ resource "aws_internet_gateway" "jenkins" {
   vpc_id = aws_vpc.jenkins.id
 
   tags = {
-    Name = "JenkinsIGW"
+    # This name can be used to refer to this IGW from other TF modules
+    Name = var.internet_gateway_name
   }
 }
 
@@ -43,17 +45,19 @@ resource "aws_route_table" "route_table" {
   vpc_id = aws_vpc.jenkins.id
 
   route {
+    # The default route for all outgoing
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.jenkins.id
   }
 
   tags = {
-    Name = "Public Subnet Routing Table"
+    Name = var.public_subnet_routing_table_name
   }
 }
 
 # Associate our public subnet with the public routing table
 resource "aws_route_table_association" "rt_associate_public" {
+# TODO: change name of resource used to more universal
   subnet_id = aws_subnet.jenkins.id
   route_table_id = aws_route_table.route_table.id
 }
@@ -63,8 +67,9 @@ resource "aws_route_table_association" "rt_associate_public" {
 #  - HTTPS traffic for secure Jenkins access.
 # Security group is a sort of firewall.
 
+# TODO: change name of resource used to more universal
 resource "aws_security_group" "jenkins" {
-  name        = "JenkinsSG"
+  name        = var.security_group_name
   description = "Allow Jenkins and SSH traffic"
   vpc_id      = aws_vpc.jenkins.id
 
@@ -93,7 +98,7 @@ resource "aws_security_group" "jenkins" {
   }
 
   tags = {
-    Name = "JenkinsSG"
+    Name = var.security_group_name
   }
 }
 
@@ -105,7 +110,7 @@ resource "aws_security_group" "jenkins" {
 # name.
 #    This is achieved using a data source for aws_key_pair.
 data "aws_key_pair" "existing" {
-  key_name = "cicd-project-key"
+  key_name = var.ssh_key_name
 }
 
 # 2. Conditionally create a new SSH key resource only if an existing
@@ -119,8 +124,8 @@ data "aws_key_pair" "existing" {
 #      the resource.
 resource "aws_key_pair" "jenkins-key" {
   count         = data.aws_key_pair.existing != null ? 0 : 1
-  key_name      = "cicd-project-key"
-  public_key    = file("../vault/id_25519_aws_flaskcicd.pub")
+  key_name      = var.ssh_key_name
+  public_key    = file(var.local_ssh_key_path)
 }
 
 # Create an EC2 instance for the Jenkins Server
@@ -154,7 +159,7 @@ resource "aws_instance" "jenkins" {
   ]
 
   tags = {
-    Name = "JenkinsServer"
+    Name = var.jenkins_instance_name
   }
 
   user_data = <<-EOF
@@ -191,13 +196,5 @@ resource "null_resource" "ansible_inventory_edit" {
        bash "${path.module}/add_ip_to_inventory.sh" \
          "${aws_instance.jenkins.public_ip}"
        EOF
-    
-    on_failure = "retry"
-    # Specify the maximum number of retries
-    retry {
-      attempts = 3
-      delay_seconds = 10
-      backoff_rate = 2
-    }
   }
 }
