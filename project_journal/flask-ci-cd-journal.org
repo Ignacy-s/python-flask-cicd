@@ -4255,3 +4255,14 @@ readability. Going to change the "Jenkins+STH" resource names
 next. Afterwards should move the "networking" code to a separate file,
 maybe networking.tf?
 
+* Sun Jul  7 03:23:11 PM CEST 2024
+Code is going to work even without segregating variables into object
+variables and into local variables (not all of them, just those that
+could, like all VPC variables into one object or things that shouldn't
+be changed into local variables). Doing it now would be Yak shaving,
+but I can add a task for that in the project plan. Added.
+
+Now it's time to remove all Jenkins things. But first take the infra
+down and put it up again. Just to make sure there were no bugs
+introduced when putting things in variables. There's always risk of a
+typo.
