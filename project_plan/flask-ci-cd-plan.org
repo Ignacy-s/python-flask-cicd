@@ -453,6 +453,13 @@ It's not going to work with files with a different extension than
 .org, but for now this is good enough.
 * Mistakes:
 ** Terraform:
+*** When testing Terraform configuration, running only Terraform Apply to test if it "compiles" - need to also test the IP address of the server
+At some point I've introduced an error into my code, because I only
+run `terraform destroy` and `terraform apply`. Without testing the
+access to the server that was being set up.
+
+
+
 *** Encapsulated a variable reference in double quotes, making it a literal string (effectively) turning off the reference mechanism.
 #+BEGIN_SRC terraform
   provider "aws" {

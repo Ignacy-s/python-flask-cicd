@@ -4266,3 +4266,163 @@ Now it's time to remove all Jenkins things. But first take the infra
 down and put it up again. Just to make sure there were no bugs
 introduced when putting things in variables. There's always risk of a
 typo.
+
+* Sun Jul  7 07:51:12 PM CEST 2024
+Found a bug, caused by a typo. Actually these are two bugs, but I
+think that the second (unsupported block type) was caused by the first
+one.
+
+Errors:
+#+BEGIN_EXAMPLE
+igi@dragon:.../python-flask-cicd/terraform$ terraform state pull
+>
+> Error: Unbalanced parentheses
+> 
+>   on /home/igi/Coding/projekty/cv-portfolio/python-flask-cicd/terraform/vars.tf line 93, in variable "local_ssh_key_path":
+>   92:   default     = ("../vault/id_25519_aws_flaskcicd.pub"
+>   93: }
+> 
+> Expected a closing parenthesis to terminate the expression.
+>
+
+>
+> Error: Unsupported block type
+> 
+>   on /home/igi/Coding/projekty/cv-portfolio/python-flask-cicd/terraform/vars.tf line 95, in variable "local_ssh_key_path":
+>   95: variable "jenkins_instance_name" {
+> 
+> Blocks of type "variable" are not expected here.
+>
+#+END_EXAMPLE
+
+Looks like there were some resources already defined. Maybe I didn't
+destroy all when I was on the plane? Need to login to AWS console to
+make sure there is nothing there. Or maybe I can do it using aws-cli?
+: aws ec2 describe-instances --region=eu-north-1
+Listed instances. There was one instance. I was scared at first, but
+then realized that I didn't order Terraform to destroy things after
+the last time. But it was just one small instance, even if I get
+billed for that, it's not going to be much.
+
+Looks like the reason the instance showed up was because even after
+termination, instances will still show up for several hours. If I've
+read the output carefully, I'd have noticed that it says that the
+instance was terminated.
+
+Commands used:
+#+BEGIN_SRC bash
+      # You need to be logged in to AWS for these to work.
+
+      # To show instances in region eu-north-1:
+      aws ec2 describe-instances --region=eu-north-1
+
+      # Using output from the command above we can terminate the instance
+      aws ec2 terminate-instances \
+          --instance-ids i-04ec271f3b2da100e \
+          --region=eu-north-1  
+#+END_SRC
+
+So Terraform works, but can we connect to the instance?
+#+BEGIN_EXAMPLE
+jenkins_public_ip = "16.170.203.0"
+igi@dragon:.../python-flask-cicd/terraform$ curl 16.170.203.0:8080
+curl: (7) Failed to connect to 16.170.203.0 port 8080 after 19 ms: Couldn't connect to server
+#+END_EXAMPLE
+
+It doesn't look good.
+
+I need to add it to the list of my mistakes. I always checked if
+`terraform apply` works, but never tested the server with curl.
+
+Haha, but I've never installed Jenkins on that server. Need to run
+Ansible.
+
+Even after changing the username to ec2-user, still can't access the
+server with ssh or Ansible. Now it's time to try from within the
+amazon web console.
+
+I can connect to the server from within the AWS console.
+
+There is no firewalld on the system. I can understand that, since the
+firewall on the system is effectively managed by the cloud.
+
+: ss -tuln
+shows just a few services listening. One of them is 0.0.0.0:22, so
+connecting trough ssh should work. Maybe something wrong with my ssh
+key?
+
+Should first try netcat and test if something can connect on the other
+open port, 8080, if I will be listening on this port on the server.
+
+Using Netcat we can show that networking works on the server.
+#+BEGIN_SRC bash
+# On the server with networking issues:
+nc -l -p 8080 # Port is above 1000 so we don't need root
+
+# On the server that will connect to the open port:
+nc XXX.XXX.XXX.XXX 8080
+
+# Then anything written on the connecting server
+# will be transmitted to the target machine.
+#+END_SRC
+
+Looks like SSH issues. Next I will try to manually add a key and see
+how it works.
+
+* Mon Jul  8 11:45:04 AM CEST 2024
+Can't copy from the AWS inbuilt terminal.
+Looks like '.ssh/authorized_keys has 600 permissions which is correct.
+
+Visually comparing the public ssh key on the EC2 instance and locally
+shows a discrepancy. I'm going to delete that key manually, but maybe
+I could somehow verify this with Terraform to make sure that this
+error doesn't happen again?
+
+Deleted the key with this command:
+: aws ec2 delete-key-pair --key-name cicd-project-key
+
+Re-trying `terraform destroy'. Doesn't work, because the ssh key pair
+cannot be found. ChatGPT suggests using terraform destroy
+-refresh=false, to avoid refreshing the resources before destroying
+them. This should allow to avoid discrepancy between Terraform's state
+and actual state.
+
+: terraform destroy -auto-approve -refresh=false
+This time it worked.
+
+#+BEGIN_EXAMPLE
+Plan: 6 to add, 0 to change, 0 to destroy.
+
+ Error: no matching EC2 Key Pair found
+ 
+   with data.aws_key_pair.existing,
+   on main.tf line 112, in data "aws_key_pair" "existing":
+  112: data "aws_key_pair" "existing" {
+ 
+
+#+END_EXAMPLE
+
+Another issue with the ssh key code. Maybe it's just an edge case that
+I didn't test in the beginning and thought it works while it actually
+doesn't.
+
+I have a hunch that it could be caused by some remaining state in
+Terraform. ChatGPT says my options are to manually update the tf state
+by removing the key with:
+: terraform state rm 'data.aws_key_pair.existing'
+
+Or to make the data source a conditional tf expression using the
+`count` trick. Manual deletion didn't work. Have to use
+`count`. Interesting, it looks like it worked at first because as I
+was developing the SSH key solution, there already was a key in AWS,
+so it always worked.
+
+While I'm at it, I could also try to make sure that my ssh key is
+what's in the cloud.
+
+ChatGPT suggests creating a new script that can verify the ssh key
+using aws-cli (to pull the key hash from the cloud) and ssh-keygen (to
+generate a hash of the local key). Then we can add a null resource
+that will re-upload the key if it doesn't exist or if the existing key
+is not identical to what we expect. Just to be sure, I'll commit the
+current version for easier rollback.

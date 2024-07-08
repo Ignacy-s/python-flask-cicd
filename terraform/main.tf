@@ -17,9 +17,9 @@ resource "aws_vpc" "jenkins" {
 # to allow direct Internet access, necessary for initial configuration
 # and remote management.
 resource "aws_subnet" "jenkins" {
-  vpc_id                  = aws_vpc.jenkins.id
+  vpc_id = aws_vpc.jenkins.id
   # A CIDR block for subnet that must be within the VPC CIDR block
-  cidr_block              = var.public_subnet_cidr_block
+  cidr_block = var.public_subnet_cidr_block
   # Setting responsible for public IP assignment
   map_public_ip_on_launch = var.is_public_subnet_public
   tags = {
@@ -57,8 +57,8 @@ resource "aws_route_table" "route_table" {
 
 # Associate our public subnet with the public routing table
 resource "aws_route_table_association" "rt_associate_public" {
-# TODO: change name of resource used to more universal
-  subnet_id = aws_subnet.jenkins.id
+  # TODO: change name of resource used to more universal
+  subnet_id      = aws_subnet.jenkins.id
   route_table_id = aws_route_table.route_table.id
 }
 
@@ -123,17 +123,17 @@ data "aws_key_pair" "existing" {
 #      be null, making 'count' equal to 1, triggering the creation of
 #      the resource.
 resource "aws_key_pair" "jenkins-key" {
-  count         = data.aws_key_pair.existing != null ? 0 : 1
-  key_name      = var.ssh_key_name
-  public_key    = file(var.local_ssh_key_path)
+  count      = data.aws_key_pair.existing != null ? 0 : 1
+  key_name   = var.ssh_key_name
+  public_key = file(var.local_ssh_key_path)
 }
 
 # Create an EC2 instance for the Jenkins Server
 resource "aws_instance" "jenkins" {
   # Using a hardcoded AMI for Alma Linux for quick setup.
   # TODO: Automate AMI selection to dynamically pick the latest stable release.
-  ami           = "ami-04e4606740c9c9381"
-#  ami           = data.aws_ami.amazon_linux.id
+  ami = "ami-04e4606740c9c9381"
+  #  ami           = data.aws_ami.amazon_linux.id
   instance_type = var.instance_type
 
   # Assign the correct SSH key dynamically
@@ -144,11 +144,11 @@ resource "aws_instance" "jenkins" {
   # Why 'jenkins-key[0]' instead of 'jenkins-key'? Because 'count' was
   # used to create that resource and all resources created by 'count'
   # are treated as lists, even if it's just one resource.
-  key_name      = (data.aws_key_pair.existing != null ?
+  key_name = (data.aws_key_pair.existing != null ?
     data.aws_key_pair.existing.key_name :
-    aws_key_pair.jenkins-key[0].key_name)
+  aws_key_pair.jenkins-key[0].key_name)
 
-  subnet_id     = aws_subnet.jenkins.id
+  subnet_id = aws_subnet.jenkins.id
   # Associate a public IP to allow direct Internet access
   associate_public_ip_address = true
 
