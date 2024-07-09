@@ -4426,3 +4426,19 @@ generate a hash of the local key). Then we can add a null resource
 that will re-upload the key if it doesn't exist or if the existing key
 is not identical to what we expect. Just to be sure, I'll commit the
 current version for easier rollback.
+
+* Mon Jul  8 08:39:13 PM CEST 2024
+Generated first version of the script that will compare the aws-side
+ssh key with the local one.
+
+Had an issue with missing parenthesis, showing as a problem with
+missing quote.
+#+BEGIN_EXAMPLE
+# Correct
+LOCAL_KEY_FINGERPRINT="$(ssh-keygen -lf "${LOCAL_KEY_PATH}" \
+            | awk '{sub(/^[^:]+:/, "", $2); print $2}')"
+
+# Wrong
+LOCAL_KEY_FINGERPRINT="$(ssh-keygen -lf "${LOCAL_KEY_PATH}" \
+            | awk '{sub(/^[^:]+:/, "", $2); print$2}'"                       
+#+END_EXAMPLE
