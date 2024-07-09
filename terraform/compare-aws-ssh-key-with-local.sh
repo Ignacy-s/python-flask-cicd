@@ -10,16 +10,29 @@
 KEY_NAME="${1}"
 LOCAL_KEY_PATH="${2}"
 
+# Test input parameters
+# Check if variables are non empty
+if [[ -z "${KEY_NAME}" || -z "${LOCAL_KEY_PATH}" ]]; then
+  echo "Error: Key name or local key path cannot be empty." >&2
+  exit 1
+fi
+# Check if the key at Local Key Path exists and is accessible
+if [[ ! -f "${LOCAL_KEY_PATH}" ]]; then
+  echo "Error: The specified key file does not exist or cannot\
+ be accessed." >&2
+  exit 1
+fi
+
 test_fingerprint(){
 # Test if fingerprints didn't change its form to future-proof the
 # script a little bit
 FINGERPRINT="${1}"
 if ! [[ "$FINGERPRINT" =~ ^[A-Za-z0-9+/]+={0,2}$ ]]; then
-  echo "Error: Unexpected fingerprint format."
+  echo "Error: Unexpected fingerprint format: " \
+       "$FINGERPRINT" >&2
   exit 1
 fi
 }
-
 
 # Check if the key exists in AWS and fetch its fingerprint
 AWS_KEY_FINGERPRINT="$(aws ec2 describe-key-pairs \

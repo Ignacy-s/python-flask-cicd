@@ -4442,3 +4442,14 @@ LOCAL_KEY_FINGERPRINT="$(ssh-keygen -lf "${LOCAL_KEY_PATH}" \
 LOCAL_KEY_FINGERPRINT="$(ssh-keygen -lf "${LOCAL_KEY_PATH}" \
             | awk '{sub(/^[^:]+:/, "", $2); print$2}'"                       
 #+END_EXAMPLE
+
+* Tue Jul  9 12:00:14 PM CEST 2024
+Tested a few cases for the script, including some errors:
+1. Remote key and local key identical.
+2. Local key not existing/inaccessible.
+3. Key names empty.
+4. Local key different than remote.
+5. Remote key not existing
+
+I think the script is pretty robust now. Can proceed to integrate it
+into the Terraform code.
