@@ -4520,3 +4520,18 @@ attempt.
 
 It works.
 
+* Wed Jul 10 08:11:04 PM CEST 2024
+Now moving the networking code to networking.tf. If it works I can
+copy the code to the other side of the project, with only slight
+modifications.
+
+This is the command to connect to the remote host using IP address
+from terraform output:
+
+#+BEGIN_SRC bash
+    ssh ec2-user@$(terraform output jenkins_public_ip | tr -d '\"') \
+        -i ../vault/id_25519_aws_flaskcicd \
+        -o IdentitiesOnly=yes
+#+END_SRC
+
+It works again!
