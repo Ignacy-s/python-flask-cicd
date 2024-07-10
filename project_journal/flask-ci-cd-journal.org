@@ -4453,3 +4453,54 @@ Tested a few cases for the script, including some errors:
 
 I think the script is pretty robust now. Can proceed to integrate it
 into the Terraform code.
+
+* Tue Jul  9 09:12:56 PM CEST 2024
+Finished the script and made updates to the main.tf file. After all
+that work, it doesn't work, if the ssh key is somehow re-generated.
+
+It was depressing, seeing how an idea that seemed very smart turned
+out to be quite unproductive. It's time to look at it realistically,
+trough the lens of "was it smart to automate that?".
+
+How probable is it that the ssh key would change on disk? Not very
+likely. Maybe once in a few months. How much time does it take to fix
+it? It took some time to realize that the wrong ssh key was the reason
+I couldn't login into the server. But exchanging the key is just a
+moment. So, after doing the math, it wasn't worth spending the time
+trying to automate that. I should add it to the list of mistakes -
+attempting to automate a solution to a problem that rarely happens.
+Maybe I could even print out the XKCD comic about that? I'll ask
+ChatGPT to fetch it.
+
+
+ I could use the script later on in the project, because it's
+well written and does it's job well - it can tell if the key with
+given name that has been uploaded to AWS is the same as the key we
+have locally.
+
+* Wed Jul 10 01:12:40 PM CEST 2024
+Need to revert to the previous version of the code. Luckily, it's quite
+easy with Magit. I'll just open the old version of the file side by
+side.
+
+I've also added a null resource with local-exec provisioner to use the
+script to verify the ssh keys.
+
+Had to add an "optional = true" parameter to the "existing" key
+definition.
+
+Ha! There is no such parameter. And Terraform can't 'try' adding a
+data type resource, to use resources created somewhere else. There
+will be an error if the resource doesn't exist. I thought that my code
+worked all this time, only uploading the key if it didn't exist. But
+it just never uploaded the key and instead used the key put there by
+another instance of terraform or manually.
+
+I guess this is another mistake and can be called something like not
+verifying information from an LLM and when problems arise, instead of
+questioning "knowledge" from an LLM, trying to solve the issue like if
+what LLM was a Wikipedia.
+
+I could've tested for the key "being there" in aws with a script, but
+that is such a rare event that it's not worth putting any more work
+into it.

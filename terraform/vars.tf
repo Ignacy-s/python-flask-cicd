@@ -6,12 +6,6 @@ variable "aws_region" {
 }
 
 /* Networking variables */
-variable "all_ips_cidr" {
-  description = "CIDR that matches all IP addresses, a Wildcard CIDR"
-  type        = string
-  default     = "0.0.0.0/0"
-}
-
 variable "vpc_cidr_block" {
   description = "CIDR range/block for the main VPC"
   type        = string
@@ -63,7 +57,7 @@ variable "internet_gateway_name" {
 
 variable "public_subnet_routing_table_name" {
   description = "Name assigned to the public subnet routing table"
-  type        =  string
+  type        = string
   default     = "Public Subnet Routing Table"
 }
 

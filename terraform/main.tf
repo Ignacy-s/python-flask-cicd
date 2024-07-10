@@ -102,36 +102,17 @@ resource "aws_security_group" "jenkins" {
   }
 }
 
-
-# SSH Key Setup
-# This configuration employs a method to prevent re-uploading an SSH
-# key if it already exists in AWS:
-# 1. Attempt to fetch an existing SSH key from AWS by specifying its
-# name.
-#    This is achieved using a data source for aws_key_pair.
-data "aws_key_pair" "existing" {
-  key_name = var.ssh_key_name
-}
-
-# 2. Conditionally create a new SSH key resource only if an existing
-# key was not found.
-#    This is controlled using the 'count' attribute:
-#    - If the data source finds the key, 'data.aws_key_pair.existing'
-#      will be non-null, making 'count' equal to 0, thus the resource
-#      will not be created.
-#    - If no existing key is found, 'data.aws_key_pair.existing' will
-#      be null, making 'count' equal to 1, triggering the creation of
-#      the resource.
+# Create an SSH key from a local file
 resource "aws_key_pair" "jenkins-key" {
-  count      = data.aws_key_pair.existing != null ? 0 : 1
   key_name   = var.ssh_key_name
   public_key = file(var.local_ssh_key_path)
 }
 
 # Create an EC2 instance for the Jenkins Server
 resource "aws_instance" "jenkins" {
-  # Using a hardcoded AMI for Alma Linux for quick setup.
-  # TODO: Automate AMI selection to dynamically pick the latest stable release.
+  # Using a hardcoded AMI for Alma Linux for quick setup.  TODO:
+  # Automate AMI selection to dynamically pick the latest stable
+  # release.
   ami = "ami-04e4606740c9c9381"
   #  ami           = data.aws_ami.amazon_linux.id
   instance_type = var.instance_type
@@ -144,10 +125,11 @@ resource "aws_instance" "jenkins" {
   # Why 'jenkins-key[0]' instead of 'jenkins-key'? Because 'count' was
   # used to create that resource and all resources created by 'count'
   # are treated as lists, even if it's just one resource.
-  key_name = (data.aws_key_pair.existing != null ?
-    data.aws_key_pair.existing.key_name :
-  aws_key_pair.jenkins-key[0].key_name)
-
+  # key_name = (data.aws_key_pair.existing != null ?
+  #   data.aws_key_pair.existing.key_name :
+  # aws_key_pair.jenkins-key[0].key_name)
+  key_name = aws_key_pair.jenkins-key.key_name
+  
   subnet_id = aws_subnet.jenkins.id
   # Associate a public IP to allow direct Internet access
   associate_public_ip_address = true
@@ -187,6 +169,7 @@ resource "null_resource" "ansible_inventory_edit" {
   triggers = {
     # This is a trick to ALWAYS run this resource
     always_run = "${timestamp()}"
+    # This shows an error:  main.tf   180  18 warning  terraform_deprecated_interpolation Interpolation-only expressions are deprecated in Terraform v0.12.14 (terraform-tflint)
   }
 
   # This command will run a script, which updates the IP address in

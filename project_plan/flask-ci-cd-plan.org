@@ -457,9 +457,6 @@ It's not going to work with files with a different extension than
 At some point I've introduced an error into my code, because I only
 run `terraform destroy` and `terraform apply`. Without testing the
 access to the server that was being set up.
-
-
-
 *** Encapsulated a variable reference in double quotes, making it a literal string (effectively) turning off the reference mechanism.
 #+BEGIN_SRC terraform
   provider "aws" {
@@ -469,7 +466,7 @@ access to the server that was being set up.
 #+END_SRC
 ** Using 'firewall-cmd' command without the '--permanent' option
 It doesn't work.
-** Ansible
+** Ansible:
 *** Defining variables for a group in Ansible's hosts.ini outside [GROUPNAME:vars] subsection (forgetting the ':vars' modificator)
 I used just the [GROUPNAME], instead of this:
 [aws:vars]
@@ -478,8 +475,27 @@ ansible_user=vagrant
 ansible_ssh_private_key_file="../vault/id_25519_aws_flaskcicd"
 
 *** Using a shell builtin with ansible command module - only the shell module has bash builtins.
-** Not refactoring the plan often enough. As we go deeper into the project, we gain knowledge and experience. In the light of newfound knowledge, the old plan becomes obsolete and should be replaced with more refined new plan. It doesn't mean that I was stupid by making the wrong plan in the beginning. Acting incompetently is the only way to gain competence to start acting competently.
-** Not reading up enough of previous documentation when coming back to project after a break. This led to duplicate work and thinking that the current task is more complicated than it was, in effect causing a longer delay in the project.
+** General:
+*** Not verifying information from LLM
+ChatGPT didn't 'know' that a data type resource will cause an
+execution stop if there is no resource with the given name. This means
+that the intricate logic of checking if the resource exists and if it
+doesn't, creating it, was pointless. Using LLMs is a big shortcut, but
+things like that cause a lot of pain. Need to find a way to strike the
+balance and be more doubtful of ChatGPT/LLM output.
+*** Automating solutions for infrequent problems
+Attempting to automate a solution for an issue that rarely occurs can
+lead to inefficient use of resources. While it's tempting to create a
+script or automation for every potential problem, it's important to
+assess the frequency and impact of the issue. If the problem is
+unlikely to recur often, the time and effort invested in automation
+might outweigh the benefits. This oversight can distract from more
+pressing tasks and lead to an accumulation of rarely used scripts that
+require maintenance, overshadowing their practical utility.
+*** Not refactoring the plan often enough.
+As we go deeper into the project, we gain knowledge and experience. In the light of newfound knowledge, the old plan becomes obsolete and should be replaced with more refined new plan. It doesn't mean that I was stupid by making the wrong plan in the beginning. Acting incompetently is the only way to gain competence to start acting competently.
+*** Not reading up enough of previous documentation when coming back to project after a break.
+This led to duplicate work and thinking that the current task is more complicated than it was, in effect causing a longer delay in the project.
 ** Jenkins:
 *** Tried to configure Jenkins the same way I once configured Icinga server in an automatic deployment - by dropping in configuration files from a preconfigured working server. Instead I should've looked for a more classic solution.
 The right way to do it was through Jenkins CLI. I tried the drop in method to avoid learning how to use JCasC. If the plugin installation was that straightforward, I coul've finished the project without learning how to configure Jenkins with CLI (with the JCasC updating itself and installing other plugins from IaC).
