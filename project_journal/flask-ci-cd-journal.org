@@ -4504,3 +4504,19 @@ what LLM was a Wikipedia.
 I could've tested for the key "being there" in aws with a script, but
 that is such a rare event that it's not worth putting any more work
 into it.
+
+* Wed Jul 10 04:50:40 PM CEST 2024
+Now that SSH keys are solved, I can rename resources to jenkinsless
+names.
+
+M-% is a conditional replace string command in Emacs.
+
+It took less time than I thought. Having worked with the Terraform
+configuration recently made me more familiar with the main.tf file
+which might have been the reason why it was easier.
+
+Testing new file version with 'terraform apply' and an ssh login
+attempt.
+
+It works.
+

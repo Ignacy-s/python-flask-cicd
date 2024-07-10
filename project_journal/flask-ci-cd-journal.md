@@ -1,293 +1,294 @@
 
 # Table of Contents
 
--   [Sat 25 Mar 2023 08:25:40 PM CET](#org570582b)
-    -   [Write a step by step guide to create a most basic devops project to show in portfolio. Fully automated, using most popular technologies. It is just a simplest pipeline in jenkins or circleci. It should be deployed by cloning a git repo and running terraform. Before you start, ask questions about details with possible options and arguments for each choice. Only generate the step by step guide after you have all required data.](#orged34b0d)
-        -   [Before creating the step-by-step guide for your basic DevOps project, I need some clarification on a few details. Please provide information on the following:](#orga56c079)
-    -   [A.D. 1. I don't know, I would like something simple. In a later project version, we can use something more complicated. Please give me some options for a most basic project. Maybe some open source web app?](#org628138a)
-        -   [Thank you for providing the necessary details. Based on your preferences, I suggest using a simple Python Flask web application as the base project for your portfolio. Here's the step-by-step guide for creating a basic DevOps project:](#org50c14d3)
-    -   [The deployment of the CI/CD should be fully automated, configuring Jenkins by hand wont do. Maybe you have to use CircleCI to be able to have CI/CD configuration in YAML format?](#orgc956080)
-        -   [You're correct. CircleCI allows you to store your CI/CD configuration in a YAML file, which simplifies the automation process. Here's the updated step-by-step guide for creating a basic DevOps project using CircleCI, Terraform, and Ansible:](#orgbbdc73d)
-    -   [Is it possible to make it even simpler? CircleCI requires logging in. Maybe it's possible to have jenkins configuration saved in a file and have jenkins load this configuration from repo? Maybe use a separate repo for the jenkins provisioning and installation and configuration?](#orgb0f72de)
-        -   [I apologize for the confusion. Here's the complete step-by-step guide for creating a basic DevOps project using Jenkins Configuration as Code (JCasC), Terraform, and Ansible:](#org5ee9fce)
-    -   [How could the Jenkins provisioning (\`jenkins<sub>playbook.yml</sub>\`) playbook be modified to also install the Jenkins config from the \`jenkins.yml\` file?](#orgf435195)
-        -   [To modify the jenkins<sub>playbook.yml</sub> to install the Jenkins config from the jenkins.yaml file, you can add a few tasks to the Ansible playbook. These tasks will clone the jenkins<sub>config</sub> repository, copy the jenkins.yaml file to the JCasC configuration directory, and restart Jenkins to apply the changes.](#org49b3d69)
--   [Sun 26 Mar 2023 09:30:15 AM CEST](#org84af16a)
-    -   [Preparing org-style plan for what needs to be done.](#org294958f)
-        -   [It's easier to follow the instructions in ChatGPT web app than what's copied into the org document. Might be because the numbered list doesn't get copied correctly (it's copied without the numbers).](#org0680eda)
-        -   [Going to use the basic 6 steps from the prompt as the first level tasks for the org document.](#org15e9834)
-        -   [For now leaving it with just 6 steps, will plan each step as I approach it.](#orgc8c22bd)
-    -   [Copying the code snippets from ChatGPT into one organized place.](#org34fe095)
-        -   [Code is already in this org file. I've made screenshots of the whole conversation in case I need some more organized reference.](#orgdef34e6)
-    -   [Moved the journal to another file, so it can be removed from the repo if it's required.](#org54e5485)
-    -   [A problem needs solving before I start work. This project calls for usage of two more repositories, while I like to have one big repo that also includes the journal files. Maybe if I could explain the situation verbosely enough to ChatGPT, it could have some insights. I'm using the same conversation as for the whole project, so I assume that ChatGPT has context enough for this question (i.e. I don't have to tell it about the project).](#orgaf213d9)
-        -   [Based on your requirements and priorities, I suggest going with Option Four. This option strikes a balance between simplicity and showcasing your DevOps skills, while also allowing you to maintain your project journal alongside the code.](#org0672d24)
-        -   [Comment: Just describing the problem well let me have an insight on how to solve it. I wonder if some of the power of large language models doesn't lie in the rubberducking nature of using them. Rubber-ducking is a process of troubleshooting a problem by first describing it thoroughly to a rubber duck before we go and ask other people about it. What's special about it, is that just by talking and explaining the problem to a rubber duck, or any imaginary entity, we often arrive at solutions to our problems.](#orge42f3ce)
--   [Sun 26 Mar 2023 11:57:06 AM CEST](#org9867205)
-    -   [After deciding on how project will look (including repos and such), I'm preparing the first commit that will include basic directory structure, but also contain project's description. Actually I'm going to cut a corner here and have ChatGPT generate project's description.](#orge6b4104)
-        -   [Create a project description to be included at the beginning of project documentation file. It is to be read by people checking out the portfolio. You can base it on this:](#org900e975)
--   [Sun 26 Mar 2023 02:57:37 PM CEST](#org51255cd)
-    -   [Just posting this project description would make me feel weak inside. How can I use it and still have clean conscience? By adding a note that it was written by ChatGPT and also informing potential readers that ChatGPT assisted in planning the project and writing parts of the documentation. Maybe just a general info in the project description, and then specific notes in places where ChatGPT does most of the work, like in the project description? This feels good. I have a feeling that this kind of ethical questions is what many people ask themselves at the moment. Problem in my case is that if I just had ChatGPT do 90% of the work in every aspect, it would be insincere to claim that I've done the work or that it shows any skills on my part other than prompt engineering.](#orga737179)
-    -   [I should explicitly say in the project's readme (which can be just a .md version of project description from the documentation .org file) what ChatGPT helped with.](#org9e9f119)
--   [Thu 06 Apr 2023 05:09:35 PM CEST](#org1047690)
-    -   [Prompt:](#org8774582)
-    -   [Reply:](#orgf2b3cb7)
-    -   [Conclusions: I'm finishing the second chapter, focusing especially on what might be relevant to the flask CI/CD pipeline project.](#org24ed1a7)
--   [Sun 16 Apr 2023 12:45:42 PM CEST](#org3c68870)
--   [Tue 18 Apr 2023 06:45:06 PM CEST](#org0de2ed1)
-    -   [Choose OS and AMI](#org8189aa5)
-        -   [Debian or Redhat family?](#org0d82b46)
-        -   [AMI, use an existing or build own?](#org6fb8c2f)
--   [Wed 19 Apr 2023 08:38:35 PM CEST](#org6f133c4)
--   [Sat 22 Apr 2023 01:47:05 PM CEST](#org11e819a)
-    -   [Getting the AMI](#orgf7d464d)
-        -   [grep method](#org1a88aac)
-        -   [awk method](#org7c83e81)
-        -   [Terraform Data Source method](#org4844376)
--   [Mon 01 May 2023 02:40:31 PM CEST](#orgdf9942c)
-    -   [Differences:](#org3c49f11)
-        -   [Defined VPC and Subnet](#org538d971)
-        -   [Explicitly defining egress traffic rules in the Security Group](#orge848293)
--   [Sun 07 May 2023 01:09:21 PM CEST](#orgc560d4f)
--   [Tue 09 May 2023 07:31:53 PM CEST](#org80316ea)
-    -   [Generated instructions on how to create and upload an ssh key:](#org0c69877)
-    -   [Generated instructions on how to create a LUKS container for SSH key:](#org62fc00e)
-    -   [Generated a script to create, open and close the container.](#org90a35a4)
-    -   [V2 version of script for management of LUKS container](#org9f70c56)
-    -   [Generated a script to init the project, create the ssh key and the container. Also auto export passphrase so it can be used in the project.](#org2c0b595)
--   [Sat 13 May 2023 12:59:08 PM CEST](#org34c0708)
--   [Sun 21 May 2023 03:33:45 PM CEST](#org745bf43)
--   [Tue 30 May 2023 08:26:54 PM CEST](#org8e46af8)
--   [Tue Jun  6 02:50:54 PM CEST 2023](#orga27bfca)
--   [Tue 06 Jun 2023 02:53:54 PM CEST](#orgd2f7e74)
--   [Thu 08 Jun 2023 03:21:05 PM CEST](#orgd905c1f)
--   [Thu 08 Jun 2023 04:58:58 PM CEST](#org362ebbb)
--   [Sat 10 Jun 2023 02:58:43 PM CEST](#org96839aa)
--   [Sun 11 Jun 2023 12:21:44 PM CEST](#org12afc35)
--   [Tue Jun 13 11:54:45 AM CEST 2023](#orgb437b56)
--   [Wed 14 Jun 2023 09:39:44 AM CEST](#org8d2a226)
--   [Wed 14 Jun 2023 11:10:31 AM CEST](#org8e505f4)
--   [Wed 14 Jun 2023 02:31:55 PM CEST](#org6727589)
--   [Wed 14 Jun 2023 04:53:32 PM CEST](#orgc373367)
--   [Thu 15 Jun 2023 01:24:53 PM CEST](#orga60f2af)
--   [Thu 15 Jun 2023 01:57:37 PM CEST](#org3af34e0)
--   [Thu 15 Jun 2023 02:49:19 PM CEST](#org1888aa2)
--   [Sat 17 Jun 2023 01:05:28 PM CEST](#orgcfcfaf6)
--   [Sat 17 Jun 2023 05:19:27 PM CEST](#orga3c0b58)
--   [Sun 18 Jun 2023 12:32:43 PM CEST](#orgd78b1c5)
--   [Sun 18 Jun 2023 02:46:28 PM CEST](#org3839832)
--   [Mon 19 Jun 2023 05:40:59 PM CEST](#orgcbad267)
--   [Mon 19 Jun 2023 05:51:44 PM CEST](#orge653aaa)
-    -   [Planning:](#orgd5065cc)
-    -   [Create a file for VPC](#org90db2bd)
-    -   [Create a file for Public Subnet](#orgf2ecb1c)
-    -   [Create a file for Internet Gateway](#orgb4005c5)
-    -   [Create a file for the Route Table for the Public Subnet](#org1b53958)
-    -   [Create a file for the Security Group](#org7bc0824)
-    -   [Create a file for the Public EC2 Instance](#org0b31e65)
-    -   [Create a variable file](#orgd3af7a6)
-    -   [Creating a NAT with an Elastic IP - what I'm not going to do.](#org1e51c9b)
-        -   [Create a file for the Public Subnet for NAT Gateway](#org2b4e17c)
-        -   [Create a file for Elastic IP (EIP)](#orgff2e9d1)
-        -   [Create a file for the NAT Gateway](#orgdbd3329)
-        -   [Create a file for the Route Table for the NAT Gateway](#orgd41c9e1)
-        -   [Create a file for the Private Subnet](#org8c6a247)
-        -   [Create a file for the Route Table for the Private Subnet](#org36e1bc6)
-        -   [Create a file for the Private EC2 Instance](#org6221fa1)
-    -   [Run and see if it works](#orge0d3e81)
-        -   [Strange error, looked like one line was "disappeared" in Emacs.](#org6ab7628)
-        -   [Had to add the ssh key uploading code.](#org0fda856)
-    -   [Find the differences](#org98cae5d)
-    -   [Add them to flask-ci-cd Terraform code.](#orgf78a53d)
--   [Thu 22 Jun 2023 06:28:17 PM CEST](#org94fd48e)
-    -   [Creating a file with secrets in the vault](#org56d2db1)
-        -   [Secrets are: VM IP address, AWS access keys (danger!!), maybe also instance type, region and some other things that come up later on.](#orgb854da8)
-        -   [At first the data will be entered manually.](#org44d0103)
-        -   [Later on there also will be an option to start the playthrough.sh script with an interview asking for all the required settings.](#orged3e387)
-        -   [To keep things safe, a trap can be added to playthrough.sh that would close the files.](#orgd370ff3)
--   [Sat 08 Jul 2023 04:29:38 PM CEST](#org52482a9)
-    -   [Having a shot at doing some tests with Ansible using given ssh key.](#orgaa0e1ff)
-    -   [Problems with EC2 key pair - it already exists.](#orge3b907a)
-        -   [Prompt:](#org3f198d8)
-        -   [Answer:](#org8633434)
-        -   [Error: Incorrect condition type](#orgeffbc46)
-        -   [Answer:](#org881ee52)
-        -   [Summary:](#orgcf279a0)
--   [Sun 09 Jul 2023 05:44:10 PM CEST](#org5bcbe51)
-    -   [But I want to pass some data to it (namely in IP address). What format should I use to perform variable substitution when running the script from terraform, so that the script receives the ip address string as one of it's parameters?](#org2df2ed1)
-    -   [How to make this 'null resource' work every time, so that it updates the file every time, not just when resource is "created"?](#org169cc81)
--   [Fri 14 Jul 2023 01:33:57 PM CEST](#org5844a63)
-    -   [Would be cool to have some kind of Backlog? Or should I use the TODO list at the end of docs?](#org15e42f6)
-    -   [It felt weird and unnatural to use $PROJECT<sub>ROOT</sub>/vault/ssh<sub>key</sub><sub>mountpoint</sub> as the mountpoint for the vault. Changed it so that the /vault is the mountpoint for vault and the LUKS image sits at /vault.img.](#org1e3ab4f)
--   [Sat Jul 22 12:22:18 PM CEST 2023](#org64c3c4e)
-    -   [Prompt: I would like to commit Ansible's hosts.ini file, but there are IP addresses inside.](#orgccc78ba)
-        -   [Answer: You can use a Git hook to automate this process. Git hooks are scripts that Git executes before or after events such as commit, push, and so on.](#org151911c)
-        -   [Followup prompt: Would it run everytime or only when the hosts.ini is staged?](#org1d20064)
-    -   [There are only minor errors in ChatGPT script generated that I see initially.](#org8757d6a)
--   [Sun Jul 23 08:19:51 PM CEST 2023](#orgb7efe3f)
-    -   [Created a pre-commit hook for git to remove IP addresses form Ansible's hosts.ini file.](#orga8ca8e1)
-        -   [curly braces \\{  - (for regex repetition pattern)](#org9679527)
-        -   [round braces \\(  - (for regex block to be f.ex. repeated)](#org36cade1)
-        -   [dot . if we need literal dot \\.](#org7501da7)
-    -   [pre-commit script in the final form:](#org8633994)
--   [Mon Jul 24 12:19:04 PM CEST 2023](#org9aa273b)
-    -   [Run into some issues starting a Vagrant project. Vagrant complained on it's plugins. I also had to force Vagrant to use libvirt as it's plugin. When looking into info on Vagrant found out that there is a Vagrant flavor vagrant-libvirt that uses kvm/quemu (instead of Virtualbox) as it's default provider.](#org2ae38ea)
-    -   [Had to install libvirt-devel, then libvirt and then enable libvirt service.](#orgf60b3f0)
-    -   [Hard to find a correct box. Since the last RedHat drama (some business people thought someone will switch from rocky/alma to RH if they ban RH rebuilds), Geerling said he is switching his work to Debian. No official vagrant box from RedHat, no CentOS box either. No rocky box. Looks like Alma Linux people do release a vagrant image. It's called 'almalinux/9'.](#orged16114)
-    -   [Got a vagrant box working](#org8017705)
-    -   [And got Jenkins working using instructions from Jenkins docs](#org9ce4795)
--   [Wed Aug  2 01:48:49 PM CEST 2023](#orga5e3fa0)
-    -   [Got to translate the Jenkins installation instructions from Jenkins' docs (bash) to an Ansible playbook.](#org00272b9)
-    -   [First going to put the instructions in one file](#orgd6ed532)
-    -   [Actually, first going to nuke the local VM and check if installing Jenkins installs also firewalld configuration, which would simplify firewall setup.](#org624ec72)
-    -   [Had some error when changed the name of the mountpoint in the playthrough.sh. Used 'sudo rm /dev/mapper/LUKS<sub>CONTAINER</sub><sub>NAME</sub>' to delete the old container that didn't want to cooperate.](#orgde4a47d)
--   [Fri Aug  4 10:40:53 AM CEST 2023](#org79010d6)
-    -   [The 'firewalld' module in Ansible didn't work.](#org569bd18)
-    -   [Had issues connecting to the local VM using the key generated for Ansible](#org87539bc)
-    -   [Another problem connecting to the local VM - Ansible interpreted ssh options from hosts.ini as host definitions. Turns out, that a proper way to set variables for a group is to name a subsection [GROUPNAME:vars].](#orgbda81d4)
-    -   [Problem with adding of the Jenkins repo - cannot download repodata/repomd.xml](#orgd24918a)
-    -   [Error in the 'service' module. "This module does not currently support using glob patterns, found '[' in service name: ['jenkins', 'firewalld']".](#org8b22c14)
-    -   [Ansible Firewalld module says that the Jenkins service is absent. Pretty sure I checked it before and it wasn't.](#org5179651)
-    -   [Can't connect to the Jenkins web server. Looks like firewall misconfiguration.](#org12a62aa)
--   [Sat 12 Aug 2023 04:33:17 PM CEST](#orgb1c83fa)
--   [Thu Sep  7 08:17:31 PM CEST 2023](#org22f91b8)
--   [Fri Sep  8 06:58:54 PM CEST 2023](#orge7bff87)
--   [Sat Sep  9 11:59:03 AM CEST 2023](#orgb0489bf)
--   [Mon Sep 11 07:09:48 PM CEST 2023](#orga9e7054)
--   [Tue Sep 12 08:15:08 PM CEST 2023](#orgbedd821)
--   [Fri Sep 15 12:08:57 PM CEST 2023](#orgaaff2eb)
-    -   [Installing Docker Pipeline plugin](#orgae6d57e)
-    -   [Created a Jenkinsfile in the code repo](#orga9fa277)
-    -   [Installing Emacs Jenkins major mode](#org7e1c405)
--   [Sat Sep 16 01:28:32 PM CEST 2023](#org351a5d8)
--   [Sat Sep 16 01:44:38 PM CEST 2023](#orga3e96bb)
--   [Sun Sep 17 03:18:55 PM CEST 2023](#org98c707c)
-    -   [.dockerignore](#org24e7640)
-    -   [Dependency Hell](#orgf01bfa5)
-        -   [Timeboxing](#org55f82f0)
-        -   [Error from python - complaining on lack of compilation tools - switching base image to python](#orga40690b)
-        -   [Pasted the errors to ChatGPT and found out that it's a dependency issue, most likely due to old libraries being pinned.](#org4ae0811)
-        -   [Now there are errors with cffi. Trying the same as with Markupsafe, changing the dependency from equal to greater than equal. Success!](#org86fff16)
-    -   [Errors with the app](#org0cd1ca9)
-    -   [Another dependency error. It's a third one. I'm unpinning all dependencies.](#org8e72906)
-    -   [Problem with DB credentials not being set](#orgf7d0ab6)
--   [Mon Sep 18 12:43:09 PM CEST 2023](#org2d89255)
-    -   [&#x2013;no-cache-dir option for pip install -r requirements](#org6b39620)
-    -   [ENV FLASK<sub>ENV</sub>=production](#orgf012cec)
-    -   [CMD ["python", "app.py"] instead of CMD python app.py](#org27c4f4b)
--   [Mon Sep 18 03:32:56 PM CEST 2023](#org1ba42f8)
--   [Mon Sep 18 04:28:53 PM CEST 2023](#org40d72e4)
--   [Tue Sep 19 10:36:24 AM CEST 2023](#org7440975)
--   [Wed Sep 20 10:07:03 AM CEST 2023](#orgb6c3286)
--   [Wed Sep 20 11:03:30 AM CEST 2023](#org15c6a4a)
--   [Wed Sep 20 02:10:56 PM CEST 2023](#orgdd9e792)
--   [Wed Sep 20 03:05:19 PM CEST 2023](#org7ffdf17)
--   [Wed Sep 20 06:57:28 PM CEST 2023](#org3f995ed)
--   [Thu Sep 21 09:16:34 AM CEST 2023](#org0343d79)
-    -   [Value of making clean notes](#orgf7485c7)
-    -   [Ansible tutorial from Ansible Pilot YouTube channel](#org4a6e496)
-    -   [Full module names (example - 'ansible.builtin.rpm<sub>key</sub>') - a good practice](#orga28d513)
-    -   [Setting the distribution name using 'ansible.builtin.set<sub>fact</sub>'](#orgff3230e)
-        -   [I don't like the length of that line and wonder if it's possible to refactor it into a more readable form](#orga696c25)
--   [Fri Sep 22 12:13:59 PM CEST 2023](#org298ec0e)
--   [Sun Sep 24 02:14:59 PM CEST 2023](#org249545f)
--   [Sun Sep 24 05:33:44 PM CEST 2023](#org9b0edf5)
--   [Mon Sep 25 07:34:01 PM CEST 2023](#orgabe9fab)
--   [Tue Sep 26 07:58:53 PM CEST 2023](#org75fa117)
-    -   [Task Definition - like a docker-compose file that also mentions hardware requirements](#org58a3f66)
-    -   [Task - a working, self sufficient instance of your workload, made up of multiple cooperating containers. Like a Kubernetes Pod.](#orgb79ed94)
-    -   [Cluster - like a Kubernetes instance, this is a group of EC2 instances where the Tasks are executed/run](#org08f92b0)
-    -   [More ECS info:](#org98894e8)
--   [Fri Sep 29 09:47:00 PM CEST 2023](#org41b00c0)
--   [Sat Sep 30 01:47:22 PM CEST 2023](#org29c9331)
--   [Fri Oct 13 07:38:28 AM CEST 2023](#org7b8f558)
--   [Sat Oct 14 02:34:50 PM CEST 2023](#org47fb990)
--   [Sun Oct 15 01:08:36 PM CEST 2023](#org9e48598)
--   [Sun Oct 22 12:13:14 PM CEST 2023](#orge5a4a6a)
--   [Tue Nov  7 01:16:16 PM CET 2023](#org80ae724)
--   [sø. 18. feb. 15:38:41 +0100 2024](#orge453ec9)
--   [Sun Feb 25 02:51:02 PM CET 2024](#orgb90256f)
--   [Mon Feb 26 07:46:42 PM CET 2024](#orgb802863)
--   [Tue Mar 12 04:09:13 PM CET 2024](#orgbe9967f)
--   [Tue Mar 12 10:28:18 PM CET 2024](#org2013b3d)
--   [Wed Mar 13 03:12:01 PM CET 2024](#orgdc833e8)
--   [Sat Mar 16 02:36:47 PM CET 2024](#org6d00848)
--   [Tue Mar 19 09:00:14 PM CET 2024](#org39ce70a)
--   [Sat Mar 23 11:44:43 AM CET 2024](#org6909bd5)
--   [Sun Mar 31 05:39:14 PM CEST 2024](#org793cc91)
--   [Mon Apr  1 01:49:18 PM CEST 2024](#orgc0c021f)
--   [Tue Apr  2 06:30:25 PM CEST 2024](#org6b7a52e)
--   [Sat Apr  6 11:28:50 AM CEST 2024](#orgc5b1267)
--   [Fri May 10 10:05:03 AM CEST 2024](#org2ec9230)
--   [Fri May 10 04:17:05 PM CEST 2024](#orgaf4af5b)
--   [Sat May 11 04:45:30 PM CEST 2024](#org60fc98d)
--   [Mon May 13 03:01:03 PM CEST 2024](#org5ce1cba)
-    -   [Asked ChatGPT about how DNF stores repository info.](#orgca121c6)
-    -   [So, going to compare the .repo files. But first will clear the cache manually.](#orgf0fbf51)
--   [Sun Jun  2 06:04:15 PM CEST 2024](#orgac4f5e5)
-    -   [Error MSG](#orge2b1af3)
-    -   [dnf output on the server](#orgbf56026)
--   [Tue Jun 11 09:25:28 AM CEST 2024](#org26fbbb8)
--   [Tue Jun 11 09:39:58 AM CEST 2024](#org1f3db2e)
-    -   [Here is the code again:](#orgdb4d1e5)
--   [Thu Jun 13 01:43:30 PM CEST 2024](#org689101c)
--   [Thu Jun 13 07:45:23 PM CEST 2024](#org443ae15)
--   [Sat Jun 15 03:49:15 PM CEST 2024](#org93edc90)
-    -   [this alternative task:](#orgdaba37e)
--   [Sun Jun 16 04:27:48 PM CEST 2024](#orge66d410)
--   [Mon Jun 17 07:00:09 PM CEST 2024](#org03d6e1f)
--   [Mon Jun 17 08:22:59 PM CEST 2024](#org3ef7c47)
--   [Tue Jun 18 01:57:47 PM CEST 2024](#org3f77a02)
--   [Wed Jun 19 10:39:36 AM CEST 2024](#org02acec6)
--   [Thu Jun 20 09:48:59 AM CEST 2024](#orgcb99469)
--   [Wed Jun 19 04:52:29 PM CEST 2024](#org9d2f68b)
--   [Tue Jun 25 08:47:45 PM CEST 2024](#org8ad9efd)
--   [Thu Jun 27 06:58:45 PM CEST 2024](#org122c46c)
--   [Fri Jun 28 10:52:06 AM CEST 2024](#org5e19403)
-    -   [Name](#org367f048)
-    -   [Image](#org326c19a)
-    -   [Memory](#org5ab6122)
-    -   [Port mappings](#org30bc0ae)
-    -   [Private Repository Credentials](#org04bc294)
-    -   [Other parameters:](#org16f012a)
--   [Fri Jun 28 11:15:02 AM CEST 2024](#orga6de090)
-    -   [Template Task Definition](#org801b223)
--   [Fri Jun 28 10:29:28 PM CEST 2024](#org71411f0)
--   [Sat Jun 29 01:46:13 PM CEST 2024](#orgf694ee4)
--   [Sun Jun 30 08:48:12 PM CEST 2024](#orgd4ce145)
--   [Mon Jul  1 08:28:25 PM CEST 2024](#orgf14ad3d)
--   [Tue Jul  2 12:53:42 PM CEST 2024](#org597fbf0)
--   [Wed Jul  3 01:06:37 PM CEST 2024](#org12d3392)
--   [Thu Jul  4 09:17:53 AM CEST 2024](#org623d0fd)
--   [Fri Jul  5 12:26:45 PM CEST 2024](#org7549ece)
--   [Sat Jul  6 02:12:33 PM CEST 2024](#org6fdd829)
--   [Sun Jul  7 12:03:27 PM CEST 2024](#orgaaf43d4)
--   [Sun Jul  7 03:23:11 PM CEST 2024](#org4cd5d27)
--   [Sun Jul  7 07:51:12 PM CEST 2024](#orgfc134af)
--   [Mon Jul  8 11:45:04 AM CEST 2024](#org2611ded)
--   [Mon Jul  8 08:39:13 PM CEST 2024](#org4a69bc3)
--   [Tue Jul  9 12:00:14 PM CEST 2024](#orgbeb1285)
--   [Tue Jul  9 09:12:56 PM CEST 2024](#org77d047d)
--   [Wed Jul 10 01:12:40 PM CEST 2024](#org9720e2f)
+-   [Sat 25 Mar 2023 08:25:40 PM CET](#orgfa70347)
+    -   [Write a step by step guide to create a most basic devops project to show in portfolio. Fully automated, using most popular technologies. It is just a simplest pipeline in jenkins or circleci. It should be deployed by cloning a git repo and running terraform. Before you start, ask questions about details with possible options and arguments for each choice. Only generate the step by step guide after you have all required data.](#orgf31bdfe)
+        -   [Before creating the step-by-step guide for your basic DevOps project, I need some clarification on a few details. Please provide information on the following:](#org2998649)
+    -   [A.D. 1. I don't know, I would like something simple. In a later project version, we can use something more complicated. Please give me some options for a most basic project. Maybe some open source web app?](#org2771542)
+        -   [Thank you for providing the necessary details. Based on your preferences, I suggest using a simple Python Flask web application as the base project for your portfolio. Here's the step-by-step guide for creating a basic DevOps project:](#orgcca0369)
+    -   [The deployment of the CI/CD should be fully automated, configuring Jenkins by hand wont do. Maybe you have to use CircleCI to be able to have CI/CD configuration in YAML format?](#org85cae3b)
+        -   [You're correct. CircleCI allows you to store your CI/CD configuration in a YAML file, which simplifies the automation process. Here's the updated step-by-step guide for creating a basic DevOps project using CircleCI, Terraform, and Ansible:](#orge5d9721)
+    -   [Is it possible to make it even simpler? CircleCI requires logging in. Maybe it's possible to have jenkins configuration saved in a file and have jenkins load this configuration from repo? Maybe use a separate repo for the jenkins provisioning and installation and configuration?](#org9c18732)
+        -   [I apologize for the confusion. Here's the complete step-by-step guide for creating a basic DevOps project using Jenkins Configuration as Code (JCasC), Terraform, and Ansible:](#org23e71d6)
+    -   [How could the Jenkins provisioning (\`jenkins<sub>playbook.yml</sub>\`) playbook be modified to also install the Jenkins config from the \`jenkins.yml\` file?](#orgb49758e)
+        -   [To modify the jenkins<sub>playbook.yml</sub> to install the Jenkins config from the jenkins.yaml file, you can add a few tasks to the Ansible playbook. These tasks will clone the jenkins<sub>config</sub> repository, copy the jenkins.yaml file to the JCasC configuration directory, and restart Jenkins to apply the changes.](#orgfccdde8)
+-   [Sun 26 Mar 2023 09:30:15 AM CEST](#orgd330cbb)
+    -   [Preparing org-style plan for what needs to be done.](#org9905dfb)
+        -   [It's easier to follow the instructions in ChatGPT web app than what's copied into the org document. Might be because the numbered list doesn't get copied correctly (it's copied without the numbers).](#org9f88527)
+        -   [Going to use the basic 6 steps from the prompt as the first level tasks for the org document.](#org82536c1)
+        -   [For now leaving it with just 6 steps, will plan each step as I approach it.](#org521d5a1)
+    -   [Copying the code snippets from ChatGPT into one organized place.](#org2fff1ea)
+        -   [Code is already in this org file. I've made screenshots of the whole conversation in case I need some more organized reference.](#org885fef6)
+    -   [Moved the journal to another file, so it can be removed from the repo if it's required.](#org166ee9b)
+    -   [A problem needs solving before I start work. This project calls for usage of two more repositories, while I like to have one big repo that also includes the journal files. Maybe if I could explain the situation verbosely enough to ChatGPT, it could have some insights. I'm using the same conversation as for the whole project, so I assume that ChatGPT has context enough for this question (i.e. I don't have to tell it about the project).](#org1f8b87e)
+        -   [Based on your requirements and priorities, I suggest going with Option Four. This option strikes a balance between simplicity and showcasing your DevOps skills, while also allowing you to maintain your project journal alongside the code.](#org789913c)
+        -   [Comment: Just describing the problem well let me have an insight on how to solve it. I wonder if some of the power of large language models doesn't lie in the rubberducking nature of using them. Rubber-ducking is a process of troubleshooting a problem by first describing it thoroughly to a rubber duck before we go and ask other people about it. What's special about it, is that just by talking and explaining the problem to a rubber duck, or any imaginary entity, we often arrive at solutions to our problems.](#orgd0501af)
+-   [Sun 26 Mar 2023 11:57:06 AM CEST](#org7c0a57a)
+    -   [After deciding on how project will look (including repos and such), I'm preparing the first commit that will include basic directory structure, but also contain project's description. Actually I'm going to cut a corner here and have ChatGPT generate project's description.](#org59d3618)
+        -   [Create a project description to be included at the beginning of project documentation file. It is to be read by people checking out the portfolio. You can base it on this:](#org7b37696)
+-   [Sun 26 Mar 2023 02:57:37 PM CEST](#org8f9d6b3)
+    -   [Just posting this project description would make me feel weak inside. How can I use it and still have clean conscience? By adding a note that it was written by ChatGPT and also informing potential readers that ChatGPT assisted in planning the project and writing parts of the documentation. Maybe just a general info in the project description, and then specific notes in places where ChatGPT does most of the work, like in the project description? This feels good. I have a feeling that this kind of ethical questions is what many people ask themselves at the moment. Problem in my case is that if I just had ChatGPT do 90% of the work in every aspect, it would be insincere to claim that I've done the work or that it shows any skills on my part other than prompt engineering.](#org27460d8)
+    -   [I should explicitly say in the project's readme (which can be just a .md version of project description from the documentation .org file) what ChatGPT helped with.](#org3ff7bc1)
+-   [Thu 06 Apr 2023 05:09:35 PM CEST](#orgec1c8cd)
+    -   [Prompt:](#org7796d6c)
+    -   [Reply:](#orgf438412)
+    -   [Conclusions: I'm finishing the second chapter, focusing especially on what might be relevant to the flask CI/CD pipeline project.](#orgcdb8620)
+-   [Sun 16 Apr 2023 12:45:42 PM CEST](#org959441c)
+-   [Tue 18 Apr 2023 06:45:06 PM CEST](#orgc33de61)
+    -   [Choose OS and AMI](#org8237b5e)
+        -   [Debian or Redhat family?](#org256668f)
+        -   [AMI, use an existing or build own?](#orgd9300b3)
+-   [Wed 19 Apr 2023 08:38:35 PM CEST](#orga30a1cb)
+-   [Sat 22 Apr 2023 01:47:05 PM CEST](#orgfe9f9a5)
+    -   [Getting the AMI](#org8225e39)
+        -   [grep method](#org74b8197)
+        -   [awk method](#org099ec35)
+        -   [Terraform Data Source method](#orga7f1f95)
+-   [Mon 01 May 2023 02:40:31 PM CEST](#org7677d01)
+    -   [Differences:](#org969876d)
+        -   [Defined VPC and Subnet](#orgaa5897a)
+        -   [Explicitly defining egress traffic rules in the Security Group](#orgc6c1588)
+-   [Sun 07 May 2023 01:09:21 PM CEST](#orgd82dbee)
+-   [Tue 09 May 2023 07:31:53 PM CEST](#org88a5b3c)
+    -   [Generated instructions on how to create and upload an ssh key:](#org36a6e32)
+    -   [Generated instructions on how to create a LUKS container for SSH key:](#orgf750f5e)
+    -   [Generated a script to create, open and close the container.](#org771a1b1)
+    -   [V2 version of script for management of LUKS container](#orgedd002c)
+    -   [Generated a script to init the project, create the ssh key and the container. Also auto export passphrase so it can be used in the project.](#orgaa651b6)
+-   [Sat 13 May 2023 12:59:08 PM CEST](#org98fe020)
+-   [Sun 21 May 2023 03:33:45 PM CEST](#org8e5f8b7)
+-   [Tue 30 May 2023 08:26:54 PM CEST](#org375e02c)
+-   [Tue Jun  6 02:50:54 PM CEST 2023](#org21a8f85)
+-   [Tue 06 Jun 2023 02:53:54 PM CEST](#orge675d07)
+-   [Thu 08 Jun 2023 03:21:05 PM CEST](#org5727699)
+-   [Thu 08 Jun 2023 04:58:58 PM CEST](#org51918d5)
+-   [Sat 10 Jun 2023 02:58:43 PM CEST](#orge56831f)
+-   [Sun 11 Jun 2023 12:21:44 PM CEST](#org33520ae)
+-   [Tue Jun 13 11:54:45 AM CEST 2023](#org85e3797)
+-   [Wed 14 Jun 2023 09:39:44 AM CEST](#orgfd5b1d9)
+-   [Wed 14 Jun 2023 11:10:31 AM CEST](#orgbbfd5e8)
+-   [Wed 14 Jun 2023 02:31:55 PM CEST](#org624c74e)
+-   [Wed 14 Jun 2023 04:53:32 PM CEST](#orgae4d371)
+-   [Thu 15 Jun 2023 01:24:53 PM CEST](#orgea951ce)
+-   [Thu 15 Jun 2023 01:57:37 PM CEST](#orgfe803f4)
+-   [Thu 15 Jun 2023 02:49:19 PM CEST](#org3647d0c)
+-   [Sat 17 Jun 2023 01:05:28 PM CEST](#org3bcf893)
+-   [Sat 17 Jun 2023 05:19:27 PM CEST](#org20dec2d)
+-   [Sun 18 Jun 2023 12:32:43 PM CEST](#org0293406)
+-   [Sun 18 Jun 2023 02:46:28 PM CEST](#org515f22d)
+-   [Mon 19 Jun 2023 05:40:59 PM CEST](#org084b0cd)
+-   [Mon 19 Jun 2023 05:51:44 PM CEST](#org1a4f303)
+    -   [Planning:](#org862ba5a)
+    -   [Create a file for VPC](#org7aa176d)
+    -   [Create a file for Public Subnet](#org9ebf5cc)
+    -   [Create a file for Internet Gateway](#org5622cb4)
+    -   [Create a file for the Route Table for the Public Subnet](#org807e7db)
+    -   [Create a file for the Security Group](#org531f89d)
+    -   [Create a file for the Public EC2 Instance](#org8fc860b)
+    -   [Create a variable file](#org5a0e07c)
+    -   [Creating a NAT with an Elastic IP - what I'm not going to do.](#orga5d252b)
+        -   [Create a file for the Public Subnet for NAT Gateway](#org3e14618)
+        -   [Create a file for Elastic IP (EIP)](#orga8d84e2)
+        -   [Create a file for the NAT Gateway](#orgf7edf09)
+        -   [Create a file for the Route Table for the NAT Gateway](#orgc1f842c)
+        -   [Create a file for the Private Subnet](#orgfd5a204)
+        -   [Create a file for the Route Table for the Private Subnet](#org5086ac4)
+        -   [Create a file for the Private EC2 Instance](#org32eb2bb)
+    -   [Run and see if it works](#orgbc51c66)
+        -   [Strange error, looked like one line was "disappeared" in Emacs.](#orga56021f)
+        -   [Had to add the ssh key uploading code.](#orgc009eab)
+    -   [Find the differences](#org0568ba5)
+    -   [Add them to flask-ci-cd Terraform code.](#orga76da2d)
+-   [Thu 22 Jun 2023 06:28:17 PM CEST](#org4736b66)
+    -   [Creating a file with secrets in the vault](#org56b7419)
+        -   [Secrets are: VM IP address, AWS access keys (danger!!), maybe also instance type, region and some other things that come up later on.](#org08b6596)
+        -   [At first the data will be entered manually.](#org8c69ce1)
+        -   [Later on there also will be an option to start the playthrough.sh script with an interview asking for all the required settings.](#org514b7f0)
+        -   [To keep things safe, a trap can be added to playthrough.sh that would close the files.](#org36554de)
+-   [Sat 08 Jul 2023 04:29:38 PM CEST](#org034ac8b)
+    -   [Having a shot at doing some tests with Ansible using given ssh key.](#org91b408b)
+    -   [Problems with EC2 key pair - it already exists.](#orgea6acfd)
+        -   [Prompt:](#org9d1a60e)
+        -   [Answer:](#orgecf635f)
+        -   [Error: Incorrect condition type](#org3039f07)
+        -   [Answer:](#orga9eab33)
+        -   [Summary:](#orga49d94d)
+-   [Sun 09 Jul 2023 05:44:10 PM CEST](#org6f5a63b)
+    -   [But I want to pass some data to it (namely in IP address). What format should I use to perform variable substitution when running the script from terraform, so that the script receives the ip address string as one of it's parameters?](#orgbfd4b9a)
+    -   [How to make this 'null resource' work every time, so that it updates the file every time, not just when resource is "created"?](#orgab7cea6)
+-   [Fri 14 Jul 2023 01:33:57 PM CEST](#orga081147)
+    -   [Would be cool to have some kind of Backlog? Or should I use the TODO list at the end of docs?](#org939cde2)
+    -   [It felt weird and unnatural to use $PROJECT<sub>ROOT</sub>/vault/ssh<sub>key</sub><sub>mountpoint</sub> as the mountpoint for the vault. Changed it so that the /vault is the mountpoint for vault and the LUKS image sits at /vault.img.](#org7fc5658)
+-   [Sat Jul 22 12:22:18 PM CEST 2023](#org3411376)
+    -   [Prompt: I would like to commit Ansible's hosts.ini file, but there are IP addresses inside.](#org4ae8049)
+        -   [Answer: You can use a Git hook to automate this process. Git hooks are scripts that Git executes before or after events such as commit, push, and so on.](#org9446b21)
+        -   [Followup prompt: Would it run everytime or only when the hosts.ini is staged?](#orgd551009)
+    -   [There are only minor errors in ChatGPT script generated that I see initially.](#org84198f5)
+-   [Sun Jul 23 08:19:51 PM CEST 2023](#orgb5ba083)
+    -   [Created a pre-commit hook for git to remove IP addresses form Ansible's hosts.ini file.](#org1aad1b6)
+        -   [curly braces \\{  - (for regex repetition pattern)](#org5175c82)
+        -   [round braces \\(  - (for regex block to be f.ex. repeated)](#org3c03b91)
+        -   [dot . if we need literal dot \\.](#org8bf2c97)
+    -   [pre-commit script in the final form:](#org1317913)
+-   [Mon Jul 24 12:19:04 PM CEST 2023](#org9bb7d4d)
+    -   [Run into some issues starting a Vagrant project. Vagrant complained on it's plugins. I also had to force Vagrant to use libvirt as it's plugin. When looking into info on Vagrant found out that there is a Vagrant flavor vagrant-libvirt that uses kvm/quemu (instead of Virtualbox) as it's default provider.](#org085a82c)
+    -   [Had to install libvirt-devel, then libvirt and then enable libvirt service.](#orgd00794b)
+    -   [Hard to find a correct box. Since the last RedHat drama (some business people thought someone will switch from rocky/alma to RH if they ban RH rebuilds), Geerling said he is switching his work to Debian. No official vagrant box from RedHat, no CentOS box either. No rocky box. Looks like Alma Linux people do release a vagrant image. It's called 'almalinux/9'.](#org3083ba5)
+    -   [Got a vagrant box working](#orgedfb4ec)
+    -   [And got Jenkins working using instructions from Jenkins docs](#org76351e0)
+-   [Wed Aug  2 01:48:49 PM CEST 2023](#org6a4e615)
+    -   [Got to translate the Jenkins installation instructions from Jenkins' docs (bash) to an Ansible playbook.](#orga642213)
+    -   [First going to put the instructions in one file](#org797b15f)
+    -   [Actually, first going to nuke the local VM and check if installing Jenkins installs also firewalld configuration, which would simplify firewall setup.](#orga6d4531)
+    -   [Had some error when changed the name of the mountpoint in the playthrough.sh. Used 'sudo rm /dev/mapper/LUKS<sub>CONTAINER</sub><sub>NAME</sub>' to delete the old container that didn't want to cooperate.](#orgffc47af)
+-   [Fri Aug  4 10:40:53 AM CEST 2023](#orgf748f8e)
+    -   [The 'firewalld' module in Ansible didn't work.](#orga11829a)
+    -   [Had issues connecting to the local VM using the key generated for Ansible](#org88ab1c5)
+    -   [Another problem connecting to the local VM - Ansible interpreted ssh options from hosts.ini as host definitions. Turns out, that a proper way to set variables for a group is to name a subsection [GROUPNAME:vars].](#orgd05fbed)
+    -   [Problem with adding of the Jenkins repo - cannot download repodata/repomd.xml](#orge686b59)
+    -   [Error in the 'service' module. "This module does not currently support using glob patterns, found '[' in service name: ['jenkins', 'firewalld']".](#org1702145)
+    -   [Ansible Firewalld module says that the Jenkins service is absent. Pretty sure I checked it before and it wasn't.](#orgfc11751)
+    -   [Can't connect to the Jenkins web server. Looks like firewall misconfiguration.](#org6642a30)
+-   [Sat 12 Aug 2023 04:33:17 PM CEST](#orgcc97136)
+-   [Thu Sep  7 08:17:31 PM CEST 2023](#org932af49)
+-   [Fri Sep  8 06:58:54 PM CEST 2023](#orgcfe71f5)
+-   [Sat Sep  9 11:59:03 AM CEST 2023](#org505aa54)
+-   [Mon Sep 11 07:09:48 PM CEST 2023](#org5af6708)
+-   [Tue Sep 12 08:15:08 PM CEST 2023](#orgdc4cc29)
+-   [Fri Sep 15 12:08:57 PM CEST 2023](#org378b29c)
+    -   [Installing Docker Pipeline plugin](#org5a36473)
+    -   [Created a Jenkinsfile in the code repo](#org9670aaf)
+    -   [Installing Emacs Jenkins major mode](#org1abedf1)
+-   [Sat Sep 16 01:28:32 PM CEST 2023](#orgb2b2b11)
+-   [Sat Sep 16 01:44:38 PM CEST 2023](#org243aabe)
+-   [Sun Sep 17 03:18:55 PM CEST 2023](#org77b0914)
+    -   [.dockerignore](#org6c7fc6e)
+    -   [Dependency Hell](#org10d5510)
+        -   [Timeboxing](#org2cdb163)
+        -   [Error from python - complaining on lack of compilation tools - switching base image to python](#org44eb5a6)
+        -   [Pasted the errors to ChatGPT and found out that it's a dependency issue, most likely due to old libraries being pinned.](#org4d9dc12)
+        -   [Now there are errors with cffi. Trying the same as with Markupsafe, changing the dependency from equal to greater than equal. Success!](#org512aa9e)
+    -   [Errors with the app](#orgcd890ac)
+    -   [Another dependency error. It's a third one. I'm unpinning all dependencies.](#org7aa6aab)
+    -   [Problem with DB credentials not being set](#orgd6dedbe)
+-   [Mon Sep 18 12:43:09 PM CEST 2023](#org6dd38ce)
+    -   [&#x2013;no-cache-dir option for pip install -r requirements](#org99f5c98)
+    -   [ENV FLASK<sub>ENV</sub>=production](#org780adc1)
+    -   [CMD ["python", "app.py"] instead of CMD python app.py](#org3b345ad)
+-   [Mon Sep 18 03:32:56 PM CEST 2023](#orgf08a420)
+-   [Mon Sep 18 04:28:53 PM CEST 2023](#orge1538d9)
+-   [Tue Sep 19 10:36:24 AM CEST 2023](#orgd2f0441)
+-   [Wed Sep 20 10:07:03 AM CEST 2023](#org81f7e4c)
+-   [Wed Sep 20 11:03:30 AM CEST 2023](#org3198595)
+-   [Wed Sep 20 02:10:56 PM CEST 2023](#org83dde57)
+-   [Wed Sep 20 03:05:19 PM CEST 2023](#org851c8e9)
+-   [Wed Sep 20 06:57:28 PM CEST 2023](#orgcb4668b)
+-   [Thu Sep 21 09:16:34 AM CEST 2023](#org980ec78)
+    -   [Value of making clean notes](#org90d7666)
+    -   [Ansible tutorial from Ansible Pilot YouTube channel](#org72c7f5a)
+    -   [Full module names (example - 'ansible.builtin.rpm<sub>key</sub>') - a good practice](#orgb1452a9)
+    -   [Setting the distribution name using 'ansible.builtin.set<sub>fact</sub>'](#org81dc8d8)
+        -   [I don't like the length of that line and wonder if it's possible to refactor it into a more readable form](#orgcd5e385)
+-   [Fri Sep 22 12:13:59 PM CEST 2023](#orgbfd5a9b)
+-   [Sun Sep 24 02:14:59 PM CEST 2023](#org79da887)
+-   [Sun Sep 24 05:33:44 PM CEST 2023](#orgeafeb1e)
+-   [Mon Sep 25 07:34:01 PM CEST 2023](#orgbcbe60f)
+-   [Tue Sep 26 07:58:53 PM CEST 2023](#org2d1a3d2)
+    -   [Task Definition - like a docker-compose file that also mentions hardware requirements](#org1a5e8b6)
+    -   [Task - a working, self sufficient instance of your workload, made up of multiple cooperating containers. Like a Kubernetes Pod.](#org0a23339)
+    -   [Cluster - like a Kubernetes instance, this is a group of EC2 instances where the Tasks are executed/run](#org6ccb2d1)
+    -   [More ECS info:](#org9c71f2b)
+-   [Fri Sep 29 09:47:00 PM CEST 2023](#org8cbb3b5)
+-   [Sat Sep 30 01:47:22 PM CEST 2023](#orgf85f697)
+-   [Fri Oct 13 07:38:28 AM CEST 2023](#org4113cf0)
+-   [Sat Oct 14 02:34:50 PM CEST 2023](#orge4ec17b)
+-   [Sun Oct 15 01:08:36 PM CEST 2023](#org32d9427)
+-   [Sun Oct 22 12:13:14 PM CEST 2023](#org558485a)
+-   [Tue Nov  7 01:16:16 PM CET 2023](#org68670f7)
+-   [sø. 18. feb. 15:38:41 +0100 2024](#org6f17c9b)
+-   [Sun Feb 25 02:51:02 PM CET 2024](#orgd0a9080)
+-   [Mon Feb 26 07:46:42 PM CET 2024](#org7aedbda)
+-   [Tue Mar 12 04:09:13 PM CET 2024](#org3bfa2e4)
+-   [Tue Mar 12 10:28:18 PM CET 2024](#org268a7ef)
+-   [Wed Mar 13 03:12:01 PM CET 2024](#org0498320)
+-   [Sat Mar 16 02:36:47 PM CET 2024](#org837f601)
+-   [Tue Mar 19 09:00:14 PM CET 2024](#orgd0246a7)
+-   [Sat Mar 23 11:44:43 AM CET 2024](#org7451d3d)
+-   [Sun Mar 31 05:39:14 PM CEST 2024](#org2b4b58d)
+-   [Mon Apr  1 01:49:18 PM CEST 2024](#org28f9ea0)
+-   [Tue Apr  2 06:30:25 PM CEST 2024](#orgb5828bd)
+-   [Sat Apr  6 11:28:50 AM CEST 2024](#org3430418)
+-   [Fri May 10 10:05:03 AM CEST 2024](#org32f687f)
+-   [Fri May 10 04:17:05 PM CEST 2024](#org2819414)
+-   [Sat May 11 04:45:30 PM CEST 2024](#org5bde62e)
+-   [Mon May 13 03:01:03 PM CEST 2024](#org160a523)
+    -   [Asked ChatGPT about how DNF stores repository info.](#org0fca114)
+    -   [So, going to compare the .repo files. But first will clear the cache manually.](#orgc4aa812)
+-   [Sun Jun  2 06:04:15 PM CEST 2024](#org23ef48b)
+    -   [Error MSG](#org43f8929)
+    -   [dnf output on the server](#org76d2fc6)
+-   [Tue Jun 11 09:25:28 AM CEST 2024](#org7cb8442)
+-   [Tue Jun 11 09:39:58 AM CEST 2024](#orgd6b5525)
+    -   [Here is the code again:](#org5d6b73e)
+-   [Thu Jun 13 01:43:30 PM CEST 2024](#org4cf7084)
+-   [Thu Jun 13 07:45:23 PM CEST 2024](#org4aee089)
+-   [Sat Jun 15 03:49:15 PM CEST 2024](#orgb7bff67)
+    -   [this alternative task:](#org2982f1e)
+-   [Sun Jun 16 04:27:48 PM CEST 2024](#org770a0b2)
+-   [Mon Jun 17 07:00:09 PM CEST 2024](#orga54e827)
+-   [Mon Jun 17 08:22:59 PM CEST 2024](#orgf6d03b0)
+-   [Tue Jun 18 01:57:47 PM CEST 2024](#org93ecd24)
+-   [Wed Jun 19 10:39:36 AM CEST 2024](#orgbeeb1d5)
+-   [Thu Jun 20 09:48:59 AM CEST 2024](#org05d55bb)
+-   [Wed Jun 19 04:52:29 PM CEST 2024](#org594fe7e)
+-   [Tue Jun 25 08:47:45 PM CEST 2024](#org0d846a6)
+-   [Thu Jun 27 06:58:45 PM CEST 2024](#org205026c)
+-   [Fri Jun 28 10:52:06 AM CEST 2024](#org0fb2595)
+    -   [Name](#orgb69213d)
+    -   [Image](#org661cd07)
+    -   [Memory](#org87a1d44)
+    -   [Port mappings](#org0583bd7)
+    -   [Private Repository Credentials](#orgb2584ac)
+    -   [Other parameters:](#org579c84d)
+-   [Fri Jun 28 11:15:02 AM CEST 2024](#org3e2bd43)
+    -   [Template Task Definition](#org7bedb76)
+-   [Fri Jun 28 10:29:28 PM CEST 2024](#orgf4b71af)
+-   [Sat Jun 29 01:46:13 PM CEST 2024](#org0251c7c)
+-   [Sun Jun 30 08:48:12 PM CEST 2024](#org624e3b6)
+-   [Mon Jul  1 08:28:25 PM CEST 2024](#orgf1118d2)
+-   [Tue Jul  2 12:53:42 PM CEST 2024](#orgd579aec)
+-   [Wed Jul  3 01:06:37 PM CEST 2024](#orgf39ef8e)
+-   [Thu Jul  4 09:17:53 AM CEST 2024](#org18c7148)
+-   [Fri Jul  5 12:26:45 PM CEST 2024](#org4b84b87)
+-   [Sat Jul  6 02:12:33 PM CEST 2024](#org5cc2b6e)
+-   [Sun Jul  7 12:03:27 PM CEST 2024](#org98a9bc1)
+-   [Sun Jul  7 03:23:11 PM CEST 2024](#org87e3192)
+-   [Sun Jul  7 07:51:12 PM CEST 2024](#org21c605e)
+-   [Mon Jul  8 11:45:04 AM CEST 2024](#orgbb9ac6a)
+-   [Mon Jul  8 08:39:13 PM CEST 2024](#org41163fa)
+-   [Tue Jul  9 12:00:14 PM CEST 2024](#orgd7e9533)
+-   [Tue Jul  9 09:12:56 PM CEST 2024](#orgd2247d6)
+-   [Wed Jul 10 01:12:40 PM CEST 2024](#org5601600)
+-   [Wed Jul 10 04:50:40 PM CEST 2024](#org80662d3)
 
 Coding Journal for the python-flask-cicd learning project. This are my
 notes. Writing helps with thinking and also makes it easier to repeat
 something done over two weeks ago.
 
 
-<a id="org570582b"></a>
+<a id="orgfa70347"></a>
 
 # Sat 25 Mar 2023 08:25:40 PM CET
 
 First conversation with ChatGPT on the project.
 
 
-<a id="orged34b0d"></a>
+<a id="orgf31bdfe"></a>
 
 ## Write a step by step guide to create a most basic devops project to show in portfolio. Fully automated, using most popular technologies. It is just a simplest pipeline in jenkins or circleci. It should be deployed by cloning a git repo and running terraform. Before you start, ask questions about details with possible options and arguments for each choice. Only generate the step by step guide after you have all required data.
 
 
-<a id="orga56c079"></a>
+<a id="org2998649"></a>
 
 ### Before creating the step-by-step guide for your basic DevOps project, I need some clarification on a few details. Please provide information on the following:
 
@@ -302,7 +303,7 @@ step-by-step guide for creating a basic DevOps project for your
 portfolio.
 
 
-<a id="org628138a"></a>
+<a id="org2771542"></a>
 
 ## A.D. 1. I don't know, I would like something simple. In a later project version, we can use something more complicated. Please give me some options for a most basic project. Maybe some open source web app?
 
@@ -317,7 +318,7 @@ all credentials required to deploy to AWS, or take it from some
 credentials file.
 
 
-<a id="org50c14d3"></a>
+<a id="orgcca0369"></a>
 
 ### Thank you for providing the necessary details. Based on your preferences, I suggest using a simple Python Flask web application as the base project for your portfolio. Here's the step-by-step guide for creating a basic DevOps project:
 
@@ -389,12 +390,12 @@ ability to create a CI/CD pipeline using popular technologies like
 Jenkins, Terraform, and Ansible.
 
 
-<a id="orgc956080"></a>
+<a id="org85cae3b"></a>
 
 ## The deployment of the CI/CD should be fully automated, configuring Jenkins by hand wont do. Maybe you have to use CircleCI to be able to have CI/CD configuration in YAML format?
 
 
-<a id="orgbbdc73d"></a>
+<a id="orge5d9721"></a>
 
 ### You're correct. CircleCI allows you to store your CI/CD configuration in a YAML file, which simplifies the automation process. Here's the updated step-by-step guide for creating a basic DevOps project using CircleCI, Terraform, and Ansible:
 
@@ -492,12 +493,12 @@ Set up AWS infrastructure using Terraform:
 Follow the same
 
 
-<a id="orgb0f72de"></a>
+<a id="org9c18732"></a>
 
 ## Is it possible to make it even simpler? CircleCI requires logging in. Maybe it's possible to have jenkins configuration saved in a file and have jenkins load this configuration from repo? Maybe use a separate repo for the jenkins provisioning and installation and configuration?
 
 
-<a id="org5ee9fce"></a>
+<a id="org23e71d6"></a>
 
 ### I apologize for the confusion. Here's the complete step-by-step guide for creating a basic DevOps project using Jenkins Configuration as Code (JCasC), Terraform, and Ansible:
 
@@ -601,12 +602,12 @@ jobs:
           scriptPath
 
 
-<a id="orgf435195"></a>
+<a id="orgb49758e"></a>
 
 ## How could the Jenkins provisioning (\`jenkins<sub>playbook.yml</sub>\`) playbook be modified to also install the Jenkins config from the \`jenkins.yml\` file?
 
 
-<a id="org49b3d69"></a>
+<a id="orgfccdde8"></a>
 
 ### To modify the jenkins<sub>playbook.yml</sub> to install the Jenkins config from the jenkins.yaml file, you can add a few tasks to the Ansible playbook. These tasks will clone the jenkins<sub>config</sub> repository, copy the jenkins.yaml file to the JCasC configuration directory, and restart Jenkins to apply the changes.
 
@@ -692,44 +693,44 @@ configuration from the jenkins.yaml file located in the JCasC
 configuration directory.
 
 
-<a id="org84af16a"></a>
+<a id="orgd330cbb"></a>
 
 # Sun 26 Mar 2023 09:30:15 AM CEST
 
 
-<a id="org294958f"></a>
+<a id="org9905dfb"></a>
 
 ## Preparing org-style plan for what needs to be done.
 
 Offtop: My eyes hurt a little and vision is blurry again, think it's because some of the under-eyes cream got into the eyes.
 
 
-<a id="org0680eda"></a>
+<a id="org9f88527"></a>
 
 ### It's easier to follow the instructions in ChatGPT web app than what's copied into the org document. Might be because the numbered list doesn't get copied correctly (it's copied without the numbers).
 
 
-<a id="org15e9834"></a>
+<a id="org82536c1"></a>
 
 ### Going to use the basic 6 steps from the prompt as the first level tasks for the org document.
 
 
-<a id="orgc8c22bd"></a>
+<a id="org521d5a1"></a>
 
 ### For now leaving it with just 6 steps, will plan each step as I approach it.
 
 
-<a id="org34fe095"></a>
+<a id="org2fff1ea"></a>
 
 ## Copying the code snippets from ChatGPT into one organized place.
 
 
-<a id="orgdef34e6"></a>
+<a id="org885fef6"></a>
 
 ### Code is already in this org file. I've made screenshots of the whole conversation in case I need some more organized reference.
 
 
-<a id="org54e5485"></a>
+<a id="org166ee9b"></a>
 
 ## Moved the journal to another file, so it can be removed from the repo if it's required.
 
@@ -744,7 +745,7 @@ it, I've realized that the only thing that would be dishonest here
 would be trying to hide that I got help from a ChatGPT tutor.
 
 
-<a id="orgaf213d9"></a>
+<a id="org1f8b87e"></a>
 
 ## A problem needs solving before I start work. This project calls for usage of two more repositories, while I like to have one big repo that also includes the journal files. Maybe if I could explain the situation verbosely enough to ChatGPT, it could have some insights. I'm using the same conversation as for the whole project, so I assume that ChatGPT has context enough for this question (i.e. I don't have to tell it about the project).
 
@@ -803,7 +804,7 @@ this separate repo could properly trigger build and deployment process
 from Jenkins.
 
 
-<a id="org0672d24"></a>
+<a id="org789913c"></a>
 
 ### Based on your requirements and priorities, I suggest going with Option Four. This option strikes a balance between simplicity and showcasing your DevOps skills, while also allowing you to maintain your project journal alongside the code.
 
@@ -825,22 +826,22 @@ scripts to point to the correct directories in your new repository
 structure.
 
 
-<a id="orge42f3ce"></a>
+<a id="orgd0501af"></a>
 
 ### Comment: Just describing the problem well let me have an insight on how to solve it. I wonder if some of the power of large language models doesn't lie in the rubberducking nature of using them. Rubber-ducking is a process of troubleshooting a problem by first describing it thoroughly to a rubber duck before we go and ask other people about it. What's special about it, is that just by talking and explaining the problem to a rubber duck, or any imaginary entity, we often arrive at solutions to our problems.
 
 
-<a id="org9867205"></a>
+<a id="org7c0a57a"></a>
 
 # Sun 26 Mar 2023 11:57:06 AM CEST
 
 
-<a id="orge6b4104"></a>
+<a id="org59d3618"></a>
 
 ## After deciding on how project will look (including repos and such), I'm preparing the first commit that will include basic directory structure, but also contain project's description. Actually I'm going to cut a corner here and have ChatGPT generate project's description.
 
 
-<a id="org900e975"></a>
+<a id="org7b37696"></a>
 
 ### Create a project description to be included at the beginning of project documentation file. It is to be read by people checking out the portfolio. You can base it on this:
 
@@ -872,22 +873,22 @@ commit is made to the tracked flask app repository.
 -   Comment: Description generated by GPT-4 is flawless. Why I feel uneasy about it then? For a Junior engineer it's important to do things yourself, that's the only way to learn them. I guess in places that are not a core ability for a DevOps, cutting corners like that may be essential to work against my tendency to over complicate things and to fall into rabbit holes. On the other hand, if I'm doing something that I later want to say I can do as a professional, I might use ChatGPT as a web search or a guide on what to do next or how to solve a problem, but not to get a complete solution that I would mindlessly copy. Still, there is a certain knowledge required to use these solutions correctly and to spot when ChatGPT is hallucinating. So I shouldn't accredit all work to ChatGPT either.
 
 
-<a id="org51255cd"></a>
+<a id="org8f9d6b3"></a>
 
 # Sun 26 Mar 2023 02:57:37 PM CEST
 
 
-<a id="orga737179"></a>
+<a id="org27460d8"></a>
 
 ## Just posting this project description would make me feel weak inside. How can I use it and still have clean conscience? By adding a note that it was written by ChatGPT and also informing potential readers that ChatGPT assisted in planning the project and writing parts of the documentation. Maybe just a general info in the project description, and then specific notes in places where ChatGPT does most of the work, like in the project description? This feels good. I have a feeling that this kind of ethical questions is what many people ask themselves at the moment. Problem in my case is that if I just had ChatGPT do 90% of the work in every aspect, it would be insincere to claim that I've done the work or that it shows any skills on my part other than prompt engineering.
 
 
-<a id="org9e9f119"></a>
+<a id="org3ff7bc1"></a>
 
 ## I should explicitly say in the project's readme (which can be just a .md version of project description from the documentation .org file) what ChatGPT helped with.
 
 
-<a id="org1047690"></a>
+<a id="orgec1c8cd"></a>
 
 # Thu 06 Apr 2023 05:09:35 PM CEST
 
@@ -903,7 +904,7 @@ lot. I've also found a project that takes in your prompt and upgrades
 it to be more effective. <https://promptperfect.jina.ai/prompts>
 
 
-<a id="org8774582"></a>
+<a id="org7796d6c"></a>
 
 ## Prompt:
 
@@ -960,7 +961,7 @@ deployment gotchas, how valid plans can fail, and how to refactor
 Terraform code safely.
 
 
-<a id="orgf2b3cb7"></a>
+<a id="orgf438412"></a>
 
 ## Reply:
 
@@ -1020,12 +1021,12 @@ to complete their project while also laying the groundwork for future
 growth as a DevOps professional.
 
 
-<a id="org24ed1a7"></a>
+<a id="orgcdb8620"></a>
 
 ## Conclusions: I'm finishing the second chapter, focusing especially on what might be relevant to the flask CI/CD pipeline project.
 
 
-<a id="org3c68870"></a>
+<a id="org959441c"></a>
 
 # Sun 16 Apr 2023 12:45:42 PM CEST
 
@@ -1039,7 +1040,7 @@ foundation of Terraform knowledge, sufficient for this project
 and a basis for building further Terraform competence in the future.
 
 
-<a id="org0de2ed1"></a>
+<a id="orgc33de61"></a>
 
 # Tue 18 Apr 2023 06:45:06 PM CEST
 
@@ -1047,12 +1048,12 @@ With both the pipeline and code repositories ready, time to create a
 VM in the cloud to hold the Jenkins server. But what OS to use?
 
 
-<a id="org8189aa5"></a>
+<a id="org8237b5e"></a>
 
 ## Choose OS and AMI
 
 
-<a id="org0d82b46"></a>
+<a id="org256668f"></a>
 
 ### Debian or Redhat family?
 
@@ -1069,7 +1070,7 @@ cases. Fedora is on second place. If there are any repos missing for
 Alma that exist for Fedora, I'll fallback to Fedora Server edition.
 
 
-<a id="org6fb8c2f"></a>
+<a id="orgd9300b3"></a>
 
 ### AMI, use an existing or build own?
 
@@ -1077,7 +1078,7 @@ I could build my own ami using Packer, but to reduce complexity, I'll
 go with a ready-made AMI from AWS AMI Marketplace.
 
 
-<a id="org6f133c4"></a>
+<a id="orga30a1cb"></a>
 
 # Wed 19 Apr 2023 08:38:35 PM CEST
 
@@ -1088,7 +1089,7 @@ read. I need to make sure the Instance gets my ssh-key baked in. The
 firewall rules (security group) also has to accept Jenkins traffic.
 
 
-<a id="org11e819a"></a>
+<a id="orgfe9f9a5"></a>
 
 # Sat 22 Apr 2023 01:47:05 PM CEST
 
@@ -1103,7 +1104,7 @@ Terraform. I'll probably just get the instances IP using Terraform
 output variable and paste it into the inventory file with a script.
 
 
-<a id="orgf7d464d"></a>
+<a id="org8225e39"></a>
 
 ## Getting the AMI
 
@@ -1116,14 +1117,14 @@ number from it. Or find an alternative that doesn't include
 downloading files from Alma's website.
 
 
-<a id="org1a88aac"></a>
+<a id="org74b8197"></a>
 
 ### grep method
 
 $ grep eu-north-1 aws<sub>amis.csv</sub> | grep x86 | sort -nrk 2 -t',' | head -1 | cut -f4 -d','
 
 
-<a id="org7c83e81"></a>
+<a id="org099ec35"></a>
 
 ### awk method
 
@@ -1137,7 +1138,7 @@ $ awk -F, '$3 `= "\"eu-north-1\"" && $5 =` "\\"x86<sub>64</sub>\\"" { \\
          END { print ami<sub>id</sub> }' aws<sub>amis.csv</sub>
 
 
-<a id="org4844376"></a>
+<a id="orga7f1f95"></a>
 
 ### Terraform Data Source method
 
@@ -1192,7 +1193,7 @@ This configuration sets up the AWS provider for the \`eu-north-1\` region and de
 After running \`terraform init\` and \`terraform apply\`, the output should display the AMI ID of the most recent AlmaLinux OS 9 for x86<sub>64</sub> in the \`eu-north-1\` region.
 
 
-<a id="orgdf9942c"></a>
+<a id="org7677d01"></a>
 
 # Mon 01 May 2023 02:40:31 PM CEST
 
@@ -1212,12 +1213,12 @@ already, but ChatGPT made good arguments on why the changes were
 introduced.
 
 
-<a id="org3c49f11"></a>
+<a id="org969876d"></a>
 
 ## Differences:
 
 
-<a id="org538d971"></a>
+<a id="orgaa5897a"></a>
 
 ### Defined VPC and Subnet
 
@@ -1232,7 +1233,7 @@ They also allow usage of more advanced network tools like Network ACL
 -   I'm keeping the definitions.
 
 
-<a id="orge848293"></a>
+<a id="orgc6c1588"></a>
 
 ### Explicitly defining egress traffic rules in the Security Group
 
@@ -1242,7 +1243,7 @@ outgoing traffic is allowed purposefully and also makes it easier to
 understand our intentions for people reading our IaC.
 
 
-<a id="orgc560d4f"></a>
+<a id="orgd82dbee"></a>
 
 # Sun 07 May 2023 01:09:21 PM CEST
 
@@ -1259,7 +1260,7 @@ finally consolidating the two files into one with some variables
 separated into a vars.tf file.
 
 
-<a id="org80316ea"></a>
+<a id="org88a5b3c"></a>
 
 # Tue 09 May 2023 07:31:53 PM CEST
 
@@ -1271,7 +1272,7 @@ Maybe I'll make a script that would auto generate such a key, put it
 in a safe LUKS vault and also upload public key to AWS.
 
 
-<a id="org0c69877"></a>
+<a id="org36a6e32"></a>
 
 ## Generated instructions on how to create and upload an ssh key:
 
@@ -1286,7 +1287,7 @@ ssh-keygen -t ed25519 -a <number<sub>of</sub><sub>iterations</sub>> \\
 
 Replace <number<sub>of</sub><sub>iterations</sub>> with the desired number of iterations (e.g., 100) and <project<sub>location</sub>> with the path to your project directory.
 
-<a id="orge392a7e"></a>:
+<a id="org7472ec5"></a>:
 
 hcl
 
@@ -1317,7 +1318,7 @@ the EC2 instance. This allows you to manage the keys more efficiently
 and avoid using a single key for multiple projects or machines.
 
 
-<a id="org62fc00e"></a>
+<a id="orgf750f5e"></a>
 
 ## Generated instructions on how to create a LUKS container for SSH key:
 
@@ -1399,7 +1400,7 @@ passphrase, mount it, and then use the keys from the mounted
 directory.
 
 
-<a id="org90a35a4"></a>
+<a id="org771a1b1"></a>
 
 ## Generated a script to create, open and close the container.
 
@@ -1449,7 +1450,7 @@ directory.
     esac
 
 
-<a id="org9f70c56"></a>
+<a id="orgedd002c"></a>
 
 ## V2 version of script for management of LUKS container
 
@@ -1506,7 +1507,7 @@ directory.
     esac
 
 
-<a id="org2c0b595"></a>
+<a id="orgaa651b6"></a>
 
 ## Generated a script to init the project, create the ssh key and the container. Also auto export passphrase so it can be used in the project.
 
@@ -1544,7 +1545,7 @@ container. The passphrase is read once using read -s and stored in the
 SHELL<sub>VARIABLE</sub>.
 
 
-<a id="org34c0708"></a>
+<a id="org98fe020"></a>
 
 # Sat 13 May 2023 12:59:08 PM CEST
 
@@ -1559,7 +1560,7 @@ Initial vault management script is ready, but it shouldn't create a
 container if there is one already.
 
 
-<a id="org745bf43"></a>
+<a id="org8e5f8b7"></a>
 
 # Sun 21 May 2023 03:33:45 PM CEST
 
@@ -1571,7 +1572,7 @@ usable by non-experts.
 Volume management and ssh creation automation can be a bit more rough.
 
 
-<a id="org8e46af8"></a>
+<a id="org375e02c"></a>
 
 # Tue 30 May 2023 08:26:54 PM CEST
 
@@ -1581,7 +1582,7 @@ up after a break.
 Finishing up the vault<sub>management</sub> script.
 
 
-<a id="orga27bfca"></a>
+<a id="org21a8f85"></a>
 
 # Tue Jun  6 02:50:54 PM CEST 2023
 
@@ -1593,7 +1594,7 @@ now can just use it to generate a proper date. So annoying when things
 are not correct.
 
 
-<a id="orgd2f7e74"></a>
+<a id="orge675d07"></a>
 
 # Tue 06 Jun 2023 02:53:54 PM CEST
 
@@ -1602,7 +1603,7 @@ container is already open and reports an error in this case. Fixing it
 smells of Yak Shaving, so I'm leaving it as an extra TODO.
 
 
-<a id="orgd905c1f"></a>
+<a id="org5727699"></a>
 
 # Thu 08 Jun 2023 03:21:05 PM CEST
 
@@ -1622,14 +1623,14 @@ and the master script is going play through all the points in the
 script, I'm renaming it to playthrough.sh.
 
 
-<a id="org362ebbb"></a>
+<a id="org51918d5"></a>
 
 # Thu 08 Jun 2023 04:58:58 PM CEST
 
 Defined some more steps in the playthrough.sh.
 
 
-<a id="org96839aa"></a>
+<a id="orge56831f"></a>
 
 # Sat 10 Jun 2023 02:58:43 PM CEST
 
@@ -1640,7 +1641,7 @@ vault<sub>management.sh</sub> is kind of pointless (if a similar amount of work
 can be put into learning to use an industry standard tool).
 
 
-<a id="org12afc35"></a>
+<a id="org33520ae"></a>
 
 # Sun 11 Jun 2023 12:21:44 PM CEST
 
@@ -1688,7 +1689,7 @@ Kinda cool, and copying and pasting can be used to save a lot of
 writing.
 
 
-<a id="orgb437b56"></a>
+<a id="org85e3797"></a>
 
 # Tue Jun 13 11:54:45 AM CEST 2023
 
@@ -1707,7 +1708,7 @@ scripts run in the same shell, as proven with this script:
     exit 0
 
 
-<a id="org8d2a226"></a>
+<a id="orgfd5b1d9"></a>
 
 # Wed 14 Jun 2023 09:39:44 AM CEST
 
@@ -1725,7 +1726,7 @@ solutions to abstract problems. A good solution is not worth much if
 it doesn't work because of a typo.
 
 
-<a id="org8e505f4"></a>
+<a id="orgbbfd5e8"></a>
 
 # Wed 14 Jun 2023 11:10:31 AM CEST
 
@@ -1741,7 +1742,7 @@ creation and access test works, whether it had to be created, opened
 or just accessed. Can commit changes.
 
 
-<a id="org6727589"></a>
+<a id="org624c74e"></a>
 
 # Wed 14 Jun 2023 02:31:55 PM CEST
 
@@ -1760,13 +1761,13 @@ really matter if we use the passphrase in addition to the vault's
 password. To make things simpler, I'm not using passphrase for now.
 
 
-<a id="orgc373367"></a>
+<a id="orgae4d371"></a>
 
 # Wed 14 Jun 2023 04:53:32 PM CEST
 
 Now it's time to add the SSH key uploading step to playthrough.sh.
 
-[This AI generated snippet](#orge392a7e) for uploading the SSH key differs a little
+[This AI generated snippet](#org7472ec5) for uploading the SSH key differs a little
 from documentation at
 [this address](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/key_pair).
 
@@ -1777,7 +1778,7 @@ just hallucinate this solution. Otherwise I would have to create some
 extra Terraform file, not tracked by git, for secrets.
 
 
-<a id="orga60f2af"></a>
+<a id="orgea951ce"></a>
 
 # Thu 15 Jun 2023 01:24:53 PM CEST
 
@@ -1800,7 +1801,7 @@ I wonder why wasn't the error reported before. Maybe because it is
 only checked once when initializing the project?
 
 
-<a id="org3af34e0"></a>
+<a id="orgfe803f4"></a>
 
 # Thu 15 Jun 2023 01:57:37 PM CEST
 
@@ -1826,7 +1827,7 @@ hopefully, differences between local Vagrant Alma/Rocky installation
 and AWS Linux in the cloud will remain minimal.
 
 
-<a id="org1888aa2"></a>
+<a id="org3647d0c"></a>
 
 # Thu 15 Jun 2023 02:49:19 PM CEST
 
@@ -1838,7 +1839,7 @@ AMI ID of ami-04e4606740c9c9381. Manual entering is going to break if
 a potential user chooses a different AWS region.
 
 
-<a id="orgcfcfaf6"></a>
+<a id="org3bcf893"></a>
 
 # Sat 17 Jun 2023 01:05:28 PM CEST
 
@@ -1862,7 +1863,7 @@ for online search. When time runs out, I'll ask ChatGPT for help (like
 I'd normally ask a more senior engineer at work).
 
 
-<a id="orga3c0b58"></a>
+<a id="org20dec2d"></a>
 
 # Sat 17 Jun 2023 05:19:27 PM CEST
 
@@ -1882,7 +1883,7 @@ are either reverse proxies (which are super hardened down) and/or load
 balancers.
 
 
-<a id="orgd78b1c5"></a>
+<a id="org0293406"></a>
 
 # Sun 18 Jun 2023 12:32:43 PM CEST
 
@@ -1903,7 +1904,7 @@ subnet definition:
 Success! We have a public IP.
 
 
-<a id="org3839832"></a>
+<a id="org515f22d"></a>
 
 # Sun 18 Jun 2023 02:46:28 PM CEST
 
@@ -1942,7 +1943,7 @@ this code to Terraform configuration and see if it works:
 Still no luck.
 
 
-<a id="orgcbad267"></a>
+<a id="org084b0cd"></a>
 
 # Mon 19 Jun 2023 05:40:59 PM CEST
 
@@ -1970,14 +1971,14 @@ It might be
 actually annoying to have
 
 
-<a id="orge653aaa"></a>
+<a id="org1a4f303"></a>
 
 # Mon 19 Jun 2023 05:51:44 PM CEST
 
 Following instructions in the [blog post](https://medium.com/geekculture/how-to-manage-public-and-private-subnets-in-aws-with-terraform-69c272003c81) for deploying a private and public subnet on AWS using Terraform.
 
 
-<a id="orgd5065cc"></a>
+<a id="org862ba5a"></a>
 
 ## Planning:
 
@@ -1990,87 +1991,87 @@ document quickly, I guess that my problem was not adding the routing
 table to the public subnet, but it might not be everything.
 
 
-<a id="org90db2bd"></a>
+<a id="org7aa176d"></a>
 
 ## DONE Create a file for VPC
 
 
-<a id="orgf2ecb1c"></a>
+<a id="org9ebf5cc"></a>
 
 ## DONE Create a file for Public Subnet
 
 
-<a id="orgb4005c5"></a>
+<a id="org5622cb4"></a>
 
 ## DONE Create a file for Internet Gateway
 
 
-<a id="org1b53958"></a>
+<a id="org807e7db"></a>
 
 ## DONE Create a file for the Route Table for the Public Subnet
 
 
-<a id="org7bc0824"></a>
+<a id="org531f89d"></a>
 
 ## DONE Create a file for the Security Group
 
 
-<a id="org0b31e65"></a>
+<a id="org8fc860b"></a>
 
 ## DONE Create a file for the Public EC2 Instance
 
 
-<a id="orgd3af7a6"></a>
+<a id="org5a0e07c"></a>
 
 ## DONE Create a variable file
 
 
-<a id="org1e51c9b"></a>
+<a id="orga5d252b"></a>
 
 ## DONE Creating a NAT with an Elastic IP - what I'm not going to do.
 
 
-<a id="org2b4e17c"></a>
+<a id="org3e14618"></a>
 
 ### Create a file for the Public Subnet for NAT Gateway
 
 
-<a id="orgff2e9d1"></a>
+<a id="orga8d84e2"></a>
 
 ### Create a file for Elastic IP (EIP)
 
 
-<a id="orgdbd3329"></a>
+<a id="orgf7edf09"></a>
 
 ### Create a file for the NAT Gateway
 
 
-<a id="orgd41c9e1"></a>
+<a id="orgc1f842c"></a>
 
 ### Create a file for the Route Table for the NAT Gateway
 
 
-<a id="org8c6a247"></a>
+<a id="orgfd5a204"></a>
 
 ### Create a file for the Private Subnet
 
 
-<a id="org36e1bc6"></a>
+<a id="org5086ac4"></a>
 
 ### Create a file for the Route Table for the Private Subnet
 
 
-<a id="org6221fa1"></a>
+<a id="org32eb2bb"></a>
 
 ### Create a file for the Private EC2 Instance
 
 
-<a id="orge0d3e81"></a>
+<a id="orgbc51c66"></a>
 
 ## DONE Run and see if it works
 
 
-<a id="org6ab7628"></a>
+<a id="orga56021f"></a>
 
 ### Strange error, looked like one line was "disappeared" in Emacs.
 
@@ -2084,7 +2085,7 @@ was right after the second line. I didn't investigate, just went to
 the end of line 2 and held delete until I deleted the phantom line.
 
 
-<a id="org0fda856"></a>
+<a id="orgc009eab"></a>
 
 ### Had to add the ssh key uploading code.
 
@@ -2098,31 +2099,31 @@ Terraform. At least the hang of how things tend to be named and how to
 get id's or inside-secret-names of things, using variables.
 
 
-<a id="org98cae5d"></a>
+<a id="org0568ba5"></a>
 
 ## DONE Find the differences
 
 Differences were the routing table and routing table association.
 
 
-<a id="orgf78a53d"></a>
+<a id="orga76da2d"></a>
 
 ## DONE Add them to flask-ci-cd Terraform code.
 
 Added all networking infrastructure code to main.tf.
 
 
-<a id="org94fd48e"></a>
+<a id="org4736b66"></a>
 
 # Thu 22 Jun 2023 06:28:17 PM CEST
 
 
-<a id="org56d2db1"></a>
+<a id="org56b7419"></a>
 
 ## Creating a file with secrets in the vault
 
 
-<a id="orgb854da8"></a>
+<a id="org08b6596"></a>
 
 ### Secrets are: VM IP address, AWS access keys (danger!!), maybe also instance type, region and some other things that come up later on.
 
@@ -2131,37 +2132,37 @@ Added all networking infrastructure code to main.tf.
 -   If we could somehow test if we have AWS access to stand up a virtual machine? Then there would be no need to ask for the AWS keys. There are a few ways one can authorize Terraform to work on his behalf.
 
 
-<a id="org44d0103"></a>
+<a id="org8c69ce1"></a>
 
 ### At first the data will be entered manually.
 
 
-<a id="orged3e387"></a>
+<a id="org514b7f0"></a>
 
 ### Later on there also will be an option to start the playthrough.sh script with an interview asking for all the required settings.
 
 
-<a id="orgd370ff3"></a>
+<a id="org36554de"></a>
 
 ### To keep things safe, a trap can be added to playthrough.sh that would close the files.
 
 
-<a id="org52482a9"></a>
+<a id="org034ac8b"></a>
 
 # Sat 08 Jul 2023 04:29:38 PM CEST
 
 
-<a id="orgaa0e1ff"></a>
+<a id="org91b408b"></a>
 
 ## Having a shot at doing some tests with Ansible using given ssh key.
 
 
-<a id="orge3b907a"></a>
+<a id="orgea6acfd"></a>
 
 ## Problems with EC2 key pair - it already exists.
 
 
-<a id="org3f198d8"></a>
+<a id="org9d1a60e"></a>
 
 ### Prompt:
 
@@ -2191,7 +2192,7 @@ instance<sub>type</sub> = var.instance<sub>type</sub>
 key<sub>name</sub>      = aws<sub>key</sub><sub>pair.jenkins</sub>-key.key<sub>name</sub>
 
 
-<a id="org8633434"></a>
+<a id="orgecf635f"></a>
 
 ### Answer:
 
@@ -2237,7 +2238,7 @@ the use of the count parameter.
 Planning failed. Terraform encountered an error while generating this plan.
 
 
-<a id="orgeffbc46"></a>
+<a id="org3039f07"></a>
 
 ### Error: Incorrect condition type
 
@@ -2251,7 +2252,7 @@ Planning failed. Terraform encountered an error while generating this plan.
 ╵
 
 
-<a id="org881ee52"></a>
+<a id="orga9eab33"></a>
 
 ### Answer:
 
@@ -2275,7 +2276,7 @@ an error, you may need to use a different method to check if the key
 pair exists.
 
 
-<a id="orgcf279a0"></a>
+<a id="orga49d94d"></a>
 
 ### Summary:
 
@@ -2295,7 +2296,7 @@ array. C trick doesn't work here, address of the array is not same as
 the address of it's first element.
 
 
-<a id="org5bcbe51"></a>
+<a id="org6f5a63b"></a>
 
 # Sun 09 Jul 2023 05:44:10 PM CEST
 
@@ -2308,7 +2309,7 @@ At first it only run once, but then I modified it to make it run every
 time. Here is the ChatGPT convo:
 
 
-<a id="org2df2ed1"></a>
+<a id="orgbfd4b9a"></a>
 
 ## But I want to pass some data to it (namely in IP address). What format should I use to perform variable substitution when running the script from terraform, so that the script receives the ip address string as one of it's parameters?
 
@@ -2343,7 +2344,7 @@ in the inventory file. You would replace "IP<sub>ADDRESS</sub><sub>PLACEHOLDER</
 whatever placeholder text you have in your inventory file.
 
 
-<a id="org169cc81"></a>
+<a id="orgab7cea6"></a>
 
 ## How to make this 'null resource' work every time, so that it updates the file every time, not just when resource is "created"?
 
@@ -2371,24 +2372,24 @@ apply\`, it will cause the \`null<sub>resource</sub>\` to be recreated, and the
 provisioners to be re-run, every time.
 
 
-<a id="org5844a63"></a>
+<a id="orga081147"></a>
 
 # Fri 14 Jul 2023 01:33:57 PM CEST
 
 
-<a id="org15e42f6"></a>
+<a id="org939cde2"></a>
 
 ## Would be cool to have some kind of Backlog? Or should I use the TODO list at the end of docs?
 
 The documentation file should be one.
 
 
-<a id="org1e3ab4f"></a>
+<a id="org7fc5658"></a>
 
 ## It felt weird and unnatural to use $PROJECT<sub>ROOT</sub>/vault/ssh<sub>key</sub><sub>mountpoint</sub> as the mountpoint for the vault. Changed it so that the /vault is the mountpoint for vault and the LUKS image sits at /vault.img.
 
 
-<a id="org64c3c4e"></a>
+<a id="org3411376"></a>
 
 # Sat Jul 22 12:22:18 PM CEST 2023
 
@@ -2405,7 +2406,7 @@ It's not an essential functionality, but work to improve work,
 therefore I don't feel it's wrong to use ChatGPT to do it.
 
 
-<a id="orgccc78ba"></a>
+<a id="org4ae8049"></a>
 
 ## Prompt: I would like to commit Ansible's hosts.ini file, but there are IP addresses inside.
 
@@ -2415,7 +2416,7 @@ the file and the IP is placed in double quotes after an equal (=)
 sign.
 
 
-<a id="org151911c"></a>
+<a id="org9446b21"></a>
 
 ### Answer: You can use a Git hook to automate this process. Git hooks are scripts that Git executes before or after events such as commit, push, and so on.
 
@@ -2465,7 +2466,7 @@ commit, if necessary. You can do this by adding a post-commit hook
 that restores the hosts.ini file from the hosts.ini.bak backup.
 
 
-<a id="org1d20064"></a>
+<a id="orgd551009"></a>
 
 ### Followup prompt: Would it run everytime or only when the hosts.ini is staged?
 
@@ -2500,7 +2501,7 @@ the names of all staged files, and \`grep &#x2013;quiet "$FILE"\` checks if
 \`hosts.ini\` is staged.
 
 
-<a id="org8757d6a"></a>
+<a id="org84198f5"></a>
 
 ## There are only minor errors in ChatGPT script generated that I see initially.
 
@@ -2520,12 +2521,12 @@ I like that now the config file can be tracked in repo, since it makes
 it easier for new people to understand and use it.
 
 
-<a id="orgb7efe3f"></a>
+<a id="orgb5ba083"></a>
 
 # Sun Jul 23 08:19:51 PM CEST 2023
 
 
-<a id="orga8ca8e1"></a>
+<a id="org1aad1b6"></a>
 
 ## Created a pre-commit hook for git to remove IP addresses form Ansible's hosts.ini file.
 
@@ -2533,22 +2534,22 @@ In the process I've learned about what special characters for bash sed
 have to be escaped inside single quotes:
 
 
-<a id="org9679527"></a>
+<a id="org5175c82"></a>
 
 ### curly braces \\{  - (for regex repetition pattern)
 
 
-<a id="org36cade1"></a>
+<a id="org3c03b91"></a>
 
 ### round braces \\(  - (for regex block to be f.ex. repeated)
 
 
-<a id="org7501da7"></a>
+<a id="org8bf2c97"></a>
 
 ### dot . if we need literal dot \\.
 
 
-<a id="org8633994"></a>
+<a id="org1317913"></a>
 
 ## pre-commit script in the final form:
 
@@ -2588,52 +2589,52 @@ have to be escaped inside single quotes:
     exit 0
 
 
-<a id="org9aa273b"></a>
+<a id="org9bb7d4d"></a>
 
 # Mon Jul 24 12:19:04 PM CEST 2023
 
 
-<a id="org2ae38ea"></a>
+<a id="org085a82c"></a>
 
 ## Run into some issues starting a Vagrant project. Vagrant complained on it's plugins. I also had to force Vagrant to use libvirt as it's plugin. When looking into info on Vagrant found out that there is a Vagrant flavor vagrant-libvirt that uses kvm/quemu (instead of Virtualbox) as it's default provider.
 
 
-<a id="orgf60b3f0"></a>
+<a id="orgd00794b"></a>
 
 ## Had to install libvirt-devel, then libvirt and then enable libvirt service.
 
 
-<a id="orged16114"></a>
+<a id="org3083ba5"></a>
 
 ## Hard to find a correct box. Since the last RedHat drama (some business people thought someone will switch from rocky/alma to RH if they ban RH rebuilds), Geerling said he is switching his work to Debian. No official vagrant box from RedHat, no CentOS box either. No rocky box. Looks like Alma Linux people do release a vagrant image. It's called 'almalinux/9'.
 
 
-<a id="org8017705"></a>
+<a id="orgedfb4ec"></a>
 
 ## Got a vagrant box working
 
 
-<a id="org9ce4795"></a>
+<a id="org76351e0"></a>
 
 ## And got Jenkins working using instructions from Jenkins docs
 
 
-<a id="orga5e3fa0"></a>
+<a id="org6a4e615"></a>
 
 # Wed Aug  2 01:48:49 PM CEST 2023
 
 
-<a id="org00272b9"></a>
+<a id="orga642213"></a>
 
 ## Got to translate the Jenkins installation instructions from Jenkins' docs (bash) to an Ansible playbook.
 
 
-<a id="orgd6ed532"></a>
+<a id="org797b15f"></a>
 
 ## First going to put the instructions in one file
 
 
-<a id="org624ec72"></a>
+<a id="orga6d4531"></a>
 
 ## Actually, first going to nuke the local VM and check if installing Jenkins installs also firewalld configuration, which would simplify firewall setup.
 
@@ -2643,7 +2644,7 @@ Found Jenkins service. Reloading firewall and testing if it works.
 It works, have to remember about the &#x2013;permanent option and to reload the firewall afterwards. Added these to the script.
 
 
-<a id="orgde4a47d"></a>
+<a id="orgffc47af"></a>
 
 ## Had some error when changed the name of the mountpoint in the playthrough.sh. Used 'sudo rm /dev/mapper/LUKS<sub>CONTAINER</sub><sub>NAME</sub>' to delete the old container that didn't want to cooperate.
 
@@ -2651,14 +2652,14 @@ Maybe I could add a check for it in the vault management script.
 The 'rm' command wasn't enough. What did the job was using 'cryptsetup close my<sub>project</sub><sub>container</sub>'.
 
 
-<a id="org79010d6"></a>
+<a id="orgf748f8e"></a>
 
 # Fri Aug  4 10:40:53 AM CEST 2023
 
 Debugging the playbook.
 
 
-<a id="org569bd18"></a>
+<a id="orga11829a"></a>
 
 ## The 'firewalld' module in Ansible didn't work.
 
@@ -2670,7 +2671,7 @@ installing the 'ansible' package and it started installation - looks
 like I only had ansible-core installed.
 
 
-<a id="org87539bc"></a>
+<a id="org88ab1c5"></a>
 
 ## Had issues connecting to the local VM using the key generated for Ansible
 
@@ -2686,12 +2687,12 @@ solved the problem.
     ssh jenkins 'cat ~/.ssh/authorized_keys'
 
 
-<a id="orgbda81d4"></a>
+<a id="orgd05fbed"></a>
 
 ## Another problem connecting to the local VM - Ansible interpreted ssh options from hosts.ini as host definitions. Turns out, that a proper way to set variables for a group is to name a subsection [GROUPNAME:vars].
 
 
-<a id="orgd24918a"></a>
+<a id="orge686b59"></a>
 
 ## Problem with adding of the Jenkins repo - cannot download repodata/repomd.xml
 
@@ -2710,7 +2711,7 @@ and not the actual repository. We need to go one directory level
 up. Trying again with <https://pkg.jenkins.io/redhat-stable>
 
 
-<a id="org8b22c14"></a>
+<a id="org1702145"></a>
 
 ## Error in the 'service' module. "This module does not currently support using glob patterns, found '[' in service name: ['jenkins', 'firewalld']".
 
@@ -2742,7 +2743,7 @@ data types, not just lists). 'with<sub>items</sub>' is here for backwards
 compatibility.
 
 
-<a id="org5179651"></a>
+<a id="orgfc11751"></a>
 
 ## Ansible Firewalld module says that the Jenkins service is absent. Pretty sure I checked it before and it wasn't.
 
@@ -2764,7 +2765,7 @@ it. The module expected a string with the name (or maybe names too?)
 of the service/s and I supplied a list.
 
 
-<a id="org12a62aa"></a>
+<a id="org6642a30"></a>
 
 ## Can't connect to the Jenkins web server. Looks like firewall misconfiguration.
 
@@ -2802,7 +2803,7 @@ connect to port 8080. The webpage loads too. We can say that the
 deployment of a basic Jenkins installation was successful.
 
 
-<a id="orgb1c83fa"></a>
+<a id="orgcc97136"></a>
 
 # Sat 12 Aug 2023 04:33:17 PM CEST
 
@@ -2811,7 +2812,7 @@ Needed refreshing information on the theory behind CI/CD. The ULSAH
 interesting chapter on it.
 
 
-<a id="org22f91b8"></a>
+<a id="org932af49"></a>
 
 # Thu Sep  7 08:17:31 PM CEST 2023
 
@@ -2820,7 +2821,7 @@ brittle. It should tolerate a situation when a vault image already
 exists and/or a LUKS device has already been created.
 
 
-<a id="orge7bff87"></a>
+<a id="orgcfe71f5"></a>
 
 # Fri Sep  8 06:58:54 PM CEST 2023
 
@@ -2835,7 +2836,7 @@ while, I'll just reset the stuff by hand and keep working on the
 project.
 
 
-<a id="orgb0489bf"></a>
+<a id="org505aa54"></a>
 
 # Sat Sep  9 11:59:03 AM CEST 2023
 
@@ -2872,7 +2873,7 @@ waiting for a port to be open after a Java application is installed! I
 wonder if it was written with Jenkins in mind.
 
 
-<a id="orga9e7054"></a>
+<a id="org5af6708"></a>
 
 # Mon Sep 11 07:09:48 PM CEST 2023
 
@@ -2894,7 +2895,7 @@ it might be easier/harder to extract, depending on whether I remember
 about it.
 
 
-<a id="orgbedd821"></a>
+<a id="orgdc4cc29"></a>
 
 # Tue Sep 12 08:15:08 PM CEST 2023
 
@@ -2928,7 +2929,7 @@ that it contains the ssh key that Ansible knows about).
       ../ansible/playbook.yml
 
 
-<a id="orgaaff2eb"></a>
+<a id="org378b29c"></a>
 
 # Fri Sep 15 12:08:57 PM CEST 2023
 
@@ -2938,21 +2939,21 @@ Not sure how. I'll go with the Jenkins tutorials from here:
 <https://www.jenkins.io/doc/tutorials/>
 
 
-<a id="orgae6d57e"></a>
+<a id="org5a36473"></a>
 
 ## Installing Docker Pipeline plugin
 
 Clicking through the Web UI
 
 
-<a id="orga9fa277"></a>
+<a id="org9670aaf"></a>
 
 ## Created a Jenkinsfile in the code repo
 
 Copied from Python example from the tutorial
 
 
-<a id="org7e1c405"></a>
+<a id="org1abedf1"></a>
 
 ## Installing Emacs Jenkins major mode
 
@@ -2962,7 +2963,7 @@ plugin to manage the Jenkins server from Emacs. Can find out how to
 use it later on.
 
 
-<a id="org351a5d8"></a>
+<a id="orgb2b2b11"></a>
 
 # Sat Sep 16 01:28:32 PM CEST 2023
 
@@ -2985,7 +2986,7 @@ actions, by for example being a little more specific in planning. So
 planning it is.
 
 
-<a id="orga3e96bb"></a>
+<a id="org243aabe"></a>
 
 # Sat Sep 16 01:44:38 PM CEST 2023
 
@@ -3005,7 +3006,7 @@ manually generate the artifact. So the proper order would be:
     the code-repo based on a Jenkinsfile in the repo.
 
 
-<a id="org98c707c"></a>
+<a id="org77b0914"></a>
 
 # Sun Sep 17 03:18:55 PM CEST 2023
 
@@ -3014,7 +3015,7 @@ youtube tutorial from Hitesh Choudhary called "How to build docker
 image for python flask app".
 
 
-<a id="org24e7640"></a>
+<a id="org6c7fc6e"></a>
 
 ## .dockerignore
 
@@ -3024,7 +3025,7 @@ directory and can't simply copy it all onto the docker image. Testing
 a solution called .dockerignore which seems to work like .gitignore.
 
 
-<a id="orgf01bfa5"></a>
+<a id="org10d5510"></a>
 
 ## Dependency Hell
 
@@ -3052,7 +3053,7 @@ This are the dependencies:
     WTForms==2.1
 
 
-<a id="org55f82f0"></a>
+<a id="org2cdb163"></a>
 
 ### Timeboxing
 
@@ -3062,7 +3063,7 @@ security concerns, I'll try to solve the dependency issues in 1h. If
 it's not working by that time, I'll choose a different project.
 
 
-<a id="orga40690b"></a>
+<a id="org44eb5a6"></a>
 
 ### Error from python - complaining on lack of compilation tools - switching base image to python
 
@@ -3071,7 +3072,7 @@ Maybe what's missing is only missing in the thin alpine image.
 Didn't work.
 
 
-<a id="org4ae0811"></a>
+<a id="org4d9dc12"></a>
 
 ### Pasted the errors to ChatGPT and found out that it's a dependency issue, most likely due to old libraries being pinned.
 
@@ -3081,12 +3082,12 @@ Changed Markupsafe dependency to >=1.0 from ==1.0
 It worked.
 
 
-<a id="org86fff16"></a>
+<a id="org512aa9e"></a>
 
 ### Now there are errors with cffi. Trying the same as with Markupsafe, changing the dependency from equal to greater than equal. Success!
 
 
-<a id="org0cd1ca9"></a>
+<a id="orgcd890ac"></a>
 
 ## Errors with the app
 
@@ -3095,14 +3096,14 @@ learning Python but publishing any app in a docker image, I'm getting
 the code from the latest version of the Python Flask tutorial.
 
 
-<a id="org8e72906"></a>
+<a id="org7aa6aab"></a>
 
 ## Another dependency error. It's a third one. I'm unpinning all dependencies.
 
     sed -i 's/==/>=/' requirements.txt
 
 
-<a id="orgf7d0ab6"></a>
+<a id="orgd6dedbe"></a>
 
 ## Problem with DB credentials not being set
 
@@ -3118,7 +3119,7 @@ fledged blog with a ChatGPT generated code that returns Hello World!
 on HTTP requests.
 
 
-<a id="org2d89255"></a>
+<a id="org6dd38ce"></a>
 
 # Mon Sep 18 12:43:09 PM CEST 2023
 
@@ -3130,7 +3131,7 @@ Even though I had a Dockerfile ready, I've looked at what ChatGPT
 suggested and there were some things I asked more about:
 
 
-<a id="org6b39620"></a>
+<a id="org99f5c98"></a>
 
 ## &#x2013;no-cache-dir option for pip install -r requirements
 
@@ -3140,7 +3141,7 @@ from saving downloaded packages in cache for later use, as there will
 be no later use and it only bloats the image.
 
 
-<a id="orgf012cec"></a>
+<a id="org780adc1"></a>
 
 ## ENV FLASK<sub>ENV</sub>=production
 
@@ -3150,7 +3151,7 @@ activated. These shouldn't be active in an internet facing app, hence
 the production setting to disable them.
 
 
-<a id="org27c4f4b"></a>
+<a id="org3b345ad"></a>
 
 ## CMD ["python", "app.py"] instead of CMD python app.py
 
@@ -3163,7 +3164,7 @@ process becomes the binary in the first argument and gets run without
 the extra shell overhead.
 
 
-<a id="org1ba42f8"></a>
+<a id="orgf08a420"></a>
 
 # Mon Sep 18 03:32:56 PM CEST 2023
 
@@ -3171,7 +3172,7 @@ The flask app works, docker image builds and the container based on
 that image stays open and keeps returning "Hello, World!" when poked.
 
 
-<a id="org40d72e4"></a>
+<a id="orge1538d9"></a>
 
 # Mon Sep 18 04:28:53 PM CEST 2023
 
@@ -3188,7 +3189,7 @@ didn't come up earlier.
 Pushed the image to dockerhub.com without issues.
 
 
-<a id="org7440975"></a>
+<a id="orgd2f0441"></a>
 
 # Tue Sep 19 10:36:24 AM CEST 2023
 
@@ -3197,7 +3198,7 @@ as Code (aka Jenkinsfile) and save it in the repo along with the flask
 app code.
 
 
-<a id="orgb6c3286"></a>
+<a id="org81f7e4c"></a>
 
 # Wed Sep 20 10:07:03 AM CEST 2023
 
@@ -3208,7 +3209,7 @@ use is to couple AWS ECS (Elastic Container Service) with Fargate
 (serverless engine for containers). They can be managed with Terraform.
 
 
-<a id="org15c6a4a"></a>
+<a id="org3198595"></a>
 
 # Wed Sep 20 11:03:30 AM CEST 2023
 
@@ -3291,7 +3292,7 @@ login. Need to relog.
 Works!
 
 
-<a id="orgdd9e792"></a>
+<a id="org83dde57"></a>
 
 # Wed Sep 20 02:10:56 PM CEST 2023
 
@@ -3303,7 +3304,7 @@ And it's done and committed. Now I should create a Jenkins job or
 whatever it's called on the Jenkins server.
 
 
-<a id="org7ffdf17"></a>
+<a id="org851c8e9"></a>
 
 # Wed Sep 20 03:05:19 PM CEST 2023
 
@@ -3339,7 +3340,7 @@ She also used 'agent any' instead of 'agent { label "linux" }' which
 should allow building on the main Jenkins server.
 
 
-<a id="org3f995ed"></a>
+<a id="orgcb4668b"></a>
 
 # Wed Sep 20 06:57:28 PM CEST 2023
 
@@ -3360,7 +3361,7 @@ which will just keep running indefinitely.
 It builds!
 
 
-<a id="org0343d79"></a>
+<a id="org980ec78"></a>
 
 # Thu Sep 21 09:16:34 AM CEST 2023
 
@@ -3378,7 +3379,7 @@ I could've added them to a separate playbook. Or have their execution
 activated by some label. Next time I'll do better.
 
 
-<a id="orgf7485c7"></a>
+<a id="org90d7666"></a>
 
 ## Value of making clean notes
 
@@ -3391,7 +3392,7 @@ pro would do it, just to make sure there are no caveats I'm
 missing.
 
 
-<a id="org4a6e496"></a>
+<a id="org72c7f5a"></a>
 
 ## Ansible tutorial from Ansible Pilot YouTube channel
 
@@ -3407,7 +3408,7 @@ Generalized list of tasks to install from external repo:
     step on RedHat systems)
 
 
-<a id="orga28d513"></a>
+<a id="orgb1452a9"></a>
 
 ## Full module names (example - 'ansible.builtin.rpm<sub>key</sub>') - a good practice
 
@@ -3420,7 +3421,7 @@ especially if fixing them after the fact might take more than a couple
 of sed commands.
 
 
-<a id="orgff3230e"></a>
+<a id="org81dc8d8"></a>
 
 ## Setting the distribution name using 'ansible.builtin.set<sub>fact</sub>'
 
@@ -3434,7 +3435,7 @@ RedHat variants that existed year ago, namely CentOS, Fedora and RHEL.
         mydistribution: "{{ 'rhel' if (ansible_distribution == 'Red Hat Enterprise Linux') else (ansible_distribution | lower) }}"
 
 
-<a id="orga696c25"></a>
+<a id="orgcd5e385"></a>
 
 ### I don't like the length of that line and wonder if it's possible to refactor it into a more readable form
 
@@ -3484,7 +3485,7 @@ committing and testing them. This is an anti-pattern, as it often
 wastes more time than it saves.
 
 
-<a id="org298ec0e"></a>
+<a id="orgbfd5a9b"></a>
 
 # Fri Sep 22 12:13:59 PM CEST 2023
 
@@ -3604,7 +3605,7 @@ behavior in ansible.cfg, as an option when calling ansible-playbook or
 inside the playbook.
 
 
-<a id="org249545f"></a>
+<a id="org79da887"></a>
 
 # Sun Sep 24 02:14:59 PM CEST 2023
 
@@ -3618,7 +3619,7 @@ way I can start with something easy and iterate over it until I get
 something of satisfying complexity.
 
 
-<a id="org9b0edf5"></a>
+<a id="orgeafeb1e"></a>
 
 # Sun Sep 24 05:33:44 PM CEST 2023
 
@@ -3629,7 +3630,7 @@ found this
 <https://docs.aws.amazon.com/AmazonECS/latest/developerguide/getting-started-aws-copilot-cli.html>
 
 
-<a id="orgabe9fab"></a>
+<a id="orgbcbe60f"></a>
 
 # Mon Sep 25 07:34:01 PM CEST 2023
 
@@ -3668,7 +3669,7 @@ ECS docs to my kindle to read from a more eye friendly machine.
 It spat out a link under which the docker image is available.
 
 
-<a id="org75fa117"></a>
+<a id="org2d1a3d2"></a>
 
 # Tue Sep 26 07:58:53 PM CEST 2023
 
@@ -3676,7 +3677,7 @@ Reading more about ECS. It's like a managed service to host your
 containers. There are some concepts worth noting:
 
 
-<a id="org58a3f66"></a>
+<a id="org1a5e8b6"></a>
 
 ## Task Definition - like a docker-compose file that also mentions hardware requirements
 
@@ -3684,17 +3685,17 @@ Biggest difference is that it uses JSON and you can define CPU and RAM
 requirements.
 
 
-<a id="orgb79ed94"></a>
+<a id="org0a23339"></a>
 
 ## Task - a working, self sufficient instance of your workload, made up of multiple cooperating containers. Like a Kubernetes Pod.
 
 
-<a id="org08f92b0"></a>
+<a id="org6ccb2d1"></a>
 
 ## Cluster - like a Kubernetes instance, this is a group of EC2 instances where the Tasks are executed/run
 
 
-<a id="org98894e8"></a>
+<a id="org9c71f2b"></a>
 
 ## More ECS info:
 
@@ -3708,7 +3709,7 @@ have to be uploaded to AWS before they can be used. So we save them in
 a local file and then upload using AWS CLI.
 
 
-<a id="org41b00c0"></a>
+<a id="org8cbb3b5"></a>
 
 # Fri Sep 29 09:47:00 PM CEST 2023
 
@@ -3719,7 +3720,7 @@ ChatGPT for some rubber ducking. Incidentally, they both pointed me to
 do the same things.
 
 
-<a id="org29c9331"></a>
+<a id="orgf85f697"></a>
 
 # Sat Sep 30 01:47:22 PM CEST 2023
 
@@ -3751,7 +3752,7 @@ Need to remember to explicitly set the target region. Each region has
 it's own registry, which is a group of repos.
 
 
-<a id="org7b8f558"></a>
+<a id="org4113cf0"></a>
 
 # Fri Oct 13 07:38:28 AM CEST 2023
 
@@ -3762,7 +3763,7 @@ Getting the variables like this:
     REPO='flask_cicd_repo'
 
 
-<a id="org47fb990"></a>
+<a id="orge4ec17b"></a>
 
 # Sat Oct 14 02:34:50 PM CEST 2023
 
@@ -3786,7 +3787,7 @@ have to do it later anyway and this will make cleaning up after the
 project has run it's course much easier.
 
 
-<a id="org9e48598"></a>
+<a id="org32d9427"></a>
 
 # Sun Oct 15 01:08:36 PM CEST 2023
 
@@ -3800,7 +3801,7 @@ force<sub>delete</sub> parameter for ECR repos has to be set when creating the
 repo.
 
 
-<a id="orge5a4a6a"></a>
+<a id="org558485a"></a>
 
 # Sun Oct 22 12:13:14 PM CEST 2023
 
@@ -3814,7 +3815,7 @@ should've made notes when installing these tools.
     sudo ./aws/install
 
 
-<a id="org80ae724"></a>
+<a id="org68670f7"></a>
 
 # Tue Nov  7 01:16:16 PM CET 2023
 
@@ -3841,7 +3842,7 @@ they get deleted at some point after the installation.
 Not sure on what to supply for mode of the extracted AWS files.
 
 
-<a id="orge453ec9"></a>
+<a id="org6f17c9b"></a>
 
 # sø. 18. feb. 15:38:41 +0100 2024
 
@@ -3851,7 +3852,7 @@ systems that is not native to Linux, while other compression programs
 are).
 
 
-<a id="orgb90256f"></a>
+<a id="orgd0a9080"></a>
 
 # Sun Feb 25 02:51:02 PM CET 2024
 
@@ -3860,7 +3861,7 @@ methods. Changed something in configuration files and also used 'sudo
 update-locale LC<sub>TIME</sub>=en<sub>US.UTF</sub>-8'.
 
 
-<a id="orgb802863"></a>
+<a id="org7aedbda"></a>
 
 # Mon Feb 26 07:46:42 PM CET 2024
 
@@ -3875,7 +3876,7 @@ need to make an if/else statement so that we only upgrade the aws-cli
 if it's already installed.
 
 
-<a id="orgbe9967f"></a>
+<a id="org3bfa2e4"></a>
 
 # Tue Mar 12 04:09:13 PM CET 2024
 
@@ -3911,7 +3912,7 @@ rebuild.
 I'll move some constants out as variables and add it to the repo.
 
 
-<a id="org2013b3d"></a>
+<a id="org268a7ef"></a>
 
 # Tue Mar 12 10:28:18 PM CET 2024
 
@@ -3922,7 +3923,7 @@ a Java app and can therefore take long time to start. Jenkins is also known
 to require a lot of time for the first run.
 
 
-<a id="orgdc833e8"></a>
+<a id="org0498320"></a>
 
 # Wed Mar 13 03:12:01 PM CET 2024
 
@@ -3943,7 +3944,7 @@ Vagrant code it is located so I just wrote in an old issue about it
 that the problem still persists.
 
 
-<a id="org6d00848"></a>
+<a id="org837f601"></a>
 
 # Sat Mar 16 02:36:47 PM CET 2024
 
@@ -3961,7 +3962,7 @@ bin dir. And then updated the copy-ssh-key script to run that script
 first.
 
 
-<a id="org39ce70a"></a>
+<a id="orgd0246a7"></a>
 
 # Tue Mar 19 09:00:14 PM CET 2024
 
@@ -3982,7 +3983,7 @@ running at the same time on the laptop, but maybe that's what's
 needed.
 
 
-<a id="org6909bd5"></a>
+<a id="org7451d3d"></a>
 
 # Sat Mar 23 11:44:43 AM CET 2024
 
@@ -4007,7 +4008,7 @@ sense now after dabbling a little more in Ansible. This calls for
 sense now and can be better understood.
 
 
-<a id="org793cc91"></a>
+<a id="org2b4b58d"></a>
 
 # Sun Mar 31 05:39:14 PM CEST 2024
 
@@ -4022,7 +4023,7 @@ Copied file from PC to a temp dir and run a diff to compare files to
 test them. It works now.
 
 
-<a id="orgc0c021f"></a>
+<a id="org28f9ea0"></a>
 
 # Mon Apr  1 01:49:18 PM CEST 2024
 
@@ -4079,7 +4080,7 @@ Tried moving the block starting the services in the playbook after the
 block setting firewall rules for Jenkins.
 
 
-<a id="org6b7a52e"></a>
+<a id="orgb5828bd"></a>
 
 # Tue Apr  2 06:30:25 PM CEST 2024
 
@@ -4125,7 +4126,7 @@ and look at the logs. Why does Jenkins fail to start, but then, after
 some time it works. Or does it work after server (machine) restart.
 
 
-<a id="orgc5b1267"></a>
+<a id="org3430418"></a>
 
 # Sat Apr  6 11:28:50 AM CEST 2024
 
@@ -4157,7 +4158,7 @@ it by hand, maybe the jenkins user and/or service has a different name
 on the server.
 
 
-<a id="org2ec9230"></a>
+<a id="org32f687f"></a>
 
 # Fri May 10 10:05:03 AM CEST 2024
 
@@ -4188,7 +4189,7 @@ playthrough script.
 Playbook works after removing the JCasC bruteforce installation.
 
 
-<a id="orgaf4af5b"></a>
+<a id="org2819414"></a>
 
 # Fri May 10 04:17:05 PM CEST 2024
 
@@ -4196,7 +4197,7 @@ We need Terraform on the Jenkins server. Time to update the playbook.
 [Installation instructions from Hashicorp](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli).
 
 
-<a id="org60fc98d"></a>
+<a id="org5bde62e"></a>
 
 # Sat May 11 04:45:30 PM CEST 2024
 
@@ -4314,12 +4315,12 @@ finds Terraform packages now. I just need to look at the installed
 repository configurations on the system and spot the difference.
 
 
-<a id="org5ce1cba"></a>
+<a id="org160a523"></a>
 
 # Mon May 13 03:01:03 PM CEST 2024
 
 
-<a id="orgca121c6"></a>
+<a id="org0fca114"></a>
 
 ## Asked ChatGPT about how DNF stores repository info.
 
@@ -4340,7 +4341,7 @@ DNF Configuration: The main configuration for DNF is located in /etc/dnf/dnf.con
 Variables: DNF allows the use of variables (like $releasever and $basearch) in the .repo files, which are dynamically replaced with the appropriate values based on the system and environment.
 
 
-<a id="orgf0fbf51"></a>
+<a id="orgc4aa812"></a>
 
 ## So, going to compare the .repo files. But first will clear the cache manually.
 
@@ -4406,7 +4407,7 @@ What an annoying thing. How was I supposed to know not to use spaces
 in the name?
 
 
-<a id="orgac4f5e5"></a>
+<a id="org23ef48b"></a>
 
 # Sun Jun  2 06:04:15 PM CEST 2024
 
@@ -4415,7 +4416,7 @@ went through all steps until new packages installation and ended with a
 Byzantine error:
 
 
-<a id="orge2b1af3"></a>
+<a id="org43f8929"></a>
 
 ## Error MSG
 
@@ -4427,7 +4428,7 @@ fatal: [playbook-test-jenkins]: FAILED! `> {"changed": false, "module_stderr": "
 \#END<sub>SRC</sub>
 
 
-<a id="orgbf56026"></a>
+<a id="org76d2fc6"></a>
 
 ## dnf output on the server
 
@@ -4538,7 +4539,7 @@ are added. Thanks to Emacs - Magit package it is very easy to commit
 only some lines of changes to a file.
 
 
-<a id="org26fbbb8"></a>
+<a id="org7cb8442"></a>
 
 # Tue Jun 11 09:25:28 AM CEST 2024
 
@@ -4553,7 +4554,7 @@ setting global variables, it has to be sourced. It has an inbuilt
 check that makes sure that it's used correctly.
 
 
-<a id="org1f3db2e"></a>
+<a id="orgd6b5525"></a>
 
 # Tue Jun 11 09:39:58 AM CEST 2024
 
@@ -4580,7 +4581,7 @@ I didn't entry the commands. But there is a link to tutorial I
 used.
 
 
-<a id="orgdb4d1e5"></a>
+<a id="org5d6b73e"></a>
 
 ## Here is the code again:
 
@@ -4602,7 +4603,7 @@ I've put it into a script in the python-flask-cicd-code repo. Script
 is called push-image-jenkinsless.sh.
 
 
-<a id="org689101c"></a>
+<a id="org4cf7084"></a>
 
 # Thu Jun 13 01:43:30 PM CEST 2024
 
@@ -4630,7 +4631,7 @@ source separation in the binaries and left only one of them, removing
 both "oss" and the other adjective from the file names.
 
 
-<a id="org443ae15"></a>
+<a id="org4aee089"></a>
 
 # Thu Jun 13 07:45:23 PM CEST 2024
 
@@ -4648,7 +4649,7 @@ I can also boost the speed by first manually generating the initial
 .html versions of the journal and documentation.
 
 
-<a id="org93edc90"></a>
+<a id="orgb7bff67"></a>
 
 # Sat Jun 15 03:49:15 PM CEST 2024
 
@@ -4659,7 +4660,7 @@ package manager). There is also an option of replacing these two tasks
 with
 
 
-<a id="orgdaba37e"></a>
+<a id="org2982f1e"></a>
 
 ## this alternative task:
 
@@ -4713,7 +4714,7 @@ reported when they actually occur, keeping your Ansible runs
 idempotent and efficient.
 
 
-<a id="orge66d410"></a>
+<a id="org770a0b2"></a>
 
 # Sun Jun 16 04:27:48 PM CEST 2024
 
@@ -4737,7 +4738,7 @@ ryba" (polish: In the absence of fish, even crayfish is a fish), with
 no other options, anything will do.
 
 
-<a id="org03d6e1f"></a>
+<a id="orga54e827"></a>
 
 # Mon Jun 17 07:00:09 PM CEST 2024
 
@@ -4747,7 +4748,7 @@ existence of a directory that's not in use anymore -
 jenkins<sub>config</sub>. Going to delete it and commit the deletion to git.
 
 
-<a id="org3ef7c47"></a>
+<a id="orgf6d03b0"></a>
 
 # Mon Jun 17 08:22:59 PM CEST 2024
 
@@ -4760,7 +4761,7 @@ documentation versions later. For now it's just placeholder versions,
 generated today.
 
 
-<a id="org3f77a02"></a>
+<a id="org93ecd24"></a>
 
 # Tue Jun 18 01:57:47 PM CEST 2024
 
@@ -4839,7 +4840,7 @@ Looks like I finally moved the project forward one notch. Now it's
 time to write the Terraform code to deploy to the cloud.
 
 
-<a id="org02acec6"></a>
+<a id="orgbeeb1d5"></a>
 
 # Wed Jun 19 10:39:36 AM CEST 2024
 
@@ -4877,7 +4878,7 @@ misconfigured.
 It's working :)
 
 
-<a id="orgcb99469"></a>
+<a id="org05d55bb"></a>
 
 # Thu Jun 20 09:48:59 AM CEST 2024
 
@@ -4891,7 +4892,7 @@ modified THAT often, I'm not going to automate copying from .git/hooks
 to git<sub>hooks</sub>.
 
 
-<a id="org9d2f68b"></a>
+<a id="org594fe7e"></a>
 
 # Wed Jun 19 04:52:29 PM CEST 2024
 
@@ -4901,7 +4902,7 @@ are using and what ports they want exposed and drive mappings.  It
 also defines hardware requirements like CPU or RAM.
 
 
-<a id="org8ad9efd"></a>
+<a id="org0d846a6"></a>
 
 # Tue Jun 25 08:47:45 PM CEST 2024
 
@@ -4925,7 +4926,7 @@ it requires that the names of the resources are known. This is not a
 problem in this simple, local, PoC project.
 
 
-<a id="org122c46c"></a>
+<a id="org205026c"></a>
 
 # Thu Jun 27 06:58:45 PM CEST 2024
 
@@ -4955,14 +4956,14 @@ are some other parameters that aren't.
 Going to read up on them.
 
 
-<a id="org5e19403"></a>
+<a id="org0fb2595"></a>
 
 # Fri Jun 28 10:52:06 AM CEST 2024
 
 Explanation of the above parameters:
 
 
-<a id="org367f048"></a>
+<a id="orgb69213d"></a>
 
 ## Name
 
@@ -4971,7 +4972,7 @@ used when for example linking containers together (linked containers
 can see each other on a local network).
 
 
-<a id="org326c19a"></a>
+<a id="org661cd07"></a>
 
 ## Image
 
@@ -4988,7 +4989,7 @@ Example:
 aws<sub>account</sub><sub>id.dkr.ecr.region.amazonaws.com</sub>/my-web-app:latest
 
 
-<a id="org5ab6122"></a>
+<a id="org87a1d44"></a>
 
 ## Memory
 
@@ -4996,7 +4997,7 @@ Amount of RAM in MB for the container. Optional when using Fargate
 (which is our case).
 
 
-<a id="org30bc0ae"></a>
+<a id="org0583bd7"></a>
 
 ## Port mappings
 
@@ -5011,7 +5012,7 @@ Example:
 ]
 
 
-<a id="org04bc294"></a>
+<a id="orgb2584ac"></a>
 
 ## Private Repository Credentials
 
@@ -5019,7 +5020,7 @@ Required when using non AWS repository. Doesn't apply since we use the
 ECR.
 
 
-<a id="org16f012a"></a>
+<a id="org579c84d"></a>
 
 ## Other parameters:
 
@@ -5034,7 +5035,7 @@ correspond to docker options and AWS' own metrics and logging:
     Docker labels
 
 
-<a id="orga6de090"></a>
+<a id="org3e2bd43"></a>
 
 # Fri Jun 28 11:15:02 AM CEST 2024
 
@@ -5049,7 +5050,7 @@ The following task definition can be generated with AWS CLI using \`aws
 ecs register-task-definition &#x2013;generate-cli-skeleton\`
 
 
-<a id="org801b223"></a>
+<a id="org7bedb76"></a>
 
 ## Template Task Definition
 
@@ -5273,7 +5274,7 @@ WINDOWS<sub>SERVER</sub><sub>2022</sub><sub>CORE</sub>
     }
 
 
-<a id="org71411f0"></a>
+<a id="orgf4b71af"></a>
 
 # Fri Jun 28 10:29:28 PM CEST 2024
 
@@ -5301,7 +5302,7 @@ function, like this:
             containerPort = 80
 
 
-<a id="orgf694ee4"></a>
+<a id="org0251c7c"></a>
 
 # Sat Jun 29 01:46:13 PM CEST 2024
 
@@ -5310,7 +5311,7 @@ definitions. Maybe I should take a look and base my task definition on
 a HCL example instead.
 
 
-<a id="orgd4ce145"></a>
+<a id="org624e3b6"></a>
 
 # Sun Jun 30 08:48:12 PM CEST 2024
 
@@ -5348,7 +5349,7 @@ It reminds me of bash, where we can source other scripts inside a
 script to be able to use their functions or variables.
 
 
-<a id="orgf14ad3d"></a>
+<a id="orgf1118d2"></a>
 
 # Mon Jul  1 08:28:25 PM CEST 2024
 
@@ -5366,7 +5367,7 @@ Have to finish up describing the SSH key trick in the next coding
 session.
 
 
-<a id="org597fbf0"></a>
+<a id="orgd579aec"></a>
 
 # Tue Jul  2 12:53:42 PM CEST 2024
 
@@ -5391,7 +5392,7 @@ grasp, while others are more clear. In the former we should comment
 more.
 
 
-<a id="org12d3392"></a>
+<a id="orgf39ef8e"></a>
 
 # Wed Jul  3 01:06:37 PM CEST 2024
 
@@ -5410,7 +5411,7 @@ Next I should move the variables out from the main.tf into the vars.tf
 file.
 
 
-<a id="org623d0fd"></a>
+<a id="org18c7148"></a>
 
 # Thu Jul  4 09:17:53 AM CEST 2024
 
@@ -5432,7 +5433,7 @@ process of pulling the local vault (for the ssh key) and AWS
 credentials from password manager saved a lot of time.
 
 
-<a id="org7549ece"></a>
+<a id="org4b84b87"></a>
 
 # Fri Jul  5 12:26:45 PM CEST 2024
 
@@ -5444,7 +5445,7 @@ variables, built from multiple variables. I will revise that part from
 the book.
 
 
-<a id="org6fdd829"></a>
+<a id="org5cc2b6e"></a>
 
 # Sat Jul  6 02:12:33 PM CEST 2024
 
@@ -5489,7 +5490,7 @@ resources for a more universal names (instead of having "Jenkins" for
 a name everywhere).
 
 
-<a id="orgaaf43d4"></a>
+<a id="org98a9bc1"></a>
 
 # Sun Jul  7 12:03:27 PM CEST 2024
 
@@ -5503,7 +5504,7 @@ next. Afterwards should move the "networking" code to a separate file,
 maybe networking.tf?
 
 
-<a id="org4cd5d27"></a>
+<a id="org87e3192"></a>
 
 # Sun Jul  7 03:23:11 PM CEST 2024
 
@@ -5519,7 +5520,7 @@ introduced when putting things in variables. There's always risk of a
 typo.
 
 
-<a id="orgfc134af"></a>
+<a id="org21c605e"></a>
 
 # Sun Jul  7 07:51:12 PM CEST 2024
 
@@ -5624,7 +5625,7 @@ Looks like SSH issues. Next I will try to manually add a key and see
 how it works.
 
 
-<a id="org2611ded"></a>
+<a id="orgbb9ac6a"></a>
 
 # Mon Jul  8 11:45:04 AM CEST 2024
 
@@ -5685,7 +5686,7 @@ is not identical to what we expect. Just to be sure, I'll commit the
 current version for easier rollback.
 
 
-<a id="org4a69bc3"></a>
+<a id="org41163fa"></a>
 
 # Mon Jul  8 08:39:13 PM CEST 2024
 
@@ -5704,7 +5705,7 @@ missing quote.
                 | awk '{sub(/^[^:]+:/, "", $2); print$2}'"                       
 
 
-<a id="orgbeb1285"></a>
+<a id="orgd7e9533"></a>
 
 # Tue Jul  9 12:00:14 PM CEST 2024
 
@@ -5720,7 +5721,7 @@ I think the script is pretty robust now. Can proceed to integrate it
 into the Terraform code.
 
 
-<a id="org77d047d"></a>
+<a id="orgd2247d6"></a>
 
 # Tue Jul  9 09:12:56 PM CEST 2024
 
@@ -5747,7 +5748,7 @@ given name that has been uploaded to AWS is the same as the key we
 have locally.
 
 
-<a id="org9720e2f"></a>
+<a id="org5601600"></a>
 
 # Wed Jul 10 01:12:40 PM CEST 2024
 
@@ -5776,4 +5777,23 @@ what LLM was a Wikipedia.
 I could've tested for the key "being there" in aws with a script, but
 that is such a rare event that it's not worth putting any more work
 into it.
+
+
+<a id="org80662d3"></a>
+
+# Wed Jul 10 04:50:40 PM CEST 2024
+
+Now that SSH keys are solved, I can rename resources to jenkinsless
+names.
+
+M-% is a conditional replace string command in Emacs.
+
+It took less time than I thought. Having worked with the Terraform
+configuration recently made me more familiar with the main.tf file
+which might have been the reason why it was easier.
+
+Testing new file version with 'terraform apply' and an ssh login
+attempt.
+
+It works.
 

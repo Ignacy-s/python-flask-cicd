@@ -4,8 +4,9 @@
 provider "aws" {
   region = var.aws_region
 }
+
 # Setup a VPC for Jenkins project with a CIDR block
-resource "aws_vpc" "jenkins" {
+resource "aws_vpc" "main_vpc" {
   cidr_block = var.vpc_cidr_block
   tags = {
     Name = var.vpc_name
@@ -16,8 +17,8 @@ resource "aws_vpc" "jenkins" {
 # Instances in this subnet will receive a public IP address on launch
 # to allow direct Internet access, necessary for initial configuration
 # and remote management.
-resource "aws_subnet" "jenkins" {
-  vpc_id = aws_vpc.jenkins.id
+resource "aws_subnet" "public_subnet" {
+  vpc_id = aws_vpc.main_vpc.id
   # A CIDR block for subnet that must be within the VPC CIDR block
   cidr_block = var.public_subnet_cidr_block
   # Setting responsible for public IP assignment
@@ -30,8 +31,8 @@ resource "aws_subnet" "jenkins" {
 
 # Define a gateway for our VPC
 # Gateway is needed to exchange traffic with the outside.
-resource "aws_internet_gateway" "jenkins" {
-  vpc_id = aws_vpc.jenkins.id
+resource "aws_internet_gateway" "internet_gateway" {
+  vpc_id = aws_vpc.main_vpc.id
 
   tags = {
     # This name can be used to refer to this IGW from other TF modules
@@ -42,12 +43,12 @@ resource "aws_internet_gateway" "jenkins" {
 # Create a public routing table for our VPC for traffic to/from
 # outside and trough our new public gateway
 resource "aws_route_table" "route_table" {
-  vpc_id = aws_vpc.jenkins.id
+  vpc_id = aws_vpc.main_vpc.id
 
   route {
     # The default route for all outgoing
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.jenkins.id
+    gateway_id = aws_internet_gateway.internet_gateway.id
   }
 
   tags = {
@@ -57,8 +58,7 @@ resource "aws_route_table" "route_table" {
 
 # Associate our public subnet with the public routing table
 resource "aws_route_table_association" "rt_associate_public" {
-  # TODO: change name of resource used to more universal
-  subnet_id      = aws_subnet.jenkins.id
+  subnet_id      = aws_subnet.public_subnet.id
   route_table_id = aws_route_table.route_table.id
 }
 
@@ -67,11 +67,10 @@ resource "aws_route_table_association" "rt_associate_public" {
 #  - HTTPS traffic for secure Jenkins access.
 # Security group is a sort of firewall.
 
-# TODO: change name of resource used to more universal
 resource "aws_security_group" "jenkins" {
   name        = var.security_group_name
   description = "Allow Jenkins and SSH traffic"
-  vpc_id      = aws_vpc.jenkins.id
+  vpc_id      = aws_vpc.main_vpc.id
 
   # for SSH traffic
   ingress {
@@ -130,7 +129,7 @@ resource "aws_instance" "jenkins" {
   # aws_key_pair.jenkins-key[0].key_name)
   key_name = aws_key_pair.jenkins-key.key_name
   
-  subnet_id = aws_subnet.jenkins.id
+  subnet_id = aws_subnet.public_subnet.id
   # Associate a public IP to allow direct Internet access
   associate_public_ip_address = true
 

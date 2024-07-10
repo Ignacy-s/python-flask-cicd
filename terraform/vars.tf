@@ -50,7 +50,7 @@ variable "ssh_port" {
 }
 
 variable "internet_gateway_name" {
-  description = ""
+  description = "Name assigned to the internet gateway"
   type        = string
   default     = "JenkinsIGW"
 }
