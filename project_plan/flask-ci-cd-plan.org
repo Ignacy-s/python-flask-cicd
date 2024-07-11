@@ -335,11 +335,15 @@ CLOSED: [2024-06-19 Wed 16:54]
 *** TODO Write Terraform code deploying container to ECS
 **** DONE Read on ECS/Fargate deployments with Terraform
 CLOSED: [2024-06-30 Sun 22:14]
-**** TODO Refactor Jenkin's side Terraform Networking code to make it viable for reuse on the ECS side.
-**** Create an ECS Cluster with Terraform
-**** Write a Task Definition
-
-
+**** DONE Refactor Jenkin's side Terraform Networking code to make it viable for reuse on the ECS side.
+CLOSED: [2024-07-11 Thu 13:34]
+**** DONE Create an ECS Cluster with Terraform
+CLOSED: [2024-07-11 Thu 22:44]
+Following tutorial found [[https://earthly.dev/blog/deploy-dockcontainers-to-awsecs-using-terraform/][here]], on earthly.dev.
+**** DONE Write a Task Definition
+CLOSED: [2024-07-11 Thu 22:44]
+**** TODO Write a ECS Service definition
+**** Deploy a container to ECS Fargate with Terraform
 ** Put the Terraform code in a Jenkinsfile, maybe create few more steps, so that it's easier to see where exactly is the pipeline execution. Also use more descriptive names for steps, like 'Build Docker Image' instead of just 'Build'.
 ** Test, debug and make sure it works with a manually set up Jenkins server
 ** Find out what needs to be done to use AWS permissions and secret store to give the least permissions required to have Jenkins auto deploy the container to ECS Fargate

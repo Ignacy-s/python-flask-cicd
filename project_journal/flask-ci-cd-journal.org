@@ -4535,3 +4535,80 @@ from terraform output:
 #+END_SRC
 
 It works again!
+
+* Wed Jul 10 08:24:50 PM CEST 2024
+Time to work out the differences in the networking between the Jenkins
+server and the Flask App instances in ECS. Flask uses HTTP instead of
+HTTPS, so we need to encrypt the traffic outside somehow. But do we? It
+would require adding some more code for a load balancer that would
+also handle the SSL Termination.
+
+With the actual state of the Flask App, it's not really required yet.
+
+* Thu Jul 11 01:27:27 PM CEST 2024
+https://earthly.dev/blog/deploy-dockcontainers-to-awsecs-using-terraform/
+Back to the tutorial from earthly.dev
+
+Going to follow it step by step until I get a container hosted on
+Fargate.
+
+Written a task definition, using HCL that will be translated to JSON
+(required by aws for such definitions) using a Terraform
+function. Writing JSON by hand is so annoying because of the amount of
+quotes.
+
+The ECS Task needs privileges to call the AWS API to manage resources.
+We give them by assigning the execution IAM role.
+
+Going to use the flask:latest image for the first run. I'll later find
+out how to get the image name right (need the account name). This is
+how it's supposed to look:
+: image = {ACCOUNT}.dkr.ecr.{REGION}.amazonaws.com{REPO}
+
+Terraform linter kept signaling errors because I had the
+'required_providers' block missing. I've added this:
+
+#+BEGIN_SRC terraform
+terraform {
+  required_version = ">= 1.9"
+
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "~>5.57.0"
+    }
+  }
+}
+#+END_SRC
+It's quiet now.
+
+There were some typos, but now it works. There is a Task Definition
+showing up in AWS.
+
+Don't have time today to finish the ECS code, but I can fix the
+missing account number. Don't want to commit it to the code, because I
+think it's a secret. But there is a data type resource in Terraform
+that can help us obtain that number dynamically.
+: data "aws_caller_identity" "current" {}
+This aws caller identity can be used to obtain the account ID.
+
+Had some issues with this container image with default value, because
+you can't use variables in the 'default' field. It needs to be a
+static string. Problematic code:
+
+#+BEGIN_SRC terraform
+variable "container_image_full_name" {
+  description = <<-EOF
+      container image name in the form used when running containers
+      using the docker command:
+      image = {ACCOUNT}.dkr.ecr.{REGION}.amazonaws.com{REPO}'
+  EOF
+  type        = string
+  default     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${var.ecr_repo_name}"
+}
+#+END_SRC
+
+A solution is to "build" the image name in the task definition block.
+It makes for an ugly as hell 150 character line, but so far I haven't
+found out how to split a long line like this over multiple lines. But
+I'll find it, just like I did for bash and for YAML.
