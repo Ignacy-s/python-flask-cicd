@@ -16,7 +16,7 @@ resource "aws_instance" "jenkins" {
   # Using a hardcoded AMI for Alma Linux for quick setup.  TODO:
   # Automate AMI selection to dynamically pick the latest stable
   # release.
-  ami = "ami-04e4606740c9c9381"
+  ami = "ami-0b8fd93c15b2c81ce"
   #  ami           = data.aws_ami.amazon_linux.id
   instance_type = var.instance_type
 

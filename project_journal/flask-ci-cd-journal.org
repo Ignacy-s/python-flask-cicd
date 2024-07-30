@@ -4612,3 +4612,151 @@ A solution is to "build" the image name in the task definition block.
 It makes for an ugly as hell 150 character line, but so far I haven't
 found out how to split a long line like this over multiple lines. But
 I'll find it, just like I did for bash and for YAML.
+
+* Tue Jul 30 04:13:57 PM CEST 2024
+Back to the project after focusing a little on Job Hunting. There was
+some friction with getting back to the project, but I just started by
+opening the journal and the plan. I'm going to read-up the plan and
+the past few pages from the journal - this will hopefully make the
+transition back into the project work easier. I've also started by
+doing a small Emacs workflow improvement - each time I open an .org
+file (like this documentation's source), I have to manually start some
+modes. Now it happens automagically. Customization was added as a file
+in .emacs.d/config/org-mode-hook.el (to maintain a clean config) and
+added as a commit to the Emacs config repo.
+
+Looks like I left the infra running last time when working on the
+Jenkins server. It's gonna cost me a few dollars. Just out of
+interest, re-deployed Terraform infrastructure and now running the
+Ansible playbook against it.
+
+The playbook doesn't work. Running a simple Ansible ping command
+against the server works though:
+:ansible -m ping jenkins
+
+It works now. It might have been the server taking some time for
+initial setup before it was ready.
+
+It doesn't work after all. There are packages missing. Probably
+because of the version of Linux I decide to use. I remember switching
+to Amazon Linux, will search the docs to make sure. Looks like it.
+
+Found two AMIs for Amazon Linux. Amazon Linux 2 is the old one (kernel
+5.10), Amazon Linux 2023 is newer, with 6.1 kernel.
+
+Tried to find which one I was using, but looked liked it got
+delisted. Found a command to find info on an AMI based on it's id:
+: aws ec2 describe-images --image-ids ami-04e4606740c9c9381
+
+It shows that it's a year old. We'll see if updating the AMI helps.
+
+It takes a long time to re-create infra. I only needed the server to
+be re-created, but I was afraid that it wouldn't get recreated in a
+regular `terraform apply` run. I've found out that there is a way to
+mark a Terraform resource for re-creation - it's called *tainting*.
+: terraform taint <resource.type.name>
+
+Can test it next time.
+
+It took ages for the server to start the playbook. Canceled a few
+times before running the ping module against it. It also took some
+time, but finally resolved.
+
+Run the playbook again and it took ages (more than 30 seconds)
+again. Does it have something to do with this warning?
+
+#+BEGIN_EXAMPLE
+TASK [Gathering Facts] *********************************************************
+[WARNING]: Platform linux on host jenkins is using the discovered Python
+interpreter at /usr/bin/python3.9, but future installation of another Python
+interpreter could change the meaning of that path. See
+https://docs.ansible.com/ansible-
+core/2.16/reference_appendices/interpreter_discovery.html for more information.
+ok: [jenkins]
+#+END_EXAMPLE
+
+It's time to call this session. I'll just wait a little to see if the
+playbook can get trough the last issue (missing packages).
+
+Hmm, discovered something by chance, while waiting for ansible to
+update system packages (one of the steps in the playbook). This is a
+warning that was displayed when I tried to login to the server
+manually (to check why Jenkins didn't work, because I forgot I only
+stood the infra up with Terraform, but didn't install Jenkins on it
+with Ansible):
+#+BEGIN_EXAMPLE
+$ ssh ec2-user@$(terraform output jenkins_public_ip | tr -d '\"') -i ../vault/id_25519_aws_flaskcicd -o IdentitiesOnly=yes
+
+A newer release of "Amazon Linux" is available.
+  Version 2023.1.20230628:
+  Version 2023.1.20230629:
+  Version 2023.1.20230705:
+  Version 2023.1.20230719:
+  Version 2023.1.20230725:
+  Version 2023.1.20230809:
+  Version 2023.1.20230825:
+  Version 2023.1.20230906:
+  Version 2023.1.20230912:
+  Version 2023.2.20230920:
+  Version 2023.2.20231002:
+  Version 2023.2.20231011:
+  Version 2023.2.20231016:
+  Version 2023.2.20231018:
+  Version 2023.2.20231026:
+  Version 2023.2.20231030:
+  Version 2023.2.20231113:
+  Version 2023.3.20231211:
+  Version 2023.3.20231218:
+  Version 2023.3.20240108:
+  Version 2023.3.20240117:
+  Version 2023.3.20240122:
+  Version 2023.3.20240131:
+  Version 2023.3.20240205:
+  Version 2023.3.20240219:
+  Version 2023.3.20240304:
+  Version 2023.3.20240312:
+  Version 2023.4.20240319:
+  Version 2023.4.20240401:
+  Version 2023.4.20240416:
+  Version 2023.4.20240429:
+  Version 2023.4.20240513:
+  Version 2023.4.20240528:
+  Version 2023.4.20240611:
+  Version 2023.5.20240624:
+  Version 2023.5.20240701:
+  Version 2023.5.20240708:
+  Version 2023.5.20240722:
+Run "/usr/bin/dnf check-release-update" for full release and version update info
+#+END_EXAMPLE
+
+That's a couple of new versions :)
+
+But back to the subject of playbook execution, did changing the AMI
+help? No it didn't. Still missing some packages. Have I switched AMI
+from Alma Linux to Amazon Linux without testing the playbook?
+
+SSH'ed into the server with my trusty one liner:
+: ssh ec2-user@$(terraform output jenkins_public_ip | tr -d '\"') \
+-i ../vault/id_25519_aws_flaskcicd -o IdentitiesOnly=yes
+
+And tried to search for the last package that wasn't found:
+#+BEGIN_EXAMPLE
+$ dnf search docker-compose-plugin
+Amazon Linux 2023 repository                    54 MB/s |  26 MB     00:00    
+Amazon Linux 2023 Kernel Livepatch repository   51 kB/s |  11 kB     00:00    
+official docker repo                           467  B/s | 417  B     00:00    
+Errors during downloading metadata for repository 'docker':
+  - Status code: 404 for https://download.docker.com/linux/centos/2023.5.20240722/x86_64/stable/repodata/repomd.xml (IP: 3.164.240.73)
+Error: Failed to download metadata for repo 'docker': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried
+official hashicorp repo                        626  B/s | 337  B     00:00    
+Errors during downloading metadata for repository 'hashicorp':
+  - Status code: 404 for https://rpm.releases.hashicorp.com/RHEL/2023.5.20240722/x86_64/stable/repodata/repomd.xml (IP: 3.164.230.48)
+Error: Failed to download metadata for repo 'hashicorp': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried
+jenkins stable repo                            162 kB/s |  29 kB     00:00    
+Ignoring repositories: docker, hashicorp
+No matches found.
+#+END_EXAMPLE
+
+So it's not packages missing. Something stopped working with the
+repositories. I wonder how professional sysadmins make sure that
+errors like that surface quickly?
